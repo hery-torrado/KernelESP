@@ -51,12 +51,15 @@ SKIP_COMPILE=1 tools/verify.sh
 
 ```sh
 tools/upload.sh
+tools/upload-assets.sh http://<esp-ip> <web-key>
 tools/smoke-http.sh http://<esp-ip> <web-key>
 COUNT=30 DELAY=1 tools/stability-http.sh http://<esp-ip> <web-key>
 ```
 
 After firmware upload, `tools/upload.sh` resets the ESP8266 Wi-Fi SDK state by
 default. Set `POST_UPLOAD_WIFI_SDKRESET=0` only when intentionally skipping it.
+Upload LittleFS assets after the firmware so `/www` and `/help` match the
+current source tree.
 
 ## Create A Release Package
 

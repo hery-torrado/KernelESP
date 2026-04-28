@@ -80,7 +80,7 @@ Dashboard:
 
 ### `/ui`
 
-Authenticated Live UI served from `/www/index.html`. Most of the interface lives in LittleFS as static HTML/JS/CSS, so adding panels does not significantly affect IRAM. The JavaScript is split into small files (`app.js` through `app11.js`, plus the small `i18n*.js` language files) so the ESP8266 web editor can update them reliably.
+Authenticated Live UI served from `/www/index.html`. Most of the interface lives in LittleFS as static HTML/JS/CSS, so adding panels does not significantly affect IRAM. The JavaScript is split into small files (`app.js` through `app13.js`, plus the small `i18n*.js` language files) so the ESP8266 web editor can update them reliably.
 
 Current panels:
 

@@ -5,6 +5,7 @@ BASE="${BASE:-${1:-}}"
 KEY="${KEY:-${2:-admin}}"
 COUNT="${COUNT:-${3:-120}}"
 DELAY="${DELAY:-1}"
+MAX_TIME="${MAX_TIME:-10}"
 CURL="${CURL:-curl}"
 
 if [ -z "$BASE" ]; then
@@ -16,7 +17,7 @@ ok=0
 fail=0
 i=1
 while [ "$i" -le "$COUNT" ]; do
-  if "$CURL" -fsS --max-time 5 "$BASE/api/status?key=$KEY" >/dev/null; then
+  if "$CURL" -fsS --max-time "$MAX_TIME" "$BASE/api/status?key=$KEY" >/dev/null; then
     ok=$((ok + 1))
   else
     fail=$((fail + 1))

@@ -20,7 +20,7 @@ post_file() {
     printf 'asset too large for HTTP upload: %s (%s bytes; max %s)\n' "$dest" "$size" "$MAX_POST_BYTES" >&2
     return 1
   fi
-  "$CURL" -sS --fail --max-time 30 -X POST "$BASE/save?key=$KEY" \
+  "$CURL" -sS --ignore-content-length --fail --max-time 30 -X POST "$BASE/save?key=$KEY" \
     --data-urlencode "path=$dest" \
     --data-urlencode "content@$src" >/dev/null
   printf '%s\n' "$dest"

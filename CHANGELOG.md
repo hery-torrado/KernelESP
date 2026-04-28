@@ -22,6 +22,7 @@
 - Added web authentication lockout after repeated failed attempts.
 - Added one-shot configuration schema migration defaults.
 - Added release, verification, HTTP smoke-test, asset upload, diagnostic and OTA preflight tools.
+- Improved asset upload and hardware stability checks for slower ESP8266 HTTP responses.
 - Added production-oriented local help pages for professional operation, board profiles, releases and security.
 - Kept OTA firmware update out of the ESP8266 runtime for now because IRAM is already the tightest resource.
 

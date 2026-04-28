@@ -629,6 +629,12 @@ String basenameOf(const String& path) {
   return slash == -1 ? path : path.substring(slash + 1);
 }
 
+String dirChildPath(const String& dirPath, const String& entryName) {
+  if (entryName.startsWith("/")) return entryName;
+  String base = basenameOf(entryName);
+  return dirPath == "/" ? "/" + base : dirPath + "/" + base;
+}
+
 bool ensureFS() {
   if (!fsReady) Serial.println(F("LittleFS not mounted. Try fsformat."));
   return fsReady;
@@ -1140,7 +1146,7 @@ uint32_t duPath(const String& path, uint8_t depth) {
   uint32_t total = 0;
   Dir dir = LittleFS.openDir(path);
   while (dir.next()) {
-    String child = dir.fileName();
+    String child = dirChildPath(path, dir.fileName());
     if (dir.isDirectory()) total += duPath(child, depth + 1);
     else total += dir.fileSize();
     yield();
@@ -1162,7 +1168,7 @@ bool findPath(const String& path, const String& pattern, uint8_t depth) {
   bool any = false;
   Dir dir = LittleFS.openDir(path);
   while (dir.next()) {
-    String child = dir.fileName();
+    String child = dirChildPath(path, dir.fileName());
     String name = basenameOf(child);
     bool match = !pattern.length() || child.indexOf(pattern) >= 0 || name.indexOf(pattern) >= 0;
     if (match) {
@@ -4664,7 +4670,7 @@ void appendBackupDir(String& out, const String& dirPath) {
   if (!isDirectory(dirPath)) return;
   Dir dir = LittleFS.openDir(dirPath);
   while (dir.next()) {
-    if (!dir.isDirectory()) appendBackupFile(out, dir.fileName());
+    if (!dir.isDirectory()) appendBackupFile(out, dirChildPath(dirPath, dir.fileName()));
     yield();
   }
 }
@@ -4673,8 +4679,9 @@ void appendBackupDirRecursive(String& out, const String& dirPath, uint8_t depth)
   if (depth > 4 || !isDirectory(dirPath)) return;
   Dir dir = LittleFS.openDir(dirPath);
   while (dir.next()) {
-    if (dir.isDirectory()) appendBackupDirRecursive(out, dir.fileName(), depth + 1);
-    else appendBackupFile(out, dir.fileName());
+    String child = dirChildPath(dirPath, dir.fileName());
+    if (dir.isDirectory()) appendBackupDirRecursive(out, child, depth + 1);
+    else appendBackupFile(out, child);
     yield();
   }
 }
@@ -4759,7 +4766,7 @@ bool copyDirPath(const String& srcPath, const String& dstPath, uint8_t depth) {
   Dir dir = LittleFS.openDir(srcPath);
   bool ok = true;
   while (dir.next()) {
-    String child = dir.fileName();
+    String child = dirChildPath(srcPath, dir.fileName());
     String target = dstPath + (dstPath.endsWith("/") ? "" : "/") + basenameOf(child);
     if (dir.isDirectory()) ok = copyDirPath(child, target, depth + 1) && ok;
     else ok = copyFilePath(child, target) && ok;
@@ -4787,7 +4794,7 @@ void sendBackupDir(const String& dirPath) {
   if (!isDirectory(dirPath)) return;
   Dir dir = LittleFS.openDir(dirPath);
   while (dir.next()) {
-    if (!dir.isDirectory()) sendBackupFile(dir.fileName());
+    if (!dir.isDirectory()) sendBackupFile(dirChildPath(dirPath, dir.fileName()));
     yield();
   }
 }
@@ -4796,8 +4803,9 @@ void sendBackupDirRecursive(const String& dirPath, uint8_t depth) {
   if (depth > 4 || !isDirectory(dirPath)) return;
   Dir dir = LittleFS.openDir(dirPath);
   while (dir.next()) {
-    if (dir.isDirectory()) sendBackupDirRecursive(dir.fileName(), depth + 1);
-    else sendBackupFile(dir.fileName());
+    String child = dirChildPath(dirPath, dir.fileName());
+    if (dir.isDirectory()) sendBackupDirRecursive(child, depth + 1);
+    else sendBackupFile(child);
     yield();
   }
 }
