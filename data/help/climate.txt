@@ -1,0 +1,50 @@
+CLIMATE AUTOMATION
+==================
+
+Rules read the sensor periodically and run a command when a condition matches.
+
+Hysteresis avoids rapid relay chatter. For example:
+
+  fan on above 40 C
+  fan off below 38 C
+
+Easy form:
+
+  relay add fan D5 active_low
+  sensor begin
+  climate temp fan 38 40
+  rule list
+
+Equivalent native range rule:
+
+  rule add temp range 38 40 relay fan
+
+Humidity control requires a BME280:
+
+  relay add extractor D6 active_low
+  sensor begin
+  climate hum extractor 60 70
+
+Manual rules:
+
+  rule add temp gt 40 relay on fan
+  rule add temp lt 38 relay off fan
+  rule add hum gt 70 relay on extractor
+  rule add hum lt 60 relay off extractor
+
+Rule timing:
+
+  rule every
+  rule every 30000
+  rule cooldown 300000
+
+Pause or remove automation:
+
+  disarm
+  arm
+  rule list
+  rule rm 1
+  rule clear
+
+Test with a safe LED or small load before using heaters, pumps or motors.
+

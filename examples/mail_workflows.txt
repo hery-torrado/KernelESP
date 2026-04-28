@@ -1,0 +1,27 @@
+# KernelESP mail workflow examples.
+# Configure the SMTP relay first:
+#
+#   mail config smtp.lan 25 kernelesp@example.lan admin@example.lan
+
+# Daily health email at 08:00. Requires synced time.
+ntp sync
+cron add daily 08:00 mail health "KernelESP daily health"
+
+# Fan control plus one email when heat starts, and one when temperature returns.
+relay add fan D5 active_low
+relay boot fan off
+sensor begin
+rule every 10000
+rule cooldown 300000
+write /home/heat-on.sh relay on fan
+append /home/heat-on.sh mail send default "KernelESP heat alert" "Temperature is above 40 C. Fan is on."
+write /home/heat-off.sh relay off fan
+append /home/heat-off.sh mail send default "KernelESP temperature normal" "Temperature is below 38 C. Fan is off."
+rule add temp range 38 40 sh /home/heat-on.sh
+rule off 1 sh /home/heat-off.sh
+
+# Inspect the resulting automation.
+mail status
+cron list
+rule list
+relay status

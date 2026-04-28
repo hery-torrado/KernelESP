@@ -1,0 +1,42 @@
+MEMORY
+======
+
+Check memory:
+
+  free
+  health
+  df
+
+Important values:
+
+  heap       free runtime RAM
+  frag       heap fragmentation percentage
+  max block  largest contiguous free heap block
+  fs_free    free LittleFS space
+
+Healthy runtime signs:
+
+  - heap comfortably above 20 KB
+  - fragmentation not growing without bound
+  - max block large enough for web requests
+  - LittleFS has free space
+
+Persistent flash logging is off by default to reduce wear.
+
+Use RAM log first:
+
+  dmesg
+
+Enable persistent log only when needed:
+
+  log flash on
+  log tail
+  log compact
+  log flash off
+
+If the web UI becomes unstable, check:
+
+  free
+  dmesg
+  service web restart
+

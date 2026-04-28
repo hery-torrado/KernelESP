@@ -1,0 +1,61 @@
+QUICK START
+===========
+
+Check the board:
+
+  version
+  health
+  free
+  df
+
+Check Wi-Fi:
+
+  wifi status
+  wifi scan
+  ip
+
+If time is not synced:
+
+  ntp sync
+  date
+
+Configure a relay:
+
+  relay add light D1 active_low
+  relay boot light off
+  relay status
+  relay pulse light 500
+
+Configure a sensor:
+
+  sensor scan
+  sensor begin
+  sensor read
+
+Add a daily schedule:
+
+  cron add daily 08:10 relay on light
+  cron add daily 08:20 relay off light
+  cron list
+
+Add a climate rule:
+
+  relay add fan D5 active_low
+  sensor begin
+  rule add temp range 38 40 relay fan
+  rule list
+
+Configure mail alerts:
+
+  mail config postfix.lan 25 kernelesp@lan admin@example.com
+  mail test "Manual test from KernelESP"
+
+Before leaving the board unattended:
+
+  relay status
+  rule list
+  crontab -l
+  input list
+  health
+  backup
+

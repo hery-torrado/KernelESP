@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="720" viewBox="0 0 1200 720" role="img" aria-labelledby="title desc">
+  <title id="title">KernelESP architecture</title>
+  <desc id="desc">Diagram showing serial shell, web UI, API, command interpreter, services, LittleFS and hardware.</desc>
+  <defs>
+    <style>
+      .bg{fill:#eef4f8}.card{fill:#fff;stroke:#b8c7d6;stroke-width:2}.core{fill:#083344;stroke:#0e7490;stroke-width:3}.title{font:700 28px system-ui,Arial;fill:#102033}.h{font:700 18px system-ui,Arial;fill:#102033}.t{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#334155}.tw{font:14px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#e0f2fe}.arrow{stroke:#2563eb;stroke-width:3;fill:none;marker-end:url(#a)}
+    </style>
+    <marker id="a" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#2563eb"/></marker>
+  </defs>
+  <rect class="bg" width="1200" height="720"/>
+  <text x="56" y="56" class="title">KernelESP: ESP8266 UNIX-like control system</text>
+  <rect x="70" y="110" width="250" height="150" rx="10" class="card"/>
+  <text x="95" y="148" class="h">Serial Console</text>
+  <text x="95" y="182" class="t">115200 baud</text>
+  <text x="95" y="210" class="t">root@esp8266:/#</text>
+  <text x="95" y="238" class="t">help, wifi, relay, sh</text>
+  <rect x="70" y="325" width="250" height="170" rx="10" class="card"/>
+  <text x="95" y="363" class="h">Web UI</text>
+  <text x="95" y="397" class="t">Dashboard + Live UI</text>
+  <text x="95" y="425" class="t">Editor, Help, Mail</text>
+  <text x="95" y="453" class="t">Professional diagnostics</text>
+  <rect x="70" y="555" width="250" height="100" rx="10" class="card"/>
+  <text x="95" y="593" class="h">JSON API</text>
+  <text x="95" y="627" class="t">/api/status</text>
+  <text x="95" y="650" class="t">/api/cmd</text>
+  <rect x="440" y="245" width="320" height="210" rx="16" class="core"/>
+  <text x="480" y="292" class="h" fill="#fff">Command Interpreter</text>
+  <text x="480" y="330" class="tw">executeLine()</text>
+  <text x="480" y="360" class="tw">webCommandOutput()</text>
+  <text x="480" y="390" class="tw">pipes: grep, head, tail, wc</text>
+  <text x="480" y="420" class="tw">scripts, cron, rules, timers</text>
+  <rect x="870" y="110" width="260" height="150" rx="10" class="card"/>
+  <text x="895" y="148" class="h">Services</text>
+  <text x="895" y="182" class="t">Wi-Fi watchdog</text>
+  <text x="895" y="210" class="t">NTP sync</text>
+  <text x="895" y="238" class="t">SMTP relay mail</text>
+  <rect x="870" y="325" width="260" height="150" rx="10" class="card"/>
+  <text x="895" y="363" class="h">LittleFS</text>
+  <text x="895" y="397" class="t">/etc config</text>
+  <text x="895" y="425" class="t">/www UI assets</text>
+  <text x="895" y="453" class="t">/help localized docs</text>
+  <rect x="870" y="555" width="260" height="100" rx="10" class="card"/>
+  <text x="895" y="593" class="h">Hardware</text>
+  <text x="895" y="627" class="t">GPIO, relays, I2C sensors</text>
+  <path d="M320 185 C380 185 390 300 440 315" class="arrow"/>
+  <path d="M320 410 C380 410 390 390 440 375" class="arrow"/>
+  <path d="M320 610 C380 610 390 450 440 425" class="arrow"/>
+  <path d="M760 305 C815 265 820 200 870 185" class="arrow"/>
+  <path d="M760 365 C820 365 815 400 870 400" class="arrow"/>
+  <path d="M760 425 C820 455 815 590 870 610" class="arrow"/>
+</svg>

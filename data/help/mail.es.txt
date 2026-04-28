@@ -1,0 +1,36 @@
+COMANDO MAIL
+============
+
+El comando mail envia SMTP plano a un relay interno como Postfix. No usa TLS ni
+autenticacion SMTP; el relay debe estar protegido por red.
+
+Configuracion:
+
+  mail config postfix.lan 25 kernelesp@lan admin@example.com
+  mail status
+
+Ajustes individuales:
+
+  mail host postfix.lan
+  mail port 25
+  mail from kernelesp@lan
+  mail to admin@example.com
+  mail helo kernelesp
+
+Enviar:
+
+  mail test "Manual test from KernelESP"
+  mail health "KernelESP daily health"
+  mail send default "KernelESP alert" "Temperature is high"
+
+Uso desde automatizaciones:
+
+  cron add daily 08:00 mail health "KernelESP daily health"
+  rule add temp gt 40 mail send default "KernelESP heat alert" "Temperature is high"
+
+Diagnostico:
+
+  mail status
+  ping postfix.lan 25
+  dmesg
+

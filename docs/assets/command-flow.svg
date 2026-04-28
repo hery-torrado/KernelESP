@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="title desc">
+  <title id="title">KernelESP command flow</title>
+  <desc id="desc">Diagram showing serial, web and automation commands converging in the same command engine.</desc>
+  <defs>
+    <style>
+      .bg{fill:#f8fafc}.box{fill:white;stroke:#cbd5e1;stroke-width:2}.main{fill:#0f766e;stroke:#115e59;stroke-width:3}.h{font:700 22px system-ui,Arial;fill:#0f172a}.t{font:15px ui-monospace,SFMono-Regular,Menlo,monospace;fill:#334155}.w{font:15px ui-monospace,SFMono-Regular,Menlo,monospace;fill:white}.a{stroke:#2563eb;stroke-width:3;fill:none;marker-end:url(#m)}
+    </style>
+    <marker id="m" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L0,6 L9,3 z" fill="#2563eb"/></marker>
+  </defs>
+  <rect class="bg" width="1200" height="520"/>
+  <text x="60" y="60" class="h">One command model: serial, web, API and automation share the same engine</text>
+  <rect x="70" y="120" width="220" height="90" rx="10" class="box"/><text x="95" y="155" class="h">Serial</text><text x="95" y="185" class="t">root shell</text>
+  <rect x="70" y="250" width="220" height="90" rx="10" class="box"/><text x="95" y="285" class="h">Web UI</text><text x="95" y="315" class="t">buttons + forms</text>
+  <rect x="70" y="380" width="220" height="90" rx="10" class="box"/><text x="95" y="415" class="h">Automation</text><text x="95" y="445" class="t">cron, rules, timers</text>
+  <rect x="440" y="185" width="290" height="165" rx="16" class="main"/>
+  <text x="485" y="230" class="h" fill="white">executeLine()</text>
+  <text x="485" y="265" class="w">splitArgs + aliases</text>
+  <text x="485" y="295" class="w">pipes and scripts</text>
+  <text x="485" y="325" class="w">shared command output</text>
+  <rect x="880" y="120" width="230" height="90" rx="10" class="box"/><text x="905" y="155" class="h">State</text><text x="905" y="185" class="t">config, profiles</text>
+  <rect x="880" y="250" width="230" height="90" rx="10" class="box"/><text x="905" y="285" class="h">Network</text><text x="905" y="315" class="t">Wi-Fi, NTP, SMTP</text>
+  <rect x="880" y="380" width="230" height="90" rx="10" class="box"/><text x="905" y="415" class="h">Hardware</text><text x="905" y="445" class="t">GPIO, relays, I2C</text>
+  <path d="M290 165 C350 165 380 220 440 230" class="a"/><path d="M290 295 C360 295 375 275 440 270" class="a"/><path d="M290 425 C365 425 380 330 440 315" class="a"/>
+  <path d="M730 230 C790 210 815 170 880 165" class="a"/><path d="M730 270 C790 275 815 295 880 295" class="a"/><path d="M730 315 C790 340 815 420 880 425" class="a"/>
+</svg>

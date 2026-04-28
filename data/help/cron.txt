@@ -1,0 +1,44 @@
+CRON AND SCHEDULES
+==================
+
+Cron runs commands at a clock time. It needs synced time:
+
+  ntp sync
+  date
+
+Daily jobs:
+
+  cron add daily 08:00 relay on pump
+  cron add daily 08:05 relay off pump
+  cron list
+
+Short daily relay schedule:
+
+  schedule pump 08:00 08:05
+
+Weekday jobs:
+
+  cron add dow mon,tue,wed,thu,fri 07:30 relay on pump
+  cron add dow wed,fri 11:00 sh /home/check.sh
+
+Annual date jobs:
+
+  cron add date 05-01 11:00 sh /home/may1.sh
+  cron add date 1-may 11:00 sh /home/may1.sh
+
+List and remove:
+
+  cron list
+  crontab -l
+  cron rm 1
+  cron clear
+
+Save and load:
+
+  cron save
+  cron load
+
+Tip: if the command is long, put it in a script:
+
+  cron add daily 09:00 sh /home/morning.sh
+

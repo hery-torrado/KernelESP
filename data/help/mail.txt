@@ -1,0 +1,64 @@
+MAIL ALERTS
+===========
+
+KernelESP can submit plain SMTP messages to an internal relay such as Postfix.
+TLS and SMTP authentication are intentionally not implemented in the ESP8266
+firmware; the recommended design is:
+
+  KernelESP -> internal Postfix relay -> smart host -> mailbox
+
+Configure the relay:
+
+  mail config postfix.lan 25 kernelesp@lan admin@example.com
+
+Show configuration:
+
+  mail status
+
+Send a test to the default recipient:
+
+  mail test "Manual test from KernelESP"
+
+Send a health report to the default recipient:
+
+  mail health
+  mail health "KernelESP daily health"
+
+Send a custom alert:
+
+  mail send default "KernelESP alert" "Temperature is high"
+  mail send admin@example.com "KernelESP test" "Hello from the ESP8266"
+
+Individual settings:
+
+  mail host postfix.lan
+  mail port 25
+  mail from kernelesp@lan
+  mail to admin@example.com
+  mail helo kernelesp
+
+Use mail from cron, timers, scripts or rules:
+
+  cron add daily 08:00 mail health "KernelESP daily health"
+  cron add daily 09:00 mail test "KernelESP alive"
+  timer once 60000 mail send default "KernelESP timer" "One minute elapsed"
+
+Temperature alert with fan hysteresis:
+
+  relay add fan D5 active_low
+  sensor begin
+  rule cooldown 300000
+  write /home/heat-on.sh relay on fan
+  append /home/heat-on.sh mail send default "KernelESP heat alert" "Temperature is above 40 C. Fan is on."
+  write /home/heat-off.sh relay off fan
+  append /home/heat-off.sh mail send default "KernelESP temperature normal" "Temperature is below 38 C. Fan is off."
+  rule add temp range 38 40 sh /home/heat-on.sh
+  rule off 1 sh /home/heat-off.sh
+
+Troubleshooting:
+
+  ping postfix.lan 25
+  mail status
+  dmesg
+
+Postfix must allow this device to relay from the LAN.

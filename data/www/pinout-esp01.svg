@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 560" role="img" aria-label="ESP-01 pinout">
+<style>svg{font-family:Arial,Helvetica,sans-serif;background:#f8fafc}.t{font-size:25px;font-weight:700}.h{font-size:15px}.p{font-size:12px}.c{fill:#fff;stroke:#cbd5e1;stroke-width:2}.b{fill:#1f2937;stroke:#0f172a;stroke-width:2}.m{fill:#111827}.boot{fill:#fef3c7}.pow{fill:#dbeafe}.trace{stroke:#94a3b8;stroke-width:2}</style>
+<rect class="c" x="18" y="18" width="644" height="524" rx="8"/>
+<text class="t" x="42" y="58">ESP-01 pinout</text>
+<text class="h" x="42" y="84">Top view, antenna up. GPIO0 and GPIO2 must be HIGH for normal boot.</text>
+<text class="h" x="42" y="110">Use a tested ESP-01 relay adapter; the bare board has very few safe pins.</text>
+<rect class="b" x="198" y="142" width="284" height="210" rx="16"/>
+<rect x="234" y="160" width="212" height="46" rx="6" fill="#334155"/>
+<text class="p" x="310" y="188" fill="#e2e8f0">ANTENNA</text>
+<rect class="m" x="276" y="232" width="128" height="58" rx="7"/>
+<text class="h" x="308" y="267" fill="#e2e8f0">ESP-01</text>
+<g class="p">
+<rect class="boot" x="78" y="394" width="116" height="28"/><text x="90" y="412">TX / GPIO1</text>
+<rect class="boot" x="214" y="394" width="96" height="28"/><text x="248" y="412">EN</text>
+<rect class="boot" x="330" y="394" width="96" height="28"/><text x="357" y="412">RST</text>
+<rect class="pow" x="446" y="394" width="116" height="28"/><text x="487" y="412">VCC</text>
+<rect class="boot" x="78" y="438" width="116" height="28"/><text x="90" y="456">RX / GPIO3</text>
+<rect class="boot" x="214" y="438" width="96" height="28"/><text x="240" y="456">GPIO0</text>
+<rect class="boot" x="330" y="438" width="96" height="28"/><text x="356" y="456">GPIO2</text>
+<rect class="pow" x="446" y="438" width="116" height="28"/><text x="489" y="456">GND</text>
+</g>
+<line class="trace" x1="136" y1="394" x2="236" y2="352"/>
+<line class="trace" x1="262" y1="394" x2="306" y2="352"/>
+<line class="trace" x1="378" y1="394" x2="372" y2="352"/>
+<line class="trace" x1="504" y1="394" x2="444" y2="352"/>
+<line class="trace" x1="136" y1="438" x2="236" y2="352"/>
+<line class="trace" x1="262" y1="438" x2="306" y2="352"/>
+<line class="trace" x1="378" y1="438" x2="372" y2="352"/>
+<line class="trace" x1="504" y1="438" x2="444" y2="352"/>
+<text class="p" x="42" y="504">Normal boot: EN=HIGH, RST=HIGH, GPIO0=HIGH, GPIO2=HIGH.</text>
+<text class="p" x="42" y="526">Flash mode: GPIO0=LOW during reset. GPIO2 can be used after boot, but is not a free relay pin.</text>
+</svg>

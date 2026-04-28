@@ -1,0 +1,52 @@
+WEB UI
+======
+
+Main pages:
+
+  /        Dashboard
+  /ui      Full Live UI
+  /edit    File editor
+  /help    Local help
+  /settings Settings
+
+Live UI panels:
+
+  Dashboard     system status, relays, sensor and command runner
+  Processes     ps, jobs and automation arm/disarm
+  Network       Wi-Fi, routes, ping and httpget
+  Cron          time-based jobs
+  System        memory, flash and filesystem
+  Logs          dmesg
+  Quick Add     relays, schedules, rules and inputs
+  Scripts       script editor
+  Mail          SMTP alerts and workflow builders
+  Automations   rules, cron, timers and inputs
+  Diagnostics   read-only diagnostic report
+  Professional  release checks, diagnostics and board profile
+
+The base UI is English. Language buttons are available, but command output
+stays technical so it matches the serial console.
+
+Settings can change:
+
+  - web key
+  - web autostart
+  - safe boot
+  - Wi-Fi recovery and fallback AP
+  - NTP
+  - sensor autostart
+
+If the web UI does not respond, use serial:
+
+  wifi status
+  web status
+  service web restart
+  health
+
+API examples:
+
+  /api/status?key=YOUR_KEY
+  /api/cmd?key=YOUR_KEY&c=health
+  /api/sensor?key=YOUR_KEY
+  /api/relay?key=YOUR_KEY&name=light&state=pulse&ms=500
+

@@ -1,0 +1,43 @@
+PROFESSIONAL OPERATIONS
+=======================
+
+Before changing a live board:
+
+  backup
+  health
+  free
+  df
+  wifi status
+  jobs
+
+Before a firmware update:
+
+  tools/verify.sh
+  tools/upload.sh <serial-port>
+
+After serial upload, tools/upload.sh automatically sends:
+
+  wifi sdkreset --yes
+
+After updating LittleFS assets:
+
+  tools/upload-assets.sh http://<esp-ip> <key>
+  tools/smoke-http.sh http://<esp-ip> <key>
+
+Read-only diagnostics:
+
+  diag
+  diag wifi
+  tools/diagnostic-bundle.sh http://<esp-ip> <key>
+
+Stable-change policy:
+
+  - bug fixes
+  - stability
+  - security
+  - documentation
+  - ergonomics
+  - memory reduction
+
+Avoid adding firmware features unless they remove risk.
+

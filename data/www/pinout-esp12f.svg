@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 560" role="img" aria-label="ESP-12F pinout">
+<style>svg{font-family:Arial,Helvetica,sans-serif;background:#f8fafc}.t{font-size:26px;font-weight:700}.h{font-size:16px}.p{font-size:13px}.c{fill:#fff;stroke:#cbd5e1;stroke-width:2}.chip{fill:#111827}.safe{fill:#dcfce7}.boot{fill:#fef3c7}.bad{fill:#fee2e2}.pow{fill:#dbeafe}.pin{fill:#e5e7eb}</style>
+<rect class="c" x="18" y="18" width="684" height="524" rx="8"/>
+<text class="t" x="42" y="58">ESP-12F module pinout</text>
+<text class="h" x="42" y="84">Top view. Green pins are preferred for relays/general I/O.</text>
+<rect class="chip" x="280" y="124" width="160" height="330" rx="12"/>
+<rect x="306" y="144" width="108" height="52" rx="6" fill="#334155"/>
+<text class="p" x="320" y="175" fill="#e2e8f0">ANTENNA</text>
+<text class="h" x="323" y="300" fill="#e2e8f0">ESP-12F</text>
+<g class="p">
+<rect class="boot" x="86" y="124" width="150" height="26"/><text x="96" y="142">1 RST</text>
+<rect class="pin" x="86" y="164" width="150" height="26"/><text x="96" y="182">2 ADC, 0-1V</text>
+<rect class="boot" x="86" y="204" width="150" height="26"/><text x="96" y="222">3 EN / CH_PD</text>
+<rect class="boot" x="86" y="244" width="150" height="26"/><text x="96" y="262">4 GPIO16, limited</text>
+<rect class="safe" x="86" y="284" width="150" height="26"/><text x="96" y="302">5 GPIO14</text>
+<rect class="safe" x="86" y="324" width="150" height="26"/><text x="96" y="342">6 GPIO12</text>
+<rect class="safe" x="86" y="364" width="150" height="26"/><text x="96" y="382">7 GPIO13</text>
+<rect class="pow" x="86" y="404" width="150" height="26"/><text x="96" y="422">8 VCC 3.3V</text>
+<rect class="boot" x="484" y="124" width="150" height="26"/><text x="494" y="142">16 TX / GPIO1</text>
+<rect class="boot" x="484" y="164" width="150" height="26"/><text x="494" y="182">15 RX / GPIO3</text>
+<rect class="safe" x="484" y="204" width="150" height="26"/><text x="494" y="222">14 GPIO5, SCL</text>
+<rect class="safe" x="484" y="244" width="150" height="26"/><text x="494" y="262">13 GPIO4, SDA</text>
+<rect class="boot" x="484" y="284" width="150" height="26"/><text x="494" y="302">12 GPIO0, boot</text>
+<rect class="boot" x="484" y="324" width="150" height="26"/><text x="494" y="342">11 GPIO2, boot</text>
+<rect class="boot" x="484" y="364" width="150" height="26"/><text x="494" y="382">10 GPIO15, boot</text>
+<rect class="pow" x="484" y="404" width="150" height="26"/><text x="494" y="422">9 GND</text>
+<rect class="safe" x="64" y="486" width="18" height="18"/><text x="90" y="500">recommended: GPIO5, GPIO12, GPIO13, GPIO14</text>
+<rect class="boot" x="390" y="486" width="18" height="18"/><text x="416" y="500">take care: boot, serial or limited pins</text>
+<rect class="bad" x="64" y="516" width="18" height="18"/><text x="90" y="530">do not use GPIO6-GPIO11: connected to flash memory</text>
+</g>
+</svg>

@@ -1,0 +1,41 @@
+SAFETY
+======
+
+KernelESP switches GPIO pins. It must not power mains loads directly.
+
+For 110/230 V, pumps, heaters, motors, locks or valves:
+
+  - use certified relay/contactor modules
+  - isolate low voltage and mains wiring
+  - use fuses and proper enclosures
+  - test with the real load disconnected first
+
+Safe relay boot state:
+
+  relay boot pump off
+  relay boot heater off
+  relay boot fan off
+
+Pause automation:
+
+  disarm
+
+Resume:
+
+  arm
+
+Emergency cleanup:
+
+  safe next
+  reboot
+  cron clear
+  rule clear
+  timer clear
+
+Use dry-run before testing risky workflows:
+
+  dryrun on
+  relay on pump
+  relay off pump
+  dryrun off
+

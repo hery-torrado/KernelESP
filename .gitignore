@@ -1,0 +1,33 @@
+# macOS / editor noise
+.DS_Store
+._*
+*.swp
+*.swo
+*~
+
+# Python / local tooling
+.venv/
+__pycache__/
+*.pyc
+
+# Arduino / ESP8266 build products
+build/
+*.bin
+*.elf
+*.map
+
+# Generated release and diagnostic artifacts
+dist/
+diagnostics/
+*.tar.gz
+*.zip
+
+# Local runtime output
+*.tmp
+*.log
+*.bak
+
+# Local secrets or machine-specific settings
+.env
+.env.*
+local.*

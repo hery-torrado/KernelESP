@@ -1,0 +1,57 @@
+TROUBLESHOOTING
+===============
+
+Start with:
+
+  health
+  free
+  df
+  dmesg
+  wifi status
+  jobs
+
+Wi-Fi does not connect:
+
+  wifi scan
+  wifi diag
+  wifi recover
+  wifi sdkreset --yes
+
+Remember: ESP8266 only supports 2.4 GHz.
+
+Web UI is unreachable:
+
+  wifi status
+  web status
+  service web restart
+  ap status
+
+Time is wrong:
+
+  ntp sync
+  ntp status
+  date
+
+Sensor not found:
+
+  i2c scan
+  sensor begin 0x76 D2 D1
+  sensor begin 0x77 D2 D1
+
+Relay works backwards:
+
+  relay rm light
+  relay add light D1 active_high
+
+Mail does not send:
+
+  mail status
+  ping postfix.lan 25
+  dmesg
+
+If automation gets unsafe:
+
+  disarm
+  safe next
+  reboot
+

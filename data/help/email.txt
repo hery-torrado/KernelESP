@@ -1,0 +1,59 @@
+EMAIL ALERTS
+============
+
+KernelESP can send plain SMTP email through a trusted internal relay. The
+recommended architecture is:
+
+  KernelESP -> internal Postfix relay -> smart host -> mailbox
+
+The ESP8266 firmware intentionally avoids TLS and SMTP authentication to keep
+RAM and code size under control. Postfix should accept mail from the device only
+on the trusted LAN.
+
+One-time setup:
+
+  mail config smtp.lan 25 kernelesp@example.lan admin@example.lan
+  mail status
+  mail test "Manual test from KernelESP"
+
+Send a health report:
+
+  mail health "KernelESP daily health"
+
+Daily health at 08:00:
+
+  ntp sync
+  cron add daily 08:00 mail health "KernelESP daily health"
+  crontab -l
+
+Temperature alert with fan control:
+
+  relay add fan D5 active_low
+  relay boot fan off
+  sensor begin
+  rule cooldown 300000
+  write /home/heat-on.sh relay on fan
+  append /home/heat-on.sh mail send default "KernelESP heat alert" "Temperature is above 40 C. Fan is on."
+  write /home/heat-off.sh relay off fan
+  append /home/heat-off.sh mail send default "KernelESP temperature normal" "Temperature is below 38 C. Fan is off."
+  rule add temp range 38 40 sh /home/heat-on.sh
+  rule off 1 sh /home/heat-off.sh
+
+Power-flow alert from a digital input:
+
+  input add power D2 pullup 50
+  write /home/power-lost.sh mail send default "KernelESP power alert" "Power flow has stopped."
+  input on power low sh /home/power-lost.sh
+
+The board must stay powered to send alerts. Use a UPS or battery if the alert
+is about mains power loss.
+
+Troubleshooting:
+
+  mail status
+  ping smtp.lan 25
+  wifi status
+  dmesg
+
+Avoid mail loops. Use range rules and cooldowns so one fault does not create
+hundreds of messages.

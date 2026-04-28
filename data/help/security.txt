@@ -1,0 +1,25 @@
+SECURITY
+========
+
+Change the default web key:
+
+  web key <new-key>
+
+Or use Settings in the web UI.
+
+Web lockout is enabled by default after repeated failed logins.
+
+Check:
+
+  health
+  config get web.lockout
+  config get web.lockout.max
+
+Fallback AP is useful for recovery but should have a strong key:
+
+  ap status
+  config set ap.key <strong-key>
+
+Use the internal Postfix relay for mail. The firmware does not implement TLS or
+SMTP authentication, so do not expose SMTP directly to untrusted networks.
+

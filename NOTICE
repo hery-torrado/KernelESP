@@ -1,0 +1,16 @@
+KernelESP
+=========
+
+KernelESP is inspired by and contains source code copied/adapted from
+KernelUNO, a lightweight UNIX-like shell for Arduino UNO created by Arc1011:
+
+  https://github.com/Arc1011/KernelUNO
+
+KernelUNO is distributed under the BSD 3-Clause License. Source code portions
+copied or adapted from KernelUNO remain credited to Arc1011 under that license.
+KernelESP keeps the same BSD 3-Clause license family and acknowledges the
+original project as both a conceptual and source-code starting point.
+
+KernelESP is a substantial rework for ESP8266 with persistent LittleFS storage,
+Wi-Fi, web UI, JSON API, automations, mail alerts, localized help, diagnostics
+and release tooling.

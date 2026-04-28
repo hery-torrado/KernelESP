@@ -1,0 +1,29 @@
+INPUTS
+======
+
+Inputs watch digital pins and run commands on high, low or change events.
+
+Create an input:
+
+  input add button D2 pullup 50
+  input list
+
+Run a command when the input goes low:
+
+  input on button low relay toggle light
+
+Run a script:
+
+  write /home/power-lost.sh mail send default "KernelESP power alert" "Power flow has stopped."
+  input add power D2 pullup 50
+  input on power low sh /home/power-lost.sh
+
+Read and remove:
+
+  input read button
+  input rm button
+  input clear
+
+Use pullup for buttons wired to GND. If the board loses power at the same time
+as the monitored circuit, it needs a UPS or battery to send the alert.
+

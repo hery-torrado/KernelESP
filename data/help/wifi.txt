@@ -1,0 +1,39 @@
+WI-FI
+=====
+
+Status and scan:
+
+  wifi status
+  wifi net
+  wifi scan
+  ip
+
+Save and connect:
+
+  wifi save "SSID" "password"
+  wifi reconnect
+  wifi wait 30
+
+DHCP and static IP:
+
+  wifi dhcp on
+  wifi static IP GATEWAY MASK DNS1 DNS2
+
+Recovery:
+
+  wifi recover
+  wifi sdkreset --yes
+  wifi diag
+
+Post-upload workflow:
+
+  tools/upload.sh now runs wifi sdkreset automatically after serial upload.
+
+Troubleshooting:
+
+  201 no_ap_found       SSID is not visible to the ESP8266.
+  202 auth_fail         Check password and AP security.
+  beacon_timeout        Check signal, interference and AP load.
+
+ESP8266 only supports 2.4 GHz Wi-Fi.
+

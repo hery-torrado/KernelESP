@@ -1,0 +1,12 @@
+# Scenes, inputs and state examples.
+
+scene add noche relay off luz; relay on seguridad
+scene run noche
+
+state set riego.last_run 2026-05-01
+state get riego.last_run
+
+input add puerta D2 pullup 50
+input on puerta low scene run alarma
+input on puerta high echo puerta cerrada
+

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="560" viewBox="0 0 1100 560" role="img" aria-labelledby="title desc">
+  <title id="title">KernelESP serial console screenshot</title>
+  <desc id="desc">Terminal-style screenshot showing serial commands and pipe output.</desc>
+  <rect width="1100" height="560" rx="18" fill="#0b1117"/>
+  <rect x="0" y="0" width="1100" height="46" rx="18" fill="#111827"/>
+  <circle cx="28" cy="23" r="7" fill="#ef4444"/><circle cx="52" cy="23" r="7" fill="#f59e0b"/><circle cx="76" cy="23" r="7" fill="#22c55e"/>
+  <text x="100" y="29" font-family="system-ui,Arial" font-size="15" fill="#cbd5e1">KernelESP serial console - 115200 baud</text>
+  <g font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="18" fill="#39ff66">
+    <text x="34" y="86">KernelESP 0.10.0</text>
+    <text x="34" y="116">booting...</text>
+    <text x="34" y="146">type 'help' for commands</text>
+    <text x="34" y="176">KernelESP mini UNIX</text>
+    <text x="34" y="206">wifi connecting: Example Wi-Fi</text>
+    <text x="34" y="236">wifi ip 192.0.2.50</text>
+    <text x="34" y="286">root@esp8266:/# health | grep wifi</text>
+    <text x="34" y="316">wifi: connected</text>
+    <text x="34" y="366">root@esp8266:/# dmesg | tail -n 3</text>
+    <text x="34" y="396">[9] wifi connected</text>
+    <text x="34" y="426">[10] ntp synced</text>
+    <text x="34" y="456">[2] web started</text>
+    <text x="34" y="506">root@esp8266:/# _</text>
+  </g>
+</svg>

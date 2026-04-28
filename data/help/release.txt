@@ -1,0 +1,29 @@
+RELEASE
+=======
+
+Local verification:
+
+  tools/verify.sh
+
+Build release package:
+
+  tools/release.sh
+
+Upload firmware:
+
+  tools/upload.sh /dev/cu.usbserial-02094OMK
+
+Upload web/help assets:
+
+  tools/upload-assets.sh http://<esp-ip> admin
+
+Smoke test:
+
+  tools/smoke-http.sh http://<esp-ip> admin
+
+Stability test:
+
+  COUNT=120 DELAY=1 tools/stability-http.sh http://<esp-ip> admin
+
+Keep release notes focused on fixes, stability and known limitations.
+

@@ -1,0 +1,60 @@
+BOARD PROFILES
+==============
+
+A board profile does not change hardware. It records safe pins and pins to
+avoid for the selected board type.
+
+Show current profile:
+
+  board
+  board show
+  board pins
+
+List profiles:
+
+  board list
+
+Available profiles:
+
+  generic
+  nodemcu
+  d1mini
+  esp12f
+  esp01
+
+Save profile:
+
+  board use nodemcu
+  board use d1mini
+  board use esp12f
+
+This stores one config entry:
+
+  board.profile=nodemcu
+
+Recommended pins on NodeMCU/Wemos:
+
+  D1 D2 D5 D6 D7
+
+Recommended pins on bare ESP-12F:
+
+  GPIO4 GPIO5 GPIO12 GPIO13 GPIO14
+
+Avoid for normal relays:
+
+  GPIO0 GPIO2 GPIO15 GPIO16 RX TX
+
+GPIO0, GPIO2 and GPIO15 select boot mode. If pulled wrong during reset, the
+ESP8266 may not boot.
+
+GPIO6-GPIO11 are connected to flash and must not be used.
+
+Recommended I2C:
+
+  D2 = SDA
+  D1 = SCL
+
+Many relay boards are active_low. Test with:
+
+  relay pulse light 500
+

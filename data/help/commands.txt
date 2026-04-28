@@ -1,0 +1,122 @@
+COMMAND MAP
+===========
+
+System:
+
+  health        system summary
+  diag          read-only diagnostic bundle
+  free          heap status
+  df            LittleFS space
+  uname         firmware and board info
+  uptime        time since boot
+  ps            pseudo process list
+  jobs          timers, rules and cron
+  dmesg         RAM event log
+  reboot        restart the board
+  board         board profile and pin guidance
+
+Network:
+
+  wifi status
+  wifi scan
+  wifi save SSID PASS
+  wifi reconnect
+  wifi net
+  wifi diag
+  wifi profile save work
+  wifi profile use work
+  wifi static IP GW MASK DNS1 DNS2
+  ifconfig
+  ip route
+  ping host port
+  httpget http://host/path
+  mail status
+  mail config postfix.lan 25 kernelesp@lan admin@example.com
+  mail test "Manual test from KernelESP"
+  mail health "KernelESP daily health"
+  mail send default "KernelESP alert" "Temperature is high"
+
+Time:
+
+  date
+  ntp status
+  ntp sync
+  ntp http
+  ntp auto on
+  ntp fallback on
+  ntp server pool.ntp.org time.nist.gov
+  ntp tz 1
+
+Relay and GPIO:
+
+  pins
+  relay add light D1 active_low
+  relay on light
+  relay off light
+  relay pulse light 500
+  relay boot light off
+  relay status
+  gpio D1 on
+  read D2
+  adc
+
+Automation:
+
+  cron add daily 08:00 relay on pump
+  cron add dow thu 08:20 relay off pump
+  cron add date 05-01 11:00 sh /home/may1.sh
+  crontab -l
+  timer once 300000 relay off light
+  timer every 60000 health
+  rule add temp range 38 40 relay fan
+  climate hum extractor 60 70
+  schedule pump 08:00 08:05
+
+Files:
+
+  ls /
+  cat /home/test.sh
+  write /home/test.sh relay status
+  append /home/test.sh free
+  rm /home/test.sh
+  mkdir /home
+  cp source dest
+  mv source dest
+
+Pipes:
+
+  health | grep wifi
+  dmesg | tail -n 5
+  crontab -l | wc -l
+  cat /var/log/kernel.log | grep wifi | head -n 5
+  health | tee /home/health.txt
+
+Scripts:
+
+  sh /home/test.sh
+  sh -n /home/test.sh
+  boot set /etc/boot.sh
+  boot show
+  onboot add ntp sync
+  scene add night relay off light; relay on security
+  scene run night
+
+Safety:
+
+  disarm
+  arm
+  armed
+  safe next
+  safe status
+  dryrun on
+  dryrun off
+  config get web.lockout
+  config set web.lockout on
+
+Backup:
+
+  backup
+  profile save known-good
+  profile list
+  profile load known-good --yes
+  export all

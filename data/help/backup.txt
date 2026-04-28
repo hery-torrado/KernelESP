@@ -1,0 +1,37 @@
+BACKUP AND PROFILES
+===================
+
+Create a backup:
+
+  backup
+
+Download from web:
+
+  /backup?key=<key>
+
+The backup includes important files from:
+
+  /etc
+  /home
+  /pkg
+  /profiles
+
+Restore only when you trust the backup:
+
+  restore /home/backup.txt --yes
+
+Profiles store configuration snapshots:
+
+  profile save known-good
+  profile list
+  profile show known-good
+  profile load known-good --yes
+  profile rm known-good
+
+Recommended workflow:
+
+  1. Configure Wi-Fi, web key, relays, sensor and mail.
+  2. Test the board.
+  3. Save a profile.
+  4. Download a backup.
+

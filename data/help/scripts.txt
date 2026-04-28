@@ -1,0 +1,66 @@
+SCRIPTS
+=======
+
+A script is a file with one KernelESP command per line.
+
+Run a script:
+
+  sh /home/file.sh
+
+Example content:
+
+  relay on light
+  sleep 500
+  relay off light
+
+Create from the web UI:
+
+  1. Open Scripts.
+  2. Enter a path such as /home/test.sh.
+  3. Write commands.
+  4. Validate.
+  5. Save.
+  6. Run.
+
+Create from the console:
+
+  write /home/pulse.sh relay pulse light 500
+  append /home/pulse.sh logger pulse_light
+  append /home/pulse.sh relay status
+  cat /home/pulse.sh
+  sh /home/pulse.sh
+
+Validate before running:
+
+  sh -n /home/pulse.sh
+
+Boot script:
+
+  boot set /etc/boot.sh
+  boot show
+
+Typical /etc/boot.sh:
+
+  ntp sync
+  sensor begin
+  relay status
+
+Avoid long blocking commands at boot. Serial should remain responsive even when
+Wi-Fi is down.
+
+Scenes:
+
+  scene add night relay off light; relay on security
+  scene run night
+
+Run a script from cron:
+
+  cron add daily 22:30 sh /home/night.sh
+
+Tips:
+
+  - one command per line
+  - test manually before automation
+  - use clear names such as /home/morning_water.sh
+  - avoid writing logs every few seconds
+

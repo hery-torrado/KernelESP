@@ -1,0 +1,41 @@
+KERNELESP HELP
+==============
+
+KernelESP is a small ESP8266 control system with a serial shell, web UI,
+LittleFS storage, Wi-Fi recovery, relays, sensors, cron, rules, inputs,
+scripts, backups, diagnostics and mail alerts.
+
+Common first commands:
+
+  help
+  help commands
+  health
+  wifi status
+  date
+  relay status
+  sensor read
+  jobs
+
+Topics:
+
+  quickstart       First setup steps.
+  hardware         Wiring, pins and electrical safety.
+  relay            Relay setup and safe boot state.
+  sensor           BMP280/BME280 sensor setup.
+  climate          Temperature/humidity rules.
+  cron             Daily, weekday and date schedules.
+  email            Workflows and recipes for email alerts.
+  mail             Command reference for the mail command.
+  inputs           Digital input alerts.
+  scripts          One-command-per-line scripts.
+  web              Web UI and API notes.
+  wifi             Wi-Fi setup and recovery.
+  files            LittleFS file commands.
+  backup           Backup, restore and profiles.
+  memory           Heap, flash and log guidance.
+  safety           Safe automation practices.
+  troubleshooting  Common failures and fixes.
+
+Use:
+
+  help <topic>

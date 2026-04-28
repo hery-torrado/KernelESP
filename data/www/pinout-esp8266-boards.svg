@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 620" role="img" aria-label="NodeMCU and Wemos D1 mini pinout">
+<style>svg{font-family:Arial,Helvetica,sans-serif;background:#f8fafc}.t{font-size:25px;font-weight:700}.h{font-size:16px}.p{font-size:13px}.b{fill:#1f2937;stroke:#0f172a;stroke-width:2}.m{fill:#111827}.usb{fill:#cbd5e1;stroke:#64748b}.safe{fill:#dcfce7}.boot{fill:#fef3c7}.bad{fill:#fee2e2}.pow{fill:#dbeafe}.pin{fill:#e5e7eb}.c{fill:#fff;stroke:#cbd5e1;stroke-width:2}</style>
+<rect class="c" x="18" y="18" width="684" height="584" rx="8"/>
+<text class="t" x="42" y="58">NodeMCU / Wemos D1 mini pinout</text>
+<text class="h" x="42" y="84">Typical ESP8266 development-board labels. Check your exact silkscreen.</text>
+<rect class="b" x="270" y="112" width="180" height="400" rx="26"/>
+<rect class="usb" x="324" y="92" width="72" height="34" rx="5"/>
+<rect class="m" x="303" y="170" width="114" height="120" rx="8"/>
+<text class="p" x="318" y="225" fill="#e2e8f0">ESP-12</text>
+<circle cx="310" cy="472" r="16" fill="#334155"/><text class="p" x="298" y="477" fill="#e2e8f0">RST</text>
+<circle cx="410" cy="472" r="16" fill="#334155"/><text class="p" x="397" y="477" fill="#e2e8f0">FLASH</text>
+<g class="p">
+<rect class="boot" x="58" y="132" width="150" height="26"/><text x="68" y="150">D0 = GPIO16 limited</text>
+<rect class="safe" x="58" y="172" width="150" height="26"/><text x="68" y="190">D1 = GPIO5 SCL</text>
+<rect class="safe" x="58" y="212" width="150" height="26"/><text x="68" y="230">D2 = GPIO4 SDA</text>
+<rect class="boot" x="58" y="252" width="150" height="26"/><text x="68" y="270">D3 = GPIO0 boot</text>
+<rect class="boot" x="58" y="292" width="150" height="26"/><text x="68" y="310">D4 = GPIO2 LED</text>
+<rect class="pow" x="58" y="332" width="150" height="26"/><text x="68" y="350">3V3</text>
+<rect class="pow" x="58" y="372" width="150" height="26"/><text x="68" y="390">GND</text>
+<rect class="pin" x="58" y="412" width="150" height="26"/><text x="68" y="430">A0 = ADC</text>
+<rect class="safe" x="510" y="132" width="150" height="26"/><text x="520" y="150">D5 = GPIO14</text>
+<rect class="safe" x="510" y="172" width="150" height="26"/><text x="520" y="190">D6 = GPIO12</text>
+<rect class="safe" x="510" y="212" width="150" height="26"/><text x="520" y="230">D7 = GPIO13</text>
+<rect class="boot" x="510" y="252" width="150" height="26"/><text x="520" y="270">D8 = GPIO15 boot</text>
+<rect class="boot" x="510" y="292" width="150" height="26"/><text x="520" y="310">RX = GPIO3</text>
+<rect class="boot" x="510" y="332" width="150" height="26"/><text x="520" y="350">TX = GPIO1</text>
+<rect class="bad" x="510" y="372" width="150" height="26"/><text x="520" y="390">GPIO6-11 flash</text>
+</g>
+<text class="h" x="58" y="540">Preferred relay pins: D1, D2, D5, D6, D7. I2C: D2=SDA and D1=SCL.</text>
+<g class="p"><rect class="safe" x="58" y="562" width="18" height="18"/><text x="84" y="576">recommended</text><rect class="boot" x="210" y="562" width="18" height="18"/><text x="236" y="576">use with care</text><rect class="bad" x="380" y="562" width="18" height="18"/><text x="406" y="576">do not use</text></g>
+</svg>

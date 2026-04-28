@@ -1,0 +1,35 @@
+OPERACION PROFESIONAL
+=====================
+
+Antes de tocar una placa en uso:
+
+  backup
+  health
+  free
+  df
+  wifi status
+  jobs
+
+Antes de firmware:
+
+  tools/verify.sh
+  tools/upload.sh <serial-port>
+
+tools/upload.sh ejecuta wifi sdkreset --yes tras la subida.
+
+Despues de assets:
+
+  tools/upload-assets.sh http://<esp-ip> <key>
+  tools/smoke-http.sh http://<esp-ip> <key>
+
+Politica estable:
+
+  - bugfixes
+  - estabilidad
+  - seguridad
+  - documentacion
+  - ergonomia
+  - reduccion de memoria
+
+Evita nuevas funciones de firmware salvo que reduzcan riesgo.
+

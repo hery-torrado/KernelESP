@@ -1,0 +1,43 @@
+RELAYS
+======
+
+A named relay is easier to operate than a raw GPIO pin.
+
+Create a relay:
+
+  relay add light D1 active_low
+  relay add pump D2 active_high
+
+Use active_low for many common relay boards where LOW energizes the relay.
+Use active_high when HIGH energizes the relay.
+
+Operate relays:
+
+  relay status
+  relay on light
+  relay off light
+  relay toggle light
+  relay pulse light 500
+
+Set safe boot behavior:
+
+  relay boot light off
+  relay boot pump off
+
+Use "last" only when restoring the previous state is safe:
+
+  relay boot light last
+
+Remove or reload:
+
+  relay rm light
+  relay save
+  relay load
+
+If a relay works backwards:
+
+  relay rm light
+  relay add light D1 active_high
+
+Also check NO/NC terminals and any logic jumper on the relay module.
+

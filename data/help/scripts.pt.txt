@@ -1,0 +1,37 @@
+SCRIPTS
+=======
+
+Um script e um ficheiro com um comando KernelESP por linha.
+
+Executar:
+
+  sh /home/file.sh
+
+Criar pela consola:
+
+  write /home/pulse.sh relay pulse light 500
+  append /home/pulse.sh logger pulse_light
+  append /home/pulse.sh relay status
+  sh /home/pulse.sh
+
+Validar:
+
+  sh -n /home/pulse.sh
+
+Script de arranque:
+
+  boot set /etc/boot.sh
+  boot show
+
+Exemplo de arranque:
+
+  ntp sync
+  sensor begin
+  relay status
+
+Conselhos:
+
+  - um comando por linha
+  - testar manualmente antes de automatizar
+  - evitar escritas de log a cada poucos segundos
+

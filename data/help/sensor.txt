@@ -1,0 +1,39 @@
+SENSORS
+=======
+
+KernelESP supports BMP280 and BME280 sensors over I2C.
+
+  BMP280: temperature and pressure
+  BME280: temperature, pressure and humidity
+
+Typical pins:
+
+  SDA -> D2 / GPIO4
+  SCL -> D1 / GPIO5
+  VCC -> 3.3 V
+  GND -> GND
+
+Scan I2C:
+
+  sensor scan
+  i2c scan
+
+Start the sensor:
+
+  sensor begin
+  sensor begin 0x76 D2 D1
+  sensor begin 0x77 D2 D1
+
+Read:
+
+  sensor read
+  sensor status
+
+Save autostart configuration:
+
+  sensor save 0x76 D2 D1
+  sensor autostart on
+
+If no sensor is found, check 3.3 V power, GND, SDA/SCL order and address
+0x76 versus 0x77.
+
