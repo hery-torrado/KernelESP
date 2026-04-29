@@ -1,13 +1,12 @@
 ALERTAS POR EMAIL
 =================
 
-KernelESP pode enviar SMTP simples através de um relay interno de confiança. A
-arquitetura recomendada e:
+KernelESP envia SMTP simples através de um relay interno de confiança:
 
   KernelESP -> Postfix interno -> smart host -> caixa de correio
 
-O firmware do ESP8266 nao implementa TLS nem autenticação SMTP para poupar RAM
-e código. O Postfix deve aceitar a placa apenas a partir da rede interna.
+O firmware evita TLS e autenticação SMTP para poupar RAM e flash. O relay SMTP
+deve estar numa LAN confiável e aceitar email apenas de dispositivos conhecidos.
 
 Configuração inicial:
 
@@ -15,7 +14,7 @@ Configuração inicial:
   mail status
   mail test "Manual test from KernelESP"
 
-Enviar relatorio de saúde:
+Relatório manual de saúde:
 
   mail health "KernelESP daily health"
 
@@ -38,14 +37,20 @@ Alerta de temperatura com ventoinha:
   rule add temp range 38 40 sh /home/heat-on.sh
   rule off 1 sh /home/heat-off.sh
 
-Alerta por entrada digital, por exemplo falha de energia:
+Alerta de fluxo elétrico a partir de entrada digital:
 
   input add power D2 pullup 50
   write /home/power-lost.sh mail send default "KernelESP power alert" "Power flow has stopped."
   input on power low sh /home/power-lost.sh
 
-A placa precisa continuar alimentada para enviar alertas. Usa UPS ou bateria se
-o alerta estiver relacionado com perda de energia.
+Evita ciclos de email:
+
+  rule cooldown 300000
+  rule list
+  dmesg
+
+A placa deve continuar alimentada para enviar alertas. Usa UPS ou bateria se o
+alerta depender de perda de energia elétrica.
 
 Diagnóstico:
 
@@ -53,6 +58,3 @@ Diagnóstico:
   ping smtp.lan 25
   wifi status
   dmesg
-
-Evita ciclos de email. Usa regras de intervalo e cooldown para que uma avaria
-nao crie centenas de mensagens.

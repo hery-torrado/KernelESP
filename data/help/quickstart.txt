@@ -1,51 +1,47 @@
 QUICK START
 ===========
 
-Check the board:
+1. Check the board:
 
   version
   health
   free
   df
 
-Check Wi-Fi:
+2. Check network and time:
 
   wifi status
-  wifi scan
-  ip
-
-If time is not synced:
-
+  ifconfig
   ntp kick
   date
 
-Configure a relay:
+Use ntp kick in scripts, boot and cron because it returns immediately. Use
+ntp sync only from serial/web when you want to wait for a manual result.
+
+3. Add a relay safely:
 
   relay add light D1 active_low
   relay boot light off
   relay status
   relay pulse light 500
 
-Configure a sensor:
+If the relay works backwards, recreate it with active_high.
 
-  sensor scan
-  sensor begin
-  sensor read
-
-Add a daily schedule:
+4. Add a daily schedule:
 
   cron add daily 08:10 relay on light
   cron add daily 08:20 relay off light
   cron list
 
-Add a climate rule:
+5. Add a sensor rule:
 
-  relay add fan D5 active_low
+  sensor scan
   sensor begin
+  relay add fan D5 active_low
   rule add temp range 38 40 relay fan
   rule list
 
-Configure mail alerts:
+6. Optional mail alerts:
 
   mail config postfix.lan 25 kernelesp@lan admin@example.com
   mail test "Manual test from KernelESP"
@@ -56,5 +52,12 @@ Before leaving the board unattended:
   rule list
   crontab -l
   input list
+  jobs
   health
   backup
+
+If anything looks unsafe:
+
+  disarm
+  safe next
+  reboot

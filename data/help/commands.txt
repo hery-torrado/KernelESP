@@ -40,8 +40,8 @@ Time:
 
   date
   ntp status
-  ntp kick
-  ntp sync
+  ntp kick       non-blocking refresh for scripts/cron
+  ntp sync       blocking manual sync for testing
   ntp http
   ntp auto on
   ntp fallback on

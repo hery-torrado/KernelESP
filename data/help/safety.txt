@@ -1,7 +1,7 @@
 SAFETY
 ======
 
-KernelESP switches GPIO pins. It must not power mains loads directly.
+KernelESP switches GPIO pins. It must never power mains loads directly.
 
 For 110/230 V, pumps, heaters, motors, locks or valves:
 
@@ -9,28 +9,29 @@ For 110/230 V, pumps, heaters, motors, locks or valves:
   - isolate low voltage and mains wiring
   - use fuses and proper enclosures
   - test with the real load disconnected first
+  - keep manual override/disconnect access
 
-Safe relay boot state:
+Choose safe pins first:
+
+  D1 D2 D5 D6 D7
+
+Avoid boot-sensitive pins unless you understand the board:
+
+  D0 D3 D4 D8 RX TX
+
+Set safe relay boot state before wiring the load:
 
   relay boot pump off
   relay boot heater off
   relay boot fan off
 
-Pause automation:
+Pause all automation:
 
   disarm
 
 Resume:
 
   arm
-
-Emergency cleanup:
-
-  safe next
-  reboot
-  cron clear
-  rule clear
-  timer clear
 
 Use dry-run before testing risky workflows:
 
@@ -39,3 +40,11 @@ Use dry-run before testing risky workflows:
   relay off pump
   dryrun off
 
+Emergency cleanup:
+
+  disarm
+  safe next
+  reboot
+  cron clear
+  rule clear
+  timer clear

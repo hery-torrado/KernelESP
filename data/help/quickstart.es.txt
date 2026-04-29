@@ -1,58 +1,63 @@
 PRIMEROS PASOS
 ==============
 
-Comprueba la placa:
+1. Comprueba la placa:
 
   version
   health
   free
   df
 
-Wi-Fi:
+2. Comprueba red y hora:
 
   wifi status
-  wifi scan
-  ip
-
-Hora:
-
+  ifconfig
   ntp kick
   date
 
-Relé básico:
+Usa ntp kick en scripts, arranque y cron porque vuelve inmediatamente. Usa
+ntp sync solo desde serie/web cuando quieras esperar un resultado manual.
+
+3. Añade un relé con seguridad:
 
   relay add light D1 active_low
   relay boot light off
+  relay status
   relay pulse light 500
 
-Sensor:
+Si el relé funciona al revés, recréalo con active_high.
 
-  sensor scan
-  sensor begin
-  sensor read
-
-Automatización diaria:
+4. Añade un horario diario:
 
   cron add daily 08:10 relay on light
   cron add daily 08:20 relay off light
+  cron list
 
-Regla de temperatura:
+5. Añade una regla de sensor:
 
-  relay add fan D5 active_low
+  sensor scan
   sensor begin
+  relay add fan D5 active_low
   rule add temp range 38 40 relay fan
+  rule list
 
-Email:
+6. Avisos por email opcionales:
 
   mail config postfix.lan 25 kernelesp@lan admin@example.com
   mail test "Manual test from KernelESP"
 
-Antes de dejarlo solo:
+Antes de dejar la placa sola:
 
   relay status
   rule list
   crontab -l
   input list
+  jobs
   health
   backup
 
+Si algo parece inseguro:
+
+  disarm
+  safe next
+  reboot

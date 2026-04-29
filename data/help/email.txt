@@ -1,14 +1,13 @@
 EMAIL ALERTS
 ============
 
-KernelESP can send plain SMTP email through a trusted internal relay. The
-recommended architecture is:
+KernelESP sends plain SMTP email through a trusted internal relay:
 
   KernelESP -> internal Postfix relay -> smart host -> mailbox
 
-The ESP8266 firmware intentionally avoids TLS and SMTP authentication to keep
-RAM and code size under control. Postfix should accept mail from the device only
-on the trusted LAN.
+The ESP8266 firmware intentionally avoids TLS and SMTP authentication to save
+RAM and flash. The SMTP relay must be on a trusted LAN and should only accept
+mail from known devices.
 
 One-time setup:
 
@@ -16,7 +15,7 @@ One-time setup:
   mail status
   mail test "Manual test from KernelESP"
 
-Send a health report:
+Manual health report:
 
   mail health "KernelESP daily health"
 
@@ -45,6 +44,12 @@ Power-flow alert from a digital input:
   write /home/power-lost.sh mail send default "KernelESP power alert" "Power flow has stopped."
   input on power low sh /home/power-lost.sh
 
+Avoid mail loops:
+
+  rule cooldown 300000
+  rule list
+  dmesg
+
 The board must stay powered to send alerts. Use a UPS or battery if the alert
 is about mains power loss.
 
@@ -54,6 +59,3 @@ Troubleshooting:
   ping smtp.lan 25
   wifi status
   dmesg
-
-Avoid mail loops. Use range rules and cooldowns so one fault does not create
-hundreds of messages.

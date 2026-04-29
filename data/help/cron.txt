@@ -1,18 +1,23 @@
 CRON AND SCHEDULES
 ==================
 
-Cron runs commands at a clock time. Queue a time refresh first:
+Cron runs commands at clock time. It needs valid time:
 
   ntp kick
   date
 
-Daily jobs:
+ntp kick queues a non-blocking refresh and is the right choice for boot scripts,
+cron setup and automation. ntp sync waits and is best kept for manual testing.
 
+Daily relay schedule:
+
+  relay add pump D1 active_low
+  relay boot pump off
   cron add daily 08:00 relay on pump
   cron add daily 08:05 relay off pump
   cron list
 
-Short daily relay schedule:
+Short form for the same pattern:
 
   schedule pump 08:00 08:05
 
@@ -26,18 +31,20 @@ Annual date jobs:
   cron add date 05-01 11:00 sh /home/may1.sh
   cron add date 1-may 11:00 sh /home/may1.sh
 
-List and remove:
+If the command is long, put it in a script:
 
-  cron list
+  write /home/morning.sh date
+  append /home/morning.sh sensor read
+  cron add daily 09:00 sh /home/morning.sh
+
+Inspect and clean up:
+
   crontab -l
   cron rm 1
   cron clear
+  jobs
 
-Save and load:
+Persist explicit changes:
 
   cron save
   cron load
-
-Tip: if the command is long, put it in a script:
-
-  cron add daily 09:00 sh /home/morning.sh

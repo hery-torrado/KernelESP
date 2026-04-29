@@ -35,6 +35,13 @@ Automação:
   rule add temp range 38 40 relay fan
   input add button D2 pullup
 
+Tempo:
+
+  date
+  ntp status
+  ntp kick       atualização não bloqueante para scripts/cron
+  ntp sync       sincronização manual bloqueante para testes
+
 Ficheiros:
 
   ls, cat, write, append, rm, mkdir, cp, mv, sh, backup, profile

@@ -1,37 +1,50 @@
-SEGURANCA ELETRICA
-==================
+SEGURANÇA
+=========
 
-KernelESP comuta GPIOs. Nao alimenta cargas de rede diretamente.
+KernelESP comuta pinos GPIO. Nunca deve alimentar cargas de rede diretamente.
 
-Para 110/230 V, bombas, motores, fechaduras ou aquecedores:
+Para 110/230 V, bombas, aquecedores, motores, fechaduras ou válvulas:
 
-  - usa modulos certificados
-  - separa baixa tensao e rede
-  - usa caixa, fusivel e isolamento
-  - testa primeiro sem a carga real
+  - usa módulos de relé/contactor certificados
+  - separa baixa tensão e rede elétrica
+  - usa fusíveis e caixas adequadas
+  - testa primeiro com a carga real desligada
+  - mantém acesso a corte ou modo manual
 
-Arranque seguro:
+Escolhe primeiro pinos seguros:
+
+  D1 D2 D5 D6 D7
+
+Evita pinos delicados de arranque salvo se conheceres a placa:
+
+  D0 D3 D4 D8 RX TX
+
+Configura estado seguro antes de cablar a carga:
 
   relay boot pump off
   relay boot heater off
   relay boot fan off
 
-Pausar automacao:
+Pausar automação:
 
   disarm
 
-Recuperacao:
+Retomar:
 
-  safe next
-  reboot
-  cron clear
-  rule clear
-  timer clear
+  arm
 
-Teste com dry-run:
+Usa dry-run antes de testar fluxos de risco:
 
   dryrun on
   relay on pump
   relay off pump
   dryrun off
 
+Limpeza de emergência:
+
+  disarm
+  safe next
+  reboot
+  cron clear
+  rule clear
+  timer clear

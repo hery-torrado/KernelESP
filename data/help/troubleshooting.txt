@@ -1,7 +1,7 @@
 TROUBLESHOOTING
 ===============
 
-Start with:
+Start with a read-only snapshot:
 
   health
   free
@@ -28,9 +28,20 @@ Web UI is unreachable:
 
 Time is wrong:
 
-  ntp sync
+  ntp kick
   ntp status
   date
+
+If you need to wait manually, use:
+
+  ntp sync
+
+Cron did not run:
+
+  date
+  crontab -l
+  jobs
+  dmesg
 
 Sensor not found:
 
@@ -42,11 +53,13 @@ Relay works backwards:
 
   relay rm light
   relay add light D1 active_high
+  relay boot light off
 
 Mail does not send:
 
   mail status
-  ping postfix.lan 25
+  ping smtp.lan 25
+  wifi status
   dmesg
 
 If automation gets unsafe:
@@ -55,3 +68,9 @@ If automation gets unsafe:
   safe next
   reboot
 
+After safe boot:
+
+  cron clear
+  rule clear
+  timer clear
+  safe off

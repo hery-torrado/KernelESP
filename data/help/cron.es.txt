@@ -1,18 +1,24 @@
 CRON Y HORARIOS
 ===============
 
-Cron ejecuta comandos a una hora concreta. Necesita hora sincronizada:
+Cron ejecuta comandos a una hora concreta. Necesita hora válida:
 
   ntp kick
   date
 
-Tarea diaria:
+ntp kick encola una actualización no bloqueante y es la opción correcta para
+arranque, scripts y automatización. ntp sync espera y conviene reservarlo para
+pruebas manuales.
 
+Horario diario de relé:
+
+  relay add pump D1 active_low
+  relay boot pump off
   cron add daily 08:00 relay on pump
   cron add daily 08:05 relay off pump
   cron list
 
-Atajo para horario diario:
+Atajo para el mismo patrón:
 
   schedule pump 08:00 08:05
 
@@ -24,14 +30,22 @@ Días de semana:
 Fecha anual:
 
   cron add date 05-01 11:00 sh /home/may1.sh
+  cron add date 1-may 11:00 sh /home/may1.sh
 
-Gestión:
+Si el comando es largo, ponlo en un script:
+
+  write /home/morning.sh date
+  append /home/morning.sh sensor read
+  cron add daily 09:00 sh /home/morning.sh
+
+Inspeccionar y limpiar:
 
   crontab -l
   cron rm 1
   cron clear
+  jobs
+
+Persistir cambios explícitos:
+
   cron save
   cron load
-
-Si el comando es largo, ponlo en un script.
-

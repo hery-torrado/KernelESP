@@ -1,24 +1,27 @@
 AJUDA DO KERNELESP
 ==================
 
-KernelESP transforma o ESP8266 num pequeno sistema de controlo com consola,
-web, ficheiros LittleFS, Wi-Fi, relés, sensores, cron, regras, entradas,
-scripts, cópias de segurança, diagnóstico e alertas por email.
+KernelESP transforma um ESP8266 num pequeno controlador tipo UNIX: consola
+série, interface web, ficheiros LittleFS, recuperação Wi-Fi, relés, sensores,
+cron, regras, entradas, scripts, cópias, diagnóstico e alertas por email.
 
-Fluxo recomendado:
+Caminho recomendado:
 
-  1. Ligar Wi-Fi e verificar IP.
-  2. Sincronizar a hora com NTP.
-  3. Configurar relés com estado seguro no arranque.
-  4. Testar sensores e entradas.
-  5. Criar regras, cron ou scripts.
-  6. Ativar email se forem precisos alertas.
-  7. Fazer backup e guardar um perfil estável.
+  1. Verifica placa e rede: health, wifi status, date.
+  2. Lança a hora com ntp kick. Usa ntp sync só para testes manuais.
+  3. Configura relés com estado seguro antes de ligar cargas reais.
+  4. Testa sensores e entradas manualmente.
+  5. Adiciona uma automação de cada vez e revê jobs e dmesg.
+  6. Configura email apenas através de um relay SMTP de LAN confiável.
+  7. Cria backup/perfil quando o sistema funcionar bem.
 
-Comandos úteis:
+Primeiros comandos úteis:
 
+  help quickstart
+  help commands
   health
   wifi status
+  ntp kick
   date
   relay status
   sensor read
@@ -27,7 +30,15 @@ Comandos úteis:
 
 Tópicos principais:
 
-  quickstart, hardware, relay, sensor, climate, cron, email, inputs,
-  scripts, web, wifi, files, backup, memory, commands, safety,
-  troubleshooting.
+  quickstart       Caminho da placa vazia até à primeira automação.
+  commands         Mapa compacto de comandos.
+  hardware         Pinos, GPIO delicados e cablagem.
+  relay            Relés, active_low/active_high e arranque seguro.
+  cron             Horários diários, por dias e por data.
+  email            SMTP e receitas de alertas.
+  safety           O que verificar antes de comutar cargas reais.
+  troubleshooting  Se algo falhar, começa aqui.
 
+Uso:
+
+  help <tópico>

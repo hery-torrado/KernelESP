@@ -1,40 +1,43 @@
 KERNELESP HELP
 ==============
 
-KernelESP is a small ESP8266 control system with a serial shell, web UI,
-LittleFS storage, Wi-Fi recovery, relays, sensors, cron, rules, inputs,
+KernelESP turns an ESP8266 into a tiny UNIX-like controller: serial shell, web
+UI, LittleFS files, Wi-Fi recovery, relays, sensors, cron, rules, inputs,
 scripts, backups, diagnostics and mail alerts.
 
-Common first commands:
+Recommended path:
 
-  help
+  1. Check the board and network: health, wifi status, date.
+  2. Queue time sync with ntp kick. Use ntp sync only when testing manually.
+  3. Configure relays with a safe boot state before connecting real loads.
+  4. Test sensors and inputs manually.
+  5. Add one automation at a time, then inspect jobs and dmesg.
+  6. Configure mail only through a trusted LAN SMTP relay.
+  7. Create a backup/profile after the system behaves correctly.
+
+Useful first commands:
+
+  help quickstart
   help commands
   health
   wifi status
+  ntp kick
   date
   relay status
   sensor read
   jobs
+  backup
 
-Topics:
+Key topics:
 
-  quickstart       First setup steps.
-  hardware         Wiring, pins and electrical safety.
-  relay            Relay setup and safe boot state.
-  sensor           BMP280/BME280 sensor setup.
-  climate          Temperature/humidity rules.
+  quickstart       Setup path from empty board to first automation.
+  commands         Compact command map.
+  hardware         Pins, boot-sensitive GPIO and wiring notes.
+  relay            Relay setup, active_low/active_high and safe boot.
   cron             Daily, weekday and date schedules.
-  email            Workflows and recipes for email alerts.
-  mail             Command reference for the mail command.
-  inputs           Digital input alerts.
-  scripts          One-command-per-line scripts.
-  web              Web UI and API notes.
-  wifi             Wi-Fi setup and recovery.
-  files            LittleFS file commands.
-  backup           Backup, restore and profiles.
-  memory           Heap, flash and log guidance.
-  safety           Safe automation practices.
-  troubleshooting  Common failures and fixes.
+  email            SMTP relay setup and alert recipes.
+  safety           What to check before switching real loads.
+  troubleshooting  If something is not working, start there.
 
 Use:
 

@@ -1,7 +1,7 @@
 PROBLEMAS
 =========
 
-Empieza por:
+Empieza con una foto de solo lectura:
 
   health
   free
@@ -10,43 +10,67 @@ Empieza por:
   wifi status
   jobs
 
-Wi-Fi:
+Wi-Fi no conecta:
 
   wifi scan
   wifi diag
   wifi recover
   wifi sdkreset --yes
 
-El ESP8266 solo soporta 2.4 GHz.
+Recuerda: ESP8266 solo soporta 2.4 GHz.
 
-Web:
+La web no responde:
 
   wifi status
   web status
   service web restart
   ap status
 
-Hora:
+La hora está mal:
 
-  ntp sync
+  ntp kick
   ntp status
   date
 
-Sensor:
+Si necesitas esperar manualmente:
+
+  ntp sync
+
+Cron no ha ejecutado:
+
+  date
+  crontab -l
+  jobs
+  dmesg
+
+Sensor no encontrado:
 
   i2c scan
   sensor begin 0x76 D2 D1
   sensor begin 0x77 D2 D1
 
-Mail:
+El relé funciona al revés:
+
+  relay rm light
+  relay add light D1 active_high
+  relay boot light off
+
+El email no sale:
 
   mail status
-  ping postfix.lan 25
+  ping smtp.lan 25
+  wifi status
   dmesg
 
-Automatización peligrosa:
+Si una automatización se vuelve insegura:
 
   disarm
   safe next
   reboot
 
+Después del arranque seguro:
+
+  cron clear
+  rule clear
+  timer clear
+  safe off
