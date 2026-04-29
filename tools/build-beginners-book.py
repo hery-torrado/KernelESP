@@ -14,15 +14,19 @@ from pathlib import Path
 from textwrap import wrap
 from typing import Callable
 
+from PIL import Image
 from reportlab.lib import colors
 from reportlab.lib.pagesizes import letter
 from reportlab.lib.units import inch
 from reportlab.pdfbase import pdfmetrics
+from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "book" / "KernelESP_Beginners_Book.pdf"
+ASSETS = ROOT / "book" / "assets"
+COVER_HERO = ASSETS / "cover-hero.png"
 TITLE = "KernelESP"
 SUBTITLE = "A Beginner's Guide to a Tiny UNIX for the ESP8266"
 VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
@@ -182,10 +186,36 @@ class Book:
         c.drawString(0.65 * inch, 5.77 * inch, "microcontrollers, ESP8266 and tiny UNIX automation")
         c.setFillColor(PALETTE["blue"])
         c.rect(0, 4.95 * inch, self.w, 0.12 * inch, fill=1, stroke=0)
-        self.draw_cover_technical_plate(0, 0.72 * inch, self.w, 3.92 * inch)
+        self.draw_cover_photo(0, 0.72 * inch, self.w, 3.92 * inch)
         c.setFillColor(PALETTE["muted"])
         c.setFont("Helvetica", 9.2)
         c.drawString(0.65 * inch, 0.42 * inch, "Serial shell - Web UI - automation language - relays - sensors - garden projects - recovery")
+
+    def draw_cover_photo(self, x: float, y: float, w: float, h: float) -> None:
+        if not COVER_HERO.exists():
+            self.draw_cover_technical_plate(x, y, w, h)
+            return
+        img = Image.open(COVER_HERO).convert("RGB")
+        src_w, src_h = img.size
+        target_ratio = w / h
+        src_ratio = src_w / src_h
+        if src_ratio < target_ratio:
+            crop_h = int(src_w / target_ratio)
+            top = max(0, int((src_h - crop_h) * 0.92))
+            box = (0, top, src_w, top + crop_h)
+        else:
+            crop_w = int(src_h * target_ratio)
+            left = max(0, int((src_w - crop_w) * 0.5))
+            box = (left, 0, left + crop_w, src_h)
+        cropped = img.crop(box)
+        self.c.drawImage(ImageReader(cropped), x, y, width=w, height=h, preserveAspectRatio=False, mask=None)
+        self.c.setFillColor(colors.white)
+        self.c.setFillAlpha(0.18)
+        self.c.rect(x, y + h - 0.95 * inch, w, 0.95 * inch, fill=1, stroke=0)
+        self.c.setFillAlpha(1)
+        self.c.setStrokeColor(PALETTE["blue"])
+        self.c.setLineWidth(0.6)
+        self.c.line(x, y + h, x + w, y + h)
 
     def draw_cover_technical_plate(self, x: float, y: float, w: float, h: float) -> None:
         c = self.c
