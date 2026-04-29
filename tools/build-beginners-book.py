@@ -29,25 +29,25 @@ VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 
 
 PALETTE = {
-    "ink": colors.HexColor("#101010"),
-    "muted": colors.HexColor("#57534E"),
-    "paper": colors.HexColor("#F4EBD8"),
-    "cream": colors.HexColor("#FFF7E2"),
-    "blue": colors.HexColor("#0057B8"),
-    "blue_dark": colors.HexColor("#003B7A"),
-    "teal": colors.HexColor("#008C8C"),
-    "green": colors.HexColor("#2E7D32"),
-    "yellow": colors.HexColor("#F5C542"),
-    "orange": colors.HexColor("#E87722"),
-    "red": colors.HexColor("#E53935"),
-    "dark": colors.HexColor("#111111"),
-    "code": colors.HexColor("#151515"),
-    "line": colors.HexColor("#D7C6A3"),
-    "soft_blue": colors.HexColor("#E7F0FF"),
-    "soft_green": colors.HexColor("#E8F5E9"),
-    "soft_orange": colors.HexColor("#FFF0D1"),
-    "soft_red": colors.HexColor("#FFE8E5"),
-    "soft_yellow": colors.HexColor("#FFF5C2"),
+    "ink": colors.HexColor("#1F2937"),
+    "muted": colors.HexColor("#6B7280"),
+    "paper": colors.HexColor("#FFFFFF"),
+    "cream": colors.HexColor("#FFFFFF"),
+    "blue": colors.HexColor("#3546A0"),
+    "blue_dark": colors.HexColor("#24306F"),
+    "teal": colors.HexColor("#527C89"),
+    "green": colors.HexColor("#4C6B55"),
+    "yellow": colors.HexColor("#D7DEE8"),
+    "orange": colors.HexColor("#A66A3F"),
+    "red": colors.HexColor("#8A96A8"),
+    "dark": colors.HexColor("#111827"),
+    "code": colors.HexColor("#18202B"),
+    "line": colors.HexColor("#D7DBE3"),
+    "soft_blue": colors.HexColor("#EEF2FF"),
+    "soft_green": colors.HexColor("#EFF6F0"),
+    "soft_orange": colors.HexColor("#F6F1EC"),
+    "soft_red": colors.HexColor("#F2F4F7"),
+    "soft_yellow": colors.HexColor("#F7F8FA"),
 }
 
 
@@ -104,7 +104,7 @@ class Book:
             self.section = section
         self.c.setFillColor(PALETTE["cream"])
         self.c.rect(0, 0, self.w, self.h, fill=1, stroke=0)
-        self.draw_bauhaus_page_marks()
+        self.draw_page_marks()
         self.draw_header_footer()
         if dest:
             self.bookmark(dest, outline or section or dest, level)
@@ -139,22 +139,15 @@ class Book:
             c.drawCentredString(self.w / 2, self.h - 0.42 * inch, self.section[:70])
         c.drawRightString(self.w - 0.72 * inch, 0.28 * inch, str(self.page))
 
-    def draw_bauhaus_page_marks(self) -> None:
+    def draw_page_marks(self) -> None:
         c = self.c
         c.saveState()
-        c.setFillAlpha(0.08)
         c.setFillColor(PALETTE["blue"])
-        c.rect(0, self.h - 1.2 * inch, 1.85 * inch, 1.2 * inch, fill=1, stroke=0)
-        c.setFillColor(PALETTE["red"])
-        c.circle(self.w - 0.45 * inch, self.h - 0.95 * inch, 0.42 * inch, fill=1, stroke=0)
-        c.setFillColor(PALETTE["yellow"])
-        self.triangle(self.w - 1.2 * inch, 0.0, self.w, 0.0, self.w, 0.8 * inch, fill=1, stroke=0)
-        c.setFillAlpha(1)
-        c.setStrokeColor(PALETTE["line"])
-        c.setLineWidth(0.35)
-        for i in range(6):
-            x = 0.68 * inch + i * 0.22 * inch
-            c.line(x, self.h - 0.72 * inch, x, self.h - 0.63 * inch)
+        c.rect(0.65 * inch, self.h - 0.5 * inch, 0.45 * inch, 0.055 * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["line"])
+        c.rect(1.18 * inch, self.h - 0.49 * inch, 0.7 * inch, 0.035 * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["soft_yellow"])
+        c.rect(0, 0, 0.22 * inch, self.h, fill=1, stroke=0)
         c.restoreState()
 
     def triangle(self, x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, fill: int = 1, stroke: int = 0) -> None:
@@ -169,50 +162,68 @@ class Book:
         self.page += 1
         c = self.c
         self.bookmark("cover", "Cover", 0)
-        c.setFillColor(PALETTE["paper"])
+        c.setFillColor(colors.white)
         c.rect(0, 0, self.w, self.h, fill=1, stroke=0)
         c.setFillColor(PALETTE["blue"])
-        c.rect(0, 7.2 * inch, 2.2 * inch, 3.8 * inch, fill=1, stroke=0)
-        c.setFillColor(PALETTE["red"])
-        c.circle(5.7 * inch, 8.35 * inch, 1.25 * inch, fill=1, stroke=0)
-        c.setFillColor(PALETTE["yellow"])
-        self.triangle(4.25 * inch, 6.6 * inch, 6.95 * inch, 6.6 * inch, 6.95 * inch, 3.9 * inch, fill=1, stroke=0)
-        c.setFillColor(PALETTE["dark"])
-        c.rect(0.78 * inch, 6.36 * inch, 4.05 * inch, 0.18 * inch, fill=1, stroke=0)
-        c.rect(0.78 * inch, 6.02 * inch, 2.92 * inch, 0.18 * inch, fill=1, stroke=0)
-        c.rect(0.78 * inch, 5.68 * inch, 3.45 * inch, 0.18 * inch, fill=1, stroke=0)
-        for i in range(8):
-            c.setStrokeColor(PALETTE["dark"])
-            c.setLineWidth(0.8)
-            x = 0.8 * inch + i * 0.32 * inch
-            c.line(x, 0.48 * inch, x, 1.24 * inch)
-        panel_y = 3.04 * inch
-        panel_h = 2.24 * inch
-        c.setFillColor(PALETTE["cream"])
-        c.rect(0.78 * inch, panel_y, 5.1 * inch, panel_h, fill=1, stroke=0)
-        c.setStrokeColor(PALETTE["dark"])
-        c.setLineWidth(2.5)
-        c.rect(0.78 * inch, panel_y, 5.1 * inch, panel_h, fill=0, stroke=1)
-        c.setFillColor(PALETTE["blue_dark"])
-        c.setFillAlpha(0.13)
-        c.circle(1.75 * inch, 4.92 * inch, 1.08 * inch, fill=1, stroke=0)
-        c.setFillColor(PALETTE["red"])
-        c.circle(4.95 * inch, 3.42 * inch, 0.52 * inch, fill=1, stroke=0)
-        c.setFillAlpha(1)
-        self.draw_chip(3.35 * inch, 4.18 * inch, 0.78, dark=True)
-        c.setFillColor(PALETTE["dark"])
-        c.setFont("Helvetica-Bold", 46)
-        c.drawString(0.95 * inch, 2.08 * inch, TITLE)
-        c.setFont("Helvetica-Bold", 14)
-        c.setFillColor(PALETTE["blue_dark"])
-        c.drawString(0.98 * inch, 1.68 * inch, "A Beginner's Guide to a Tiny UNIX")
-        c.setFillColor(PALETTE["dark"])
-        c.drawString(0.98 * inch, 1.45 * inch, "for the ESP8266")
-        c.setFont("Helvetica", 9.5)
+        c.rect(0.0, self.h - 0.47 * inch, 1.78 * inch, 0.47 * inch, fill=1, stroke=0)
+        c.setFillColor(colors.white)
+        c.setFont("Helvetica", 7.5)
+        c.drawCentredString(0.89 * inch, self.h - 0.28 * inch, "KernelESP Project")
         c.setFillColor(PALETTE["muted"])
-        c.drawString(0.98 * inch, 1.05 * inch, f"Version {VERSION} - Bauhaus navigation edition")
-        c.setFont("Helvetica-Bold", 9)
-        c.drawString(0.98 * inch, 0.79 * inch, "Serial shell - Web UI - Automation - Hardware - Recovery - Real projects")
+        c.setFont("Helvetica", 8.5)
+        c.drawString(2.05 * inch, self.h - 0.28 * inch, "Beginner Edition")
+        c.drawRightString(self.w - 0.65 * inch, self.h - 0.28 * inch, f"Version {VERSION}")
+        c.setFillColor(PALETTE["ink"])
+        c.setFont("Helvetica", 17)
+        c.drawString(0.65 * inch, 6.78 * inch, "A practical guide to")
+        c.setFont("Helvetica-Bold", 45)
+        c.drawString(0.65 * inch, 6.18 * inch, "KernelESP")
+        c.setFont("Helvetica", 18)
+        c.drawString(0.65 * inch, 5.77 * inch, "microcontrollers, ESP8266 and tiny UNIX automation")
+        c.setFillColor(PALETTE["blue"])
+        c.rect(0, 4.95 * inch, self.w, 0.12 * inch, fill=1, stroke=0)
+        self.draw_cover_technical_plate(0, 0.72 * inch, self.w, 3.92 * inch)
+        c.setFillColor(PALETTE["muted"])
+        c.setFont("Helvetica", 9.2)
+        c.drawString(0.65 * inch, 0.42 * inch, "Serial shell - Web UI - automation language - relays - sensors - garden projects - recovery")
+
+    def draw_cover_technical_plate(self, x: float, y: float, w: float, h: float) -> None:
+        c = self.c
+        c.saveState()
+        c.setFillColor(colors.HexColor("#E9EAED"))
+        c.rect(x, y, w, h, fill=1, stroke=0)
+        c.setFillColor(colors.HexColor("#D8DBE0"))
+        for i in range(10):
+            xx = x + (i * 0.73 + 0.15) * inch
+            c.rect(xx, y, 0.025 * inch, h, fill=1, stroke=0)
+        c.setStrokeColor(colors.HexColor("#8A9099"))
+        c.setLineWidth(1.2)
+        base = y + 0.78 * inch
+        top = y + 2.72 * inch
+        c.line(x + 0.4 * inch, base, x + w - 0.35 * inch, base)
+        for i in range(8):
+            xx = x + (0.75 + i * 0.72) * inch
+            c.line(xx, base, xx + 0.32 * inch, top)
+            c.line(xx + 0.64 * inch, base, xx + 0.32 * inch, top)
+        c.setLineWidth(2.0)
+        c.arc(x + 0.52 * inch, base - 0.2 * inch, x + w - 0.52 * inch, top + 0.35 * inch, 9, 162)
+        c.setStrokeColor(colors.HexColor("#555C66"))
+        c.setLineWidth(0.75)
+        for i in range(18):
+            xx = x + 0.45 * inch + i * 0.34 * inch
+            c.line(xx, y + 0.28 * inch, xx, base)
+        c.setFillColor(colors.HexColor("#C4C8CF"))
+        c.roundRect(x + 4.25 * inch, y + 0.56 * inch, 1.35 * inch, 0.8 * inch, 8, fill=1, stroke=0)
+        c.setStrokeColor(colors.HexColor("#7C8490"))
+        c.setLineWidth(1)
+        for i in range(7):
+            yy = y + 0.66 * inch + i * 0.09 * inch
+            c.line(x + 4.1 * inch, yy, x + 4.25 * inch, yy)
+            c.line(x + 5.6 * inch, yy, x + 5.75 * inch, yy)
+        c.setFillColor(colors.HexColor("#4B5563"))
+        c.setFont("Helvetica-Bold", 8)
+        c.drawCentredString(x + 4.93 * inch, y + 0.98 * inch, "ESP8266")
+        c.restoreState()
 
     def title_page(self) -> None:
         self.new_page("Welcome", dest="welcome", outline="Welcome", level=0)
@@ -263,44 +274,60 @@ class Book:
         self.new_page("Table of Contents", dest="toc", outline="Table of Contents", level=0)
         self.h1("Table of Contents", 0.95 * inch)
         self.p("This index is clickable in PDF viewers that support internal links. Use it like a control panel for the book.", size=9.2, leading=12.2, width=80)
-        y = self.y
+        top_y = self.y
+        col = 0
+        col_w = 3.35 * inch
+        y = top_y
         for idx, (part, chapters) in enumerate(parts, start=1):
-            if y < 1.25 * inch:
-                self.new_page("Table of Contents")
-                y = self.y
+            needed = (0.28 + len(chapters) * 0.135) * inch
+            if y - needed < 0.82 * inch:
+                col += 1
+                if col > 1:
+                    self.new_page("Table of Contents")
+                    top_y = self.y
+                    col = 0
+                y = top_y
+            x = 0.85 * inch + col * col_w
+            jump_x = x + col_w - 0.33 * inch
             self.c.setFillColor([PALETTE["blue"], PALETTE["red"], PALETTE["yellow"]][(idx - 1) % 3])
-            self.c.rect(0.9 * inch, y - 0.04 * inch, 0.13 * inch, 0.13 * inch, fill=1, stroke=0)
+            self.c.rect(x, y - 0.04 * inch, 0.11 * inch, 0.11 * inch, fill=1, stroke=0)
             self.c.setFillColor(PALETTE["blue_dark"])
-            self.c.setFont("Helvetica-Bold", 13)
+            self.c.setFont("Helvetica-Bold", 10.2)
             label = f"Part {idx}: {part}"
-            self.c.drawString(1.12 * inch, y, label)
-            self.link_to(part_dests[idx], 1.08 * inch, y - 0.03 * inch, self.w - 0.88 * inch, y + 0.16 * inch)
-            y -= 0.22 * inch
+            self.c.drawString(x + 0.18 * inch, y, label)
+            self.link_to(part_dests[idx], x + 0.15 * inch, y - 0.03 * inch, x + col_w - 0.06 * inch, y + 0.14 * inch)
+            y -= 0.17 * inch
             self.c.setFillColor(PALETTE["ink"])
-            self.c.setFont("Helvetica", 9.2)
+            self.c.setFont("Helvetica", 7.85)
             for chapter in chapters:
                 self.c.setFillColor(PALETTE["line"])
-                self.c.rect(1.12 * inch, y + 0.045 * inch, 0.18 * inch, 0.015 * inch, fill=1, stroke=0)
+                self.c.rect(x + 0.2 * inch, y + 0.045 * inch, 0.14 * inch, 0.012 * inch, fill=1, stroke=0)
                 self.c.setFillColor(PALETTE["ink"])
-                self.c.drawString(1.38 * inch, y, chapter)
+                self.c.drawString(x + 0.42 * inch, y, chapter[:34])
                 self.c.setFillColor(PALETTE["blue"])
-                self.c.setFont("Helvetica-Bold", 7.2)
-                self.c.drawRightString(self.w - 0.9 * inch, y, "JUMP")
-                self.link_to(topic_dests[chapter], 1.34 * inch, y - 0.03 * inch, self.w - 0.86 * inch, y + 0.15 * inch)
-                self.c.setFont("Helvetica", 9.2)
-                y -= 0.16 * inch
-            y -= 0.08 * inch
-        for label, dest in [("Part 11: Command Atlas", "part-11-command-atlas"), ("Final Notes", "final-notes")]:
-            if y < 1.25 * inch:
-                self.new_page("Table of Contents")
-                y = self.y
+                self.c.setFont("Helvetica-Bold", 6.2)
+                self.c.drawRightString(jump_x, y, "JUMP")
+                self.link_to(topic_dests[chapter], x + 0.38 * inch, y - 0.03 * inch, jump_x + 0.05 * inch, y + 0.12 * inch)
+                self.c.setFont("Helvetica", 7.85)
+                y -= 0.135 * inch
+            y -= 0.06 * inch
+        atlas_part = len(parts) + 1
+        for label, dest in [(f"Part {atlas_part}: Command Atlas", "command-atlas"), ("Final Notes", "final-notes")]:
+            if y - 0.2 * inch < 0.82 * inch:
+                col += 1
+                if col > 1:
+                    self.new_page("Table of Contents")
+                    top_y = self.y
+                    col = 0
+                y = top_y
+            x = 0.85 * inch + col * col_w
             self.c.setFillColor(PALETTE["dark"])
-            self.c.rect(0.9 * inch, y - 0.04 * inch, 0.13 * inch, 0.13 * inch, fill=1, stroke=0)
+            self.c.rect(x, y - 0.04 * inch, 0.11 * inch, 0.11 * inch, fill=1, stroke=0)
             self.c.setFillColor(PALETTE["blue_dark"])
-            self.c.setFont("Helvetica-Bold", 13)
-            self.c.drawString(1.12 * inch, y, label)
-            self.link_to(dest, 1.08 * inch, y - 0.03 * inch, self.w - 0.88 * inch, y + 0.16 * inch)
-            y -= 0.24 * inch
+            self.c.setFont("Helvetica-Bold", 10.2)
+            self.c.drawString(x + 0.18 * inch, y, label)
+            self.link_to(dest, x + 0.15 * inch, y - 0.03 * inch, x + col_w - 0.06 * inch, y + 0.14 * inch)
+            y -= 0.19 * inch
         self.y = y
 
     @property
@@ -314,32 +341,30 @@ class Book:
     def h1(self, text: str, y: float | None = None) -> None:
         if y is not None:
             self.y = self.h - y
-        self.c.setFillColor(PALETTE["red"])
-        self.c.rect(0.85 * inch, self.y + 0.06 * inch, 0.18 * inch, 0.18 * inch, fill=1, stroke=0)
-        self.c.setFillColor(PALETTE["yellow"])
-        self.c.circle(1.18 * inch, self.y + 0.15 * inch, 0.09 * inch, fill=1, stroke=0)
+        self.c.setFillColor(PALETTE["blue"])
+        self.c.rect(0.82 * inch, self.y - 0.04 * inch, 0.07 * inch, 0.31 * inch, fill=1, stroke=0)
         self.c.setFillColor(PALETTE["ink"])
-        self.c.setFont("Helvetica-Bold", 24)
-        self.c.drawString(1.42 * inch, self.y, text)
+        self.c.setFont("Helvetica-Bold", 21)
+        self.c.drawString(1.0 * inch, self.y, text)
         self.c.setStrokeColor(PALETTE["blue"])
-        self.c.setLineWidth(2)
-        self.c.line(1.42 * inch, self.y - 0.08 * inch, min(self.w - 0.85 * inch, 1.42 * inch + len(text) * 0.13 * inch), self.y - 0.08 * inch)
-        self.y -= 0.38 * inch
+        self.c.setLineWidth(1.25)
+        self.c.line(1.0 * inch, self.y - 0.08 * inch, min(self.w - 0.85 * inch, 1.0 * inch + len(text) * 0.105 * inch), self.y - 0.08 * inch)
+        self.y -= 0.34 * inch
 
     def h2(self, text: str) -> None:
         self.c.setFillColor(PALETTE["blue"])
-        self.c.rect(0.85 * inch, self.y + 0.02 * inch, 0.12 * inch, 0.12 * inch, fill=1, stroke=0)
-        self.c.setFont("Helvetica-Bold", 15)
-        self.c.drawString(1.05 * inch, self.y, text)
-        self.y -= 0.27 * inch
+        self.c.rect(0.88 * inch, self.y + 0.025 * inch, 0.08 * inch, 0.12 * inch, fill=1, stroke=0)
+        self.c.setFont("Helvetica-Bold", 13.2)
+        self.c.drawString(1.04 * inch, self.y, text)
+        self.y -= 0.22 * inch
 
     def h3(self, text: str) -> None:
-        self.c.setFillColor(PALETTE["yellow"])
-        self.triangle(0.86 * inch, self.y + 0.02 * inch, 0.98 * inch, self.y + 0.02 * inch, 0.92 * inch, self.y + 0.16 * inch)
+        self.c.setFillColor(PALETTE["line"])
+        self.c.rect(0.88 * inch, self.y + 0.045 * inch, 0.12 * inch, 0.035 * inch, fill=1, stroke=0)
         self.c.setFillColor(PALETTE["ink"])
         self.c.setFont("Helvetica-Bold", 11)
-        self.c.drawString(1.08 * inch, self.y, text)
-        self.y -= 0.22 * inch
+        self.c.drawString(1.04 * inch, self.y, text)
+        self.y -= 0.18 * inch
 
     def p(self, text: str, size: float = 10.2, leading: float = 13.2, x: float = 0.9 * inch, width: int = 86) -> None:
         self.c.setFont("Helvetica", size)
@@ -355,6 +380,8 @@ class Book:
         self.c.setFont("Helvetica", 9.8)
         self.c.setFillColor(PALETTE["ink"])
         for item in items:
+            if self.y < 0.95 * inch:
+                self.new_page(self.section)
             lines = wrap(clean(item), 82)
             self.c.setFillColor(PALETTE["teal"])
             self.c.circle(0.98 * inch, self.y + 3, 2.4, fill=1, stroke=0)
@@ -403,41 +430,164 @@ class Book:
             yy -= 0.16 * inch
         self.y = y - 0.16 * inch
 
-    def part_page(self, number: int, title: str, promise: str, diagram: str, dest: str = "") -> None:
+    def reflection_box(self, title: str, prompts: list[str]) -> None:
+        remaining = self.y - 0.82 * inch
+        if remaining < 0.92 * inch:
+            return
+        x = 0.9 * inch
+        w = self.w - 1.8 * inch
+        box_h = min(remaining, 2.45 * inch)
+        y = self.y - box_h
+        self.c.setFillColor(PALETTE["soft_yellow"])
+        self.c.roundRect(x, y, w, box_h, 7, fill=1, stroke=0)
+        self.c.setStrokeColor(PALETTE["line"])
+        self.c.roundRect(x, y, w, box_h, 7, fill=0, stroke=1)
+        self.c.setFillColor(PALETTE["blue_dark"])
+        self.c.setFont("Helvetica-Bold", 9.2)
+        self.c.drawString(x + 0.16 * inch, y + box_h - 0.25 * inch, title)
+        self.c.setFillColor(PALETTE["muted"])
+        self.c.setFont("Helvetica", 8.0)
+        yy = y + box_h - 0.46 * inch
+        for prompt in prompts[:3]:
+            for line in wrap(clean(prompt), 82)[:2]:
+                self.c.drawString(x + 0.16 * inch, yy, line)
+                yy -= 0.14 * inch
+        self.c.setStrokeColor(colors.HexColor("#E0E4EA"))
+        while yy > y + 0.18 * inch:
+            self.c.line(x + 0.16 * inch, yy, x + w - 0.16 * inch, yy)
+            yy -= 0.18 * inch
+        self.y = y - 0.1 * inch
+
+    def part_page(self, number: int, title: str, promise: str, diagram: str, dest: str = "", chapters: list[str] | None = None) -> None:
         self.new_page(f"Part {number}: {title}", dest=dest, outline=f"Part {number}: {title}", level=0)
-        self.c.setFillColor(PALETTE["dark"])
-        self.c.rect(0.85 * inch, 6.65 * inch, self.w - 1.7 * inch, 2.25 * inch, fill=1, stroke=0)
         self.c.setFillColor(PALETTE["blue"])
-        self.c.rect(0.85 * inch, 6.65 * inch, 0.55 * inch, 2.25 * inch, fill=1, stroke=0)
-        self.c.setFillColor(PALETTE["red"])
-        self.c.circle(self.w - 1.25 * inch, 8.35 * inch, 0.33 * inch, fill=1, stroke=0)
-        self.c.setFillColor(PALETTE["yellow"])
-        self.triangle(self.w - 1.15 * inch, 6.65 * inch, self.w - 0.85 * inch, 6.65 * inch, self.w - 0.85 * inch, 6.95 * inch)
-        self.c.setFillColor(PALETTE["yellow"])
+        self.c.rect(0.85 * inch, 8.0 * inch, self.w - 1.7 * inch, 0.1 * inch, fill=1, stroke=0)
+        self.c.setFillColor(PALETTE["soft_blue"])
+        self.c.rect(0.85 * inch, 8.1 * inch, self.w - 1.7 * inch, 1.25 * inch, fill=1, stroke=0)
+        self.c.setStrokeColor(PALETTE["line"])
+        self.c.rect(0.85 * inch, 8.1 * inch, self.w - 1.7 * inch, 1.25 * inch, fill=0, stroke=1)
+        self.c.setFillColor(PALETTE["blue"])
         self.c.setFont("Helvetica-Bold", 12)
-        self.c.drawString(1.62 * inch, 8.35 * inch, f"PART {number}")
-        self.c.setFillColor(colors.white)
-        self.c.setFont("Helvetica-Bold", 27)
-        self.c.drawString(1.62 * inch, 7.85 * inch, title)
-        self.c.setFillColor(colors.HexColor("#D9E6FF"))
+        self.c.drawString(1.12 * inch, 9.08 * inch, f"PART {number}")
+        self.c.setFillColor(PALETTE["ink"])
+        self.c.setFont("Helvetica-Bold", 25)
+        self.c.drawString(1.12 * inch, 8.68 * inch, title)
+        self.c.setFillColor(PALETTE["muted"])
         self.c.setFont("Helvetica", 12)
         for idx, line in enumerate(wrap(clean(promise), 68)):
-            self.c.drawString(1.62 * inch, (7.45 - idx * 0.22) * inch, line)
-        self.y = 6.05 * inch
-        self.draw_named_diagram(diagram, 1.15 * inch, 2.15 * inch, 4.2 * inch, 2.7 * inch)
+            self.c.drawString(1.12 * inch, (8.38 - idx * 0.18) * inch, line)
+        self.y = 7.55 * inch
+        if chapters:
+            self.h2("Chapters")
+            x1 = 1.05 * inch
+            x2 = 4.0 * inch
+            yy1 = self.y
+            self.c.setFont("Helvetica", 9.2)
+            self.c.setFillColor(PALETTE["ink"])
+            split = (len(chapters) + 1) // 2
+            for i, chapter in enumerate(chapters):
+                x = x1 if i < split else x2
+                yy = yy1 - (i if i < split else i - split) * 0.19 * inch
+                self.c.setFillColor(PALETTE["line"])
+                self.c.rect(x, yy + 0.045 * inch, 0.16 * inch, 0.015 * inch, fill=1, stroke=0)
+                self.c.setFillColor(PALETTE["ink"])
+                self.c.drawString(x + 0.24 * inch, yy, chapter[:38])
+            self.y = yy1 - max(split, len(chapters) - split) * 0.19 * inch - 0.18 * inch
+        self.draw_named_diagram(diagram, 1.05 * inch, 4.1 * inch, 2.9 * inch, 1.65 * inch)
+        self.y = min(self.y, 3.85 * inch)
+        self.h2("How to approach it")
+        self.p("Read the explanation page first, then do the lab page slowly. The purpose is not to memorize commands, but to build a reliable mental model and a habit of verifying each change.", size=9.6, leading=12.2)
         self.callout("Beginner promise", "You do not have to memorize this part. Run the commands, observe the output, and build confidence one small success at a time.", PALETTE["soft_green"])
+        self.reflection_box("Before you begin", [
+            "What do you expect this part to help you control or understand?",
+            "Which command would you use to inspect the board before changing anything?",
+        ])
+
+    def topic_explainer(self, topic: Topic) -> str:
+        specific = {
+            "What Is a Microcontroller?": "A microcontroller is a small computer designed to live inside a device. It usually has a processor, memory and input/output pins in one package. It does not try to be a laptop. It tries to read signals, make decisions and control things reliably.",
+            "Meet the ESP8266": "The ESP8266 is a popular Wi-Fi microcontroller. It is small, inexpensive and powerful enough to host a web page, talk to sensors and switch relays, but it still has tight memory limits. KernelESP is designed around those limits.",
+            "Microcontroller vs Computer": "A normal computer is built for many programs, large storage, a screen, a keyboard and constant interaction. A microcontroller is built for a focused job: watch a few inputs, control a few outputs and keep going after power cuts.",
+            "What Can You Build?": "The useful question is not only what the chip can do, but what the chip can observe and control. With relays, inputs and sensors, KernelESP can manage watering zones, fans, heaters, warning lights, alarms and daily status reports.",
+            "How KernelESP Changes the Board": "A bare ESP8266 runs firmware. KernelESP adds a vocabulary: commands, files, cron, scripts, a web UI and a tiny C-like automation language. That vocabulary makes the board teachable and inspectable.",
+            "Beginner Safety and Mindset": "The safest beginner path is slow and observable. First log, then dry run, then test a low-voltage load, and only then connect real actuators. Good automation is not magic; it is a chain of small verified steps.",
+        }
+        if topic.title in specific:
+            return specific[topic.title]
+        by_diagram = {
+            "wifi": "Network features are a convenience layer over the same command engine. Use the serial console as the ground truth, then use the browser and API once the board is reachable.",
+            "files": "Files make the board persistent. A command changes the current moment; a file lets the board remember a script, configuration or note after reboot.",
+            "relay": "Hardware control is where software becomes physical. Treat every relay command as a real-world action, even while testing, and prefer names that describe the device being controlled.",
+            "sensor": "Sensors give the board facts about the environment. Good automation reads those facts, applies simple rules and logs the decision so a human can understand it later.",
+            "automation": "Automation is just a repeatable decision. The best programs stay short, use clear names and can be run manually before they are scheduled.",
+            "irrigation": "Garden automation combines water, electricity, weather and time. That makes it useful, but also worth testing carefully with one zone before expanding.",
+            "recovery": "Recovery is part of design. If a command can start something, another command should let you inspect, pause or undo it.",
+            "api": "The API is a bridge to other computers. Start with read-only status calls, then add control only when local safety and logging are already in place.",
+            "web": "The web UI is a friendly window into KernelESP. It should make common work easier, but the underlying commands remain the source of truth.",
+            "security": "Security on a microcontroller is mostly practical discipline: strong keys, private networks, no public exposure and a way to recover locally.",
+            "memory": "Memory is a budget. KernelESP can do a lot because it keeps features small and avoids long blocking work.",
+            "cron": "Schedules are promises to the future. They should use 24-hour time, be easy to list, and have a safe way to pause them.",
+            "system": "System commands are your dashboard. They answer what the board is, what it is doing and whether it has enough resources to continue.",
+            "chip": "The chip is small, but not mysterious. If you can read status, inspect files and run small commands, you can understand what it is doing.",
+        }
+        return by_diagram.get(topic.diagram, "This feature is one small part of the KernelESP operating model: inspect, change, verify and save.")
+
+    def topic_use_cases(self, topic: Topic) -> list[str]:
+        by_diagram = {
+            "irrigation": ["Control tree, flower or greenhouse watering zones with solenoid valves.", "Skip watering when rain, heat or time windows make irrigation unsafe.", "Log every watering decision so you can troubleshoot dry plants or wasted water."],
+            "relay": ["Switch a fan, warning lamp, low-voltage valve or contactor input.", "Pulse a test load briefly before scheduling longer work.", "Keep relay names tied to physical labels on the enclosure."],
+            "sensor": ["Turn on ventilation when temperature rises.", "Send an alert when pressure or humidity crosses a threshold.", "Use hysteresis so equipment does not chatter on and off."],
+            "automation": ["Express rules such as if temperature is high and Wi-Fi is connected, send an alert.", "Store reusable actions as functions and call them from cron.", "Use persistent variables as user-friendly switches such as irrigation.enabled."],
+            "wifi": ["Move the board from bench Wi-Fi to garden Wi-Fi.", "Find the IP address for the web UI.", "Recover access after a router or password change."],
+            "files": ["Store scripts, installation notes and boot commands.", "Inspect configuration without recompiling firmware.", "Back up the board before experiments."],
+            "api": ["Read status from a laptop or home dashboard.", "Trigger a command from another local automation system.", "Build tests that verify the board is alive after updates."],
+            "web": ["Run commands without opening a serial terminal.", "Edit scripts from a browser.", "Read local help when the internet is unavailable."],
+            "recovery": ["Pause automations before debugging.", "Remove a bad cron job without reflashing.", "Use serial as the rescue path when Wi-Fi is down."],
+        }
+        return by_diagram.get(topic.diagram, ["Use the command manually first.", "Observe the output and logs.", "Only then make the behavior persistent or scheduled."])
+
+    def topic_terms(self, topic: Topic) -> list[str]:
+        terms = {
+            "chip": ["MCU: microcontroller unit, the small computer inside the device.", "GPIO: a pin that can read or switch simple electrical signals.", "Firmware: the program stored on the chip."],
+            "wifi": ["SSID: the Wi-Fi network name.", "DHCP: automatic IP address assignment by the router.", "Static IP: a manually chosen address for predictable access."],
+            "files": ["LittleFS: the small flash filesystem used by KernelESP.", "/etc: persistent configuration.", "/home: user scripts and notes."],
+            "relay": ["Relay: an electrically controlled switch.", "Active-low: the relay turns on when the GPIO goes low.", "External supply: power source for relay coils or valves."],
+            "sensor": ["I2C: a two-wire data bus used by many sensors.", "Threshold: the value where a rule changes behavior.", "Hysteresis: separate on and off thresholds to avoid chatter."],
+            "automation": ["Expression: a yes/no condition.", "Block: several commands grouped with braces.", "Function: a persistent named command block."],
+            "cron": ["Cron: clock-based scheduler.", "Timer: delay or interval-based scheduler.", "24-hour time: 06:00, 12:00, 22:30."],
+            "api": ["Endpoint: a URL that performs a specific task.", "JSON: structured text returned by the API.", "URL encoding: safe representation of spaces and symbols."],
+        }
+        return terms.get(topic.diagram, ["Inspect: read status before changing anything.", "Persist: save the change if it must survive reboot.", "Recover: know the command that pauses or undoes the action."])
+
+    def lab_expectations(self, topic: Topic) -> list[str]:
+        return [
+            "You should see a short response, not a frozen shell or a long wait.",
+            "After any command that changes state, run a matching list, status or log command.",
+            "If hardware is involved, repeat the lab once with dryrun or a harmless load.",
+        ]
 
     def topic_pair(self, idx: int, topic: Topic, dest: str = "") -> None:
         self.new_page(topic.title, dest=dest, outline=f"{idx}. {topic.title}", level=1)
         self.h1(f"{idx}. {topic.title}", 0.95 * inch)
-        self.p(topic.goal)
-        self.draw_named_diagram(topic.diagram, 1.05 * inch, 4.55 * inch, 4.6 * inch, 1.85 * inch)
-        self.y = 4.15 * inch
+        top_after_title = self.y
+        self.draw_named_diagram(topic.diagram, 4.55 * inch, top_after_title - 1.58 * inch, 2.25 * inch, 1.42 * inch)
+        self.p(topic.goal, width=55)
+        self.p(self.topic_explainer(topic), size=9.6, leading=12.4, width=55)
+        self.y = min(self.y, top_after_title - 1.85 * inch)
         self.h2("The mental model")
         self.p(topic.mental_model)
+        self.h2("Where you will use it")
+        self.bullet(self.topic_use_cases(topic))
+        self.h2("Terms to remember")
+        self.bullet(self.topic_terms(topic))
         self.callout("Why this matters", topic.why_it_matters, PALETTE["soft_blue"])
         self.h3("Common beginner mistake")
         self.p(topic.mistake, size=9.5, leading=12.5)
+        self.reflection_box("One-minute review", [
+            f"Explain {topic.title.lower()} in one sentence.",
+            "Name the command you would run first to inspect this area.",
+            "Write one real-world device or project where this idea appears.",
+        ])
 
         lab_dest = f"{dest}-lab" if dest else ""
         self.new_page(topic.title + " - Lab", dest=lab_dest, outline=f"Lab {idx}: {topic.title}", level=2)
@@ -448,16 +598,23 @@ class Book:
         )
         self.code(list(topic.commands), "Commands")
         self.h2("What to check")
-        self.bullet(
-            [
-                "The command should return promptly. If it does not, stop adding new automations and check Wi-Fi, heap and logs.",
-                "The output should tell you what changed. KernelESP is designed to be inspectable, so verify state after every important action.",
-                "If the command controls hardware, test first with dryrun or without mains voltage connected.",
-            ]
-        )
+        self.bullet(self.lab_expectations(topic))
+        self.h2("If it fails")
+        self.bullet([
+            "Read the exact error text before trying another command.",
+            "Run health, free and dmesg to separate resource, network and syntax problems.",
+            "Disarm automations before debugging anything that can move water, heat or mains-powered equipment.",
+        ])
         if topic.project:
             self.callout("Project step", topic.project, PALETTE["soft_green"])
         self.callout("Try this next", topic.try_this, PALETTE["soft_orange"])
+        self.h2("What you have learned")
+        self.p("You have connected a concept to an observable command. That is the basic KernelESP learning loop: understand the idea, run a small command, inspect the result, then decide whether to make it persistent.", size=9.4, leading=12.2)
+        self.reflection_box("Lab notes", [
+            "What output did you see?",
+            "What command would you run to undo or verify the change?",
+            "What would make this lab unsafe on real hardware?",
+        ])
 
     def command_atlas_page(self, title: str, commands: list[str], explanation: str, dest: str = "") -> None:
         self.new_page("Command Atlas", dest=dest, outline=title, level=1)
@@ -522,54 +679,35 @@ class Book:
     def diagram_frame(self, x: float, y: float, w: float, h: float, title: str) -> None:
         c = self.c
         c.saveState()
-        c.setFillColor(colors.white)
-        c.rect(x, y, w, h, fill=1, stroke=0)
-        c.setStrokeColor(PALETTE["dark"])
-        c.setLineWidth(1.4)
-        c.rect(x, y, w, h, fill=0, stroke=1)
+        c.setFillColor(PALETTE["soft_yellow"])
+        c.roundRect(x, y, w, h, 6, fill=1, stroke=0)
         c.setStrokeColor(PALETTE["line"])
-        c.setLineWidth(0.25)
-        step = 0.22 * inch
-        gx = x + step
-        while gx < x + w:
-            c.line(gx, y, gx, y + h)
-            gx += step
-        gy = y + step
-        while gy < y + h:
-            c.line(x, gy, x + w, gy)
-            gy += step
+        c.setLineWidth(0.8)
+        c.roundRect(x, y, w, h, 6, fill=0, stroke=1)
         c.setFillColor(PALETTE["blue"])
-        c.rect(x, y + h - 0.22 * inch, 0.7 * inch, 0.22 * inch, fill=1, stroke=0)
-        c.setFillColor(PALETTE["red"])
-        c.circle(x + w - 0.22 * inch, y + h - 0.21 * inch, 0.13 * inch, fill=1, stroke=0)
-        c.setFillColor(PALETTE["yellow"])
-        self.triangle(x + w - 0.58 * inch, y, x + w, y, x + w, y + 0.58 * inch)
-        c.setFillColor(PALETTE["dark"])
-        c.setFont("Helvetica-Bold", 8.5)
-        c.drawString(x + 0.82 * inch, y + h - 0.18 * inch, title.upper())
+        c.rect(x, y + h - 0.22 * inch, w, 0.22 * inch, fill=1, stroke=0)
+        c.setFillColor(colors.white)
+        c.setFont("Helvetica-Bold", 7.6)
+        c.drawString(x + 0.12 * inch, y + h - 0.16 * inch, title.upper())
         c.restoreState()
 
     def box(self, x: float, y: float, w: float, h: float, text: str, fill=PALETTE["soft_blue"]) -> None:
-        self.c.setFillColor(colors.HexColor("#000000"))
-        self.c.setFillAlpha(0.12)
-        self.c.rect(x + 3, y - 3, w, h, fill=1, stroke=0)
-        self.c.setFillAlpha(1)
         self.c.setFillColor(fill)
-        self.c.rect(x, y, w, h, fill=1, stroke=0)
-        self.c.setStrokeColor(PALETTE["dark"])
-        self.c.setLineWidth(0.8)
-        self.c.rect(x, y, w, h, fill=0, stroke=1)
+        self.c.roundRect(x, y, w, h, 4, fill=1, stroke=0)
+        self.c.setStrokeColor(PALETTE["line"])
+        self.c.setLineWidth(0.6)
+        self.c.roundRect(x, y, w, h, 4, fill=0, stroke=1)
         self.c.setFillColor(PALETTE["ink"])
-        self.c.setFont("Helvetica-Bold", 8.0)
+        self.c.setFont("Helvetica-Bold", 7.7)
         for idx, line in enumerate(wrap(text, 16)):
             self.c.drawCentredString(x + w / 2, y + h / 2 + (0.06 - idx * 0.14) * inch, line)
 
     def arrow(self, x1: float, y1: float, x2: float, y2: float) -> None:
-        self.c.setStrokeColor(PALETTE["dark"])
-        self.c.setLineWidth(1.35)
+        self.c.setStrokeColor(PALETTE["muted"])
+        self.c.setLineWidth(1.0)
         self.c.line(x1, y1, x2, y2)
-        self.c.setFillColor(PALETTE["red"])
-        self.c.circle(x2, y2, 2.8, fill=1, stroke=0)
+        self.c.setFillColor(PALETTE["blue"])
+        self.c.circle(x2, y2, 2.2, fill=1, stroke=0)
 
     def diagram_chip(self, x: float, y: float, w: float, h: float) -> None:
         self.diagram_frame(x, y, w, h, "Tiny computer")
@@ -706,6 +844,12 @@ def topic(title: str, goal: str, model: str, commands: list[str], try_this: str,
 
 
 TOPICS = [
+    topic("What Is a Microcontroller?", "A microcontroller is a tiny computer built to control devices rather than to replace a desktop or laptop.", "Think of it as a very focused worker: it wakes up, reads inputs, follows firmware and changes outputs. It is excellent at simple repeated jobs.", ["uname", "chip", "flash", "free", "board show"], "Point to one device in your house that probably contains a microcontroller and describe what it senses or controls.", "This concept explains why KernelESP is powerful but also why it must respect memory, power and timing limits.", "Expecting a microcontroller to behave like a full PC with unlimited memory, storage and multitasking.", "chip"),
+    topic("Meet the ESP8266", "The ESP8266 is a Wi-Fi microcontroller that can run KernelESP, host a web UI and control real-world devices.", "It is small enough to hide in an enclosure but capable enough to become a local web-connected controller.", ["chip", "flash", "wifi mac", "free", "sysinfo"], "Write down the chip, flash and free heap values of your board as its identity card.", "Knowing the ESP8266 makes later design choices feel less mysterious: every feature shares the same small memory and processor.", "Judging the ESP8266 by its price. It is inexpensive, but not disposable when it controls water, heat or alarms.", "chip"),
+    topic("Microcontroller vs Computer", "A microcontroller and a normal computer are both programmable, but they are built for very different jobs.", "A computer is a general-purpose workstation. A microcontroller is embedded inside a product and usually runs one carefully designed firmware.", ["ps", "top", "df", "uptime", "health"], "Compare the output of free and df with the memory and disk of your laptop.", "This difference helps beginners understand why KernelESP favors short commands, simple files and non-blocking timers.", "Trying to install desktop-style software or heavy scripting languages on a tiny embedded board.", "memory"),
+    topic("What Can You Build?", "KernelESP can control gardens, heating helpers, fans, alerts, sensors, timed routines and local dashboards.", "The pattern is always the same: observe something, decide something, act on something and log what happened.", ["relay status", "sensor read", "crontab -l", "input list", "mail status"], "Choose one realistic project and split it into inputs, decisions, outputs and safety checks.", "Projects become much easier when you map them as sensor plus decision plus actuator plus recovery path.", "Starting with a big project before proving one input, one output and one schedule.", "irrigation"),
+    topic("How KernelESP Changes the Board", "KernelESP gives the ESP8266 a small UNIX-like personality: commands, files, logs, scripts, cron and a web UI.", "Instead of recompiling for every tiny change, you can inspect and configure the board from serial, web or API.", ["help", "ls /", "cat /etc/config.txt", "history", "diag"], "Run help and ls /, then explain why this feels more like a tiny server than a bare microcontroller.", "The shell makes the board teachable. You can learn by asking it what it knows.", "Thinking KernelESP hides the hardware. It actually exposes the hardware through safer, named commands.", "system"),
+    topic("Beginner Safety and Mindset", "The safest automation is built in small steps: simulate, log, test low voltage, then connect real equipment.", "A careful beginner is not slow; a careful beginner is building evidence.", ["dryrun on", "logger first_test", "health", "dryrun off", "backup"], "Before any real relay test, say what command will stop the action.", "This habit matters because KernelESP may control water, fans, heaters or alarms in the physical world.", "Treating software tests and hardware tests as the same thing. Hardware tests need extra caution.", "security"),
     topic("Meet the Tiny UNIX", "KernelESP turns an ESP8266 into a small networked computer with a shell, files, web pages and automation.", "Think of the board as a tiny server. It cannot run Linux, but it borrows the useful habits: inspect first, change second, save the result.", ["uname", "version", "whoami", "help", "health"], "Run help for three commands you do not understand yet and write down what each one controls.", "A mental model prevents panic. If it has commands, files and logs, you can reason about it.", "Treating the ESP8266 like a black box. KernelESP is inspectable; use that gift.", "system"),
     topic("Serial Console First Contact", "The serial console is the most reliable way to talk to the board, especially during Wi-Fi trouble.", "Serial is the local keyboard and screen. It works before the network is ready and remains the best rescue route.", ["help", "wifi status", "free", "df", "dmesg"], "Unplug Wi-Fi mentally: which commands would still help you recover?", "Every serious installation should keep a serial rescue path available during setup.", "Changing Wi-Fi and then closing the only working console.", "chip"),
     topic("Find the Web Interface", "The web UI gives beginners a friendly control panel for commands, relays, scripts, logs and help.", "The browser is a remote window into the same command engine used by serial.", ["wifi ip", "wifi status", "hostname", "health"], "Open the IP address in a browser and compare Dashboard data with health output.", "Seeing the same state in two places builds confidence that you are controlling the right board.", "Assuming the browser is broken when the board simply changed IP.", "web"),
@@ -790,6 +934,7 @@ TOPICS = [
 
 
 PARTS = [
+    ("Microcontroller Foundations", ["What Is a Microcontroller?", "Meet the ESP8266", "Microcontroller vs Computer", "What Can You Build?", "How KernelESP Changes the Board", "Beginner Safety and Mindset"]),
     ("Orientation", ["Meet the Tiny UNIX", "Serial Console First Contact", "Find the Web Interface", "Use the HTTP API", "Read System Health"]),
     ("Files and Shell Confidence", ["Understand LittleFS", "Create and Inspect Files", "Use Pipes Like a Pro", "History and Aliases", "Dry Run Mode"]),
     ("Networking and Time", ["Scan and Connect Wi-Fi", "Save Wi-Fi Profiles", "Recover Wi-Fi", "Static IP or DHCP", "Fallback Access Point", "Set the Hostname", "Read the Clock", "Use NTP Kick", "Schedule NTP Twice Daily", "Manual Time Rescue"]),
@@ -831,25 +976,33 @@ def build() -> int:
     book.new_page("Learning Map", dest="learning-map", outline="Learning Map", level=0)
     book.h1("The Learning Map", 0.95 * inch)
     book.p("Every chapter pair follows the same rhythm: first a plain-English explanation, then a lab page with commands, checks and a safe next step.")
-    book.diagram_system_map(1.0 * inch, 4.9 * inch, 4.6 * inch, 2.0 * inch)
-    book.y = 4.45 * inch
+    book.h2("The method")
     book.bullet([
         "Inspect before changing: health, logs and status commands are your first tools.",
         "Prefer non-blocking actions: timers and cron are safer than long sleeps.",
         "Make names human: trees, flowers and fan are better than relay1, relay2 and gpio5.",
         "Keep recovery nearby: serial, backups and disarm are part of the design.",
     ])
+    book.h2("How to practice safely")
+    book.p("For each idea, start with a read-only command. Then try a harmless command such as logger or echo. Only after that should you connect real hardware. This mirrors the style used in professional administration books: concept, procedure, verification and recovery.", size=9.6, leading=12.3)
+    book.callout("The KernelESP loop", "Understand the concept, run the smallest useful command, inspect the result, save only what you can explain, and keep a way back.", PALETTE["soft_blue"])
+    book.reflection_box("Your learning goal", [
+        "Which first project do you want to build: garden, fan, heater, alarm or dashboard?",
+        "What is the safest harmless output you can test before controlling real hardware?",
+    ])
 
     idx = 1
     topic_by_title = {t.title: t for t in TOPICS}
+    part_diagrams = ["chip", "system", "files", "wifi", "relay", "sensor", "automation", "web", "irrigation", "recovery", "api"]
     for part_idx, (part_title, chapters) in enumerate(PARTS, start=1):
-        diagram = ["system", "files", "wifi", "relay", "sensor", "automation", "web", "irrigation", "recovery", "api"][part_idx - 1]
-        book.part_page(part_idx, part_title, f"This part covers {', '.join(chapters[:3])} and builds toward practical confidence.", diagram, dest=part_dests[part_idx])
+        diagram = part_diagrams[part_idx - 1]
+        book.part_page(part_idx, part_title, f"This part covers {', '.join(chapters[:3])} and builds toward practical confidence.", diagram, dest=part_dests[part_idx], chapters=chapters)
         for chapter in chapters:
             book.topic_pair(idx, topic_by_title[chapter], dest=topic_dests[chapter])
             idx += 1
 
-    book.part_page(11, "Command Atlas", "A compact appendix for commands you will use again and again.", "system", dest="part-11-command-atlas")
+    atlas_part = len(PARTS) + 1
+    book.part_page(atlas_part, "Command Atlas", "A compact appendix for commands you will use again and again.", "system", dest="command-atlas", chapters=[title for title, _commands, _explanation in COMMAND_ATLAS])
     for title, commands, explanation in COMMAND_ATLAS:
         book.command_atlas_page(title, commands, explanation, dest=slugify(f"atlas-{title}"))
 
