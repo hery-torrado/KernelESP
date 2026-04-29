@@ -124,9 +124,11 @@ KernelConsole KernelSerial(Serial);
 #define CONF_INPUTS "/etc/inputs.txt"
 #define CONF_SCENES "/etc/scenes.txt"
 #define CONF_STATE "/etc/state.txt"
+#define CONF_DEFINES "/etc/defines.txt"
 #define CONF_ALIASES "/etc/aliases"
 #define HISTORY_FILE "/home/.history"
 #define PKG_DIR "/pkg"
+#define FUNC_DIR "/func"
 #define PROFILE_DIR "/profiles"
 #define LOG_FILE "/var/log/kernel.log"
 #define SAFE_BOOT_FILE "/safe"
@@ -301,6 +303,7 @@ unsigned long wifiLastConnectedMs = 0;
 WiFiEventHandler wifiDisconnectedHandler;
 bool fallbackApRunning = false;
 bool automationsArmed = true;
+bool ifBranchRunning = false;
 uint8_t webAuthFails = 0;
 unsigned long webAuthLockedUntil = 0;
 
@@ -325,6 +328,13 @@ void cmdTimeNet(String args[], int argc);
 void cmdMail(String args[], int argc);
 void cmdIf(String args[], int argc);
 void cmdWhen(String args[], int argc);
+void cmdLet(String args[], int argc);
+void cmdDefine(String args[], int argc);
+void cmdFunction(String args[], int argc);
+void cmdCall(String args[], int argc);
+String functionPath(String name);
+bool functionExists(String name);
+void runFunctionInline(String name);
 bool ntpSync(bool waitForSync);
 void compactLogIfNeeded();
 void loadRules();
@@ -452,6 +462,7 @@ void ensureSystemDirs() {
   LittleFS.mkdir("/home");
   LittleFS.mkdir("/www");
   LittleFS.mkdir(PKG_DIR);
+  LittleFS.mkdir(FUNC_DIR);
   LittleFS.mkdir(PROFILE_DIR);
   LittleFS.mkdir(WIFI_PROFILE_DIR);
 }
@@ -685,6 +696,20 @@ String safeName(String name) {
   return out;
 }
 
+String safeFunctionName(String name) {
+  name.trim();
+  String out;
+  for (uint16_t i = 0; i < name.length() && out.length() < 32; i++) {
+    char c = name[i];
+    if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_') {
+      out += c;
+    } else if ((c >= '0' && c <= '9') && out.length()) {
+      out += c;
+    }
+  }
+  return out;
+}
+
 String keyValueFromText(const String& text, const String& key, const String& fallback = "") {
   int start = 0;
   while (start < (int)text.length()) {
@@ -755,6 +780,39 @@ int splitArgs(String line, String args[], int maxArgs) {
   }
   if (current.length() && count < maxArgs) args[count++] = current;
   return count;
+}
+
+String stripCLineComment(String line) {
+  bool quoted = false;
+  char quoteChar = '\0';
+  for (uint16_t i = 0; i + 1 < line.length(); i++) {
+    char c = line[i];
+    if ((c == '"' || c == '\'') && (!quoted || quoteChar == c)) {
+      quoted = !quoted;
+      quoteChar = quoted ? c : '\0';
+    } else if (!quoted && c == '/' && line[i + 1] == '/' && (i == 0 || isSpace(line[i - 1]))) {
+      return line.substring(0, i);
+    }
+  }
+  return line;
+}
+
+int braceDepthDelta(const String& line) {
+  bool quoted = false;
+  char quoteChar = '\0';
+  int delta = 0;
+  for (uint16_t i = 0; i < line.length(); i++) {
+    char c = line[i];
+    if ((c == '"' || c == '\'') && (!quoted || quoteChar == c)) {
+      quoted = !quoted;
+      quoteChar = quoted ? c : '\0';
+    } else if (!quoted && c == '{') {
+      delta++;
+    } else if (!quoted && c == '}') {
+      delta--;
+    }
+  }
+  return delta;
 }
 
 int pinFromToken(String token) {
@@ -893,7 +951,7 @@ bool isKnownCommand(const String& cmd) {
     "help", "man", "clear", "echo", "history", "alias", "unalias", "env", "printenv", "set", "setenv", "unset", "export",
     "arm", "disarm", "armed",
     "true", "false", "test", "[", "basename", "dirname", "repeat", "watch",
-    "if", "when",
+    "if", "when", "let", "var", "define", "undef", "function", "call",
     "id", "groups", "who", "w", "sync",
     "uname", "uptime", "free", "heap", "mem", "ps", "top", "pgrep", "pidof", "kill", "dmesg", "reboot", "resetreason",
     "chip", "flash", "sysinfo", "pwd", "cd", "ls", "cat", "head", "tail", "grep", "find", "stat",
@@ -928,8 +986,11 @@ void printHelpTopic(String topic) {
   else if (topic == "scene") Serial.println(F("scene add <name> <cmd[;cmd]>; scene run|list|show|rm|clear"));
   else if (topic == "state") Serial.println(F("state set|get|rm|list|clear persistent key values"));
   else if (topic == "input") Serial.println(F("input add <name> <pin> pullup|float; input on <name> high|low|change <cmd>"));
-  else if (topic == "if") Serial.println(F("if (temp >= 40 && time < 10:00) relay on fan; ops: == != < > <= >= && || !"));
+  else if (topic == "if") Serial.println(F("if (<expr>) { cmd; cmd } else { cmd }; ops: == != < > <= >= && || !"));
   else if (topic == "when") Serial.println(F("when input|pin <name|pin> high|low|pulse if (<expr>) <cmd>"));
+  else if (topic == "let" || topic == "var") Serial.println(F("let name = value - persistent variable stored in state"));
+  else if (topic == "define") Serial.println(F("define NAME value; undef NAME - constants for expressions"));
+  else if (topic == "function") Serial.println(F("function name { cmd; cmd }; call name - persistent mini script"));
   else if (topic == "health") Serial.println(F("health [guard <min_heap>|off] - system summary and heap guard"));
   else if (topic == "diag") Serial.println(F("diag - read-only diagnostic bundle for support"));
   else if (topic == "board") Serial.println(F("board list|show|pins|use <profile> - board profile and pin guidance"));
@@ -970,7 +1031,7 @@ void cmdHelp(String args[], int argc) {
     return;
   }
   Serial.println(F("Commands:"));
-  Serial.println(F("  help clear echo history alias unalias env printenv set setenv unset true false test if when arm disarm armed"));
+  Serial.println(F("  help clear echo history alias unalias env printenv set setenv unset true false test if when let var define undef function call arm disarm armed"));
   Serial.println(F("  id groups who w sync uname uptime free heap mem ps top pgrep pidof kill dmesg reboot resetreason chip flash sysinfo"));
   Serial.println(F("  pwd cd ls cat head tail grep find wc du stat basename dirname touch write append rm mkdir rmdir cp mv df fsformat"));
   Serial.println(F("  mount which whoami hostname jobs motd health diag service board"));
@@ -1302,6 +1363,29 @@ String kvGetFile(const String& filePath, const String& key, const String& fallba
   }
   file.close();
   return fallback;
+}
+
+bool kvGetMaybe(const String& filePath, const String& key, String& value) {
+  if (!fsReady || !key.length()) return false;
+  File file = LittleFS.open(filePath, "r");
+  if (!file) return false;
+  while (file.available()) {
+    String line = file.readStringUntil('\n');
+    line.trim();
+    if (!line.length() || line.startsWith("#")) continue;
+    int eq = line.indexOf('=');
+    if (eq <= 0) continue;
+    String k = line.substring(0, eq);
+    k.trim();
+    if (k == key) {
+      value = line.substring(eq + 1);
+      value.trim();
+      file.close();
+      return true;
+    }
+  }
+  file.close();
+  return false;
 }
 
 bool kvSetFile(const String& filePath, const String& key, const String& value) {
@@ -2548,17 +2632,40 @@ void runScriptText(String content) {
   content.replace("\r", "\n");
   int start = 0;
   int contentLen = content.length();
+  String pending;
+  int pendingBraces = 0;
+  bool pendingMultilineIf = false;
   while (start < contentLen) {
     int end = content.indexOf('\n', start);
     if (end < 0) end = contentLen;
     String line = content.substring(start, end);
+    line = stripCLineComment(line);
     line.trim();
     start = end + 1;
-    if (!line.length() || line.startsWith("#")) continue;
+    if (!line.length() || line.startsWith("#") || line.startsWith("//")) continue;
+    String lineLower = line;
+    lineLower.toLowerCase();
+    bool startsPending = !pending.length();
+    if (startsPending && lineLower.startsWith("if ") && braceDepthDelta(line) > 0) pendingMultilineIf = true;
+    if (pending.length()) pending += " ";
+    pending += line;
+    pendingBraces += braceDepthDelta(line);
+    if (pendingBraces > 0) continue;
+    if (pendingBraces < 0) pendingBraces = 0;
     Serial.print(F("[sh] "));
-    Serial.println(line);
-    executeLine(line);
+    Serial.println(pending);
+    if (pendingMultilineIf) Serial.println(F("sh: multiline if blocks not supported; use one-line if block"));
+    else executeLine(pending);
+    pending = "";
+    pendingMultilineIf = false;
     yield();
+  }
+  pending.trim();
+  if (pending.length()) {
+    Serial.print(F("[sh] "));
+    Serial.println(pending);
+    if (pendingMultilineIf) Serial.println(F("sh: multiline if blocks not supported; use one-line if block"));
+    else executeLine(pending);
   }
 }
 
@@ -2579,24 +2686,48 @@ bool validateScriptFile(const String& path) {
   if (!file || file.isDirectory()) { Serial.println(F("sh: cannot open script")); return false; }
   bool ok = true;
   uint16_t lineNo = 0;
+  String pending;
+  int pendingBraces = 0;
+  bool pendingMultilineIf = false;
   while (file.available()) {
     String line = file.readStringUntil('\n');
+    line = stripCLineComment(line);
     line.trim();
     lineNo++;
-    if (!line.length() || line.startsWith("#")) continue;
+    if (!line.length() || line.startsWith("#") || line.startsWith("//")) continue;
+    String lineLower = line;
+    lineLower.toLowerCase();
+    bool startsPending = !pending.length();
+    if (startsPending && lineLower.startsWith("if ") && braceDepthDelta(line) > 0) pendingMultilineIf = true;
+    if (pending.length()) pending += " ";
+    pending += line;
+    pendingBraces += braceDepthDelta(line);
+    if (pendingBraces > 0) continue;
+    if (pendingBraces < 0) pendingBraces = 0;
     String args[MAX_ARGS];
-    int argc = splitArgs(line, args, MAX_ARGS);
+    int argc = splitArgs(pending, args, MAX_ARGS);
     if (argc == 0) continue;
     String cmd = args[0];
     cmd.toLowerCase();
-    if (!isKnownCommand(cmd)) {
+    if (pendingMultilineIf) {
+      ok = false;
+      Serial.print(F("line "));
+      Serial.print(lineNo);
+      Serial.println(F(": multiline if blocks are not supported"));
+    } else if (!isKnownCommand(cmd) && !functionExists(cmd)) {
       ok = false;
       Serial.print(F("line "));
       Serial.print(lineNo);
       Serial.print(F(": unknown command "));
       Serial.println(cmd);
     }
+    pending = "";
+    pendingMultilineIf = false;
     yield();
+  }
+  if (pending.length()) {
+    ok = false;
+    Serial.println(F("sh: unclosed block"));
   }
   file.close();
   if (ok) Serial.println(F("OK"));
@@ -6054,7 +6185,28 @@ bool isNumericLiteral(String token) {
   return digit;
 }
 
+bool storedConditionValue(String token, float& value, bool& numeric, String& text) {
+  String key = token;
+  key.trim();
+  if (key.startsWith("$")) key = key.substring(1);
+  String lowered = key;
+  lowered.toLowerCase();
+  String stored;
+  if (!kvGetMaybe(CONF_DEFINES, lowered, stored) && !kvGetMaybe(CONF_STATE, lowered, stored)) return false;
+  if (isNumericLiteral(stored)) {
+    numeric = true;
+    value = stored.toFloat();
+  } else {
+    numeric = false;
+    text = stored;
+    text.toLowerCase();
+  }
+  return true;
+}
+
 bool conditionValue(String token, float& value, bool& numeric, String& text) {
+  token.trim();
+  String original = token;
   token.toLowerCase();
   numeric = true;
   uint8_t metric = ruleMetricFromToken(token);
@@ -6078,10 +6230,11 @@ bool conditionValue(String token, float& value, bool& numeric, String& text) {
     text = WiFi.status() == WL_CONNECTED ? "connected" : "disconnected";
     return true;
   }
-  if (isNumericLiteral(token)) {
-    value = token.toFloat();
+  if (isNumericLiteral(original)) {
+    value = original.toFloat();
     return true;
   }
+  if (storedConditionValue(original, value, numeric, text)) return true;
   numeric = false;
   text = token;
   return true;
@@ -6343,10 +6496,6 @@ bool extractParenIfExpression(String expr, String& condition, String& command) {
         else if (cmdLower.startsWith("do ")) command = command.substring(3);
         else if (cmdLower == "do") command = "";
         command.trim();
-        if (command.startsWith("{") && command.endsWith("}") && command.length() >= 2) {
-          command = command.substring(1, command.length() - 1);
-          command.trim();
-        }
         return true;
       }
     }
@@ -6366,6 +6515,122 @@ bool evalCCondition(String condition, bool quiet, bool& ok) {
     return false;
   }
   return true;
+}
+
+bool findElseSeparator(const String& command, int& sepStart, int& sepEnd) {
+  bool quoted = false;
+  char quoteChar = '\0';
+  int parenDepth = 0;
+  int braceDepth = 0;
+  for (int i = 0; i < (int)command.length(); i++) {
+    char c = command[i];
+    if ((c == '"' || c == '\'') && (!quoted || quoteChar == c)) {
+      quoted = !quoted;
+      quoteChar = quoted ? c : '\0';
+      continue;
+    }
+    if (quoted) continue;
+    if (c == '(') parenDepth++;
+    else if (c == ')' && parenDepth > 0) parenDepth--;
+    else if (c == '{') braceDepth++;
+    else if (c == '}' && braceDepth > 0) braceDepth--;
+    if (parenDepth != 0 || braceDepth != 0) continue;
+    if ((i == 0 || !isWordChar(command[i - 1])) && (command.substring(i, i + 4) == "else") && (i + 4 >= (int)command.length() || !isWordChar(command[i + 4]))) {
+      sepStart = i;
+      sepEnd = i + 4;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool splitElseBlocks(String command, String& trueBlock, String& falseBlock) {
+  int sepStart = -1, sepEnd = -1;
+  if (!findElseSeparator(command, sepStart, sepEnd)) {
+    trueBlock = command;
+    falseBlock = "";
+    trueBlock.trim();
+    return false;
+  }
+  trueBlock = command.substring(0, sepStart);
+  falseBlock = command.substring(sepEnd);
+  trueBlock.trim();
+  falseBlock.trim();
+  return true;
+}
+
+String stripOuterBlock(String block) {
+  block.trim();
+  if (block.startsWith("{") && block.endsWith("}") && block.length() >= 2) {
+    block = block.substring(1, block.length() - 1);
+    block.trim();
+  }
+  return block;
+}
+
+void runCommandBlock(String block) {
+  block = stripOuterBlock(block);
+  block.replace("\r", "\n");
+  block.replace("\n", ";");
+  String commands[10];
+  uint8_t commandCount = 0;
+  String current;
+  bool quoted = false;
+  char quoteChar = '\0';
+  int parenDepth = 0;
+  int braceDepth = 0;
+  for (uint16_t i = 0; i < block.length(); i++) {
+    char c = block[i];
+    if ((c == '"' || c == '\'') && (!quoted || quoteChar == c)) {
+      quoted = !quoted;
+      quoteChar = quoted ? c : '\0';
+      current += c;
+    } else if (!quoted && c == '(') {
+      parenDepth++;
+      current += c;
+    } else if (!quoted && c == ')' && parenDepth > 0) {
+      parenDepth--;
+      current += c;
+    } else if (!quoted && c == '{') {
+      braceDepth++;
+      current += c;
+    } else if (!quoted && c == '}' && braceDepth > 0) {
+      braceDepth--;
+      current += c;
+    } else if (!quoted && c == ';' && parenDepth == 0 && braceDepth == 0) {
+      current = stripCLineComment(current);
+      current.trim();
+      if (current.length() && !current.startsWith("#") && !current.startsWith("//")) {
+        if (commandCount >= 10) { Serial.println(F("block: too many commands")); return; }
+        commands[commandCount++] = current;
+      }
+      current = "";
+      yield();
+    } else {
+      current += c;
+    }
+  }
+  current = stripCLineComment(current);
+  current.trim();
+  if (current.length() && !current.startsWith("#") && !current.startsWith("//")) {
+    if (commandCount >= 10) { Serial.println(F("block: too many commands")); return; }
+    commands[commandCount++] = current;
+  }
+  for (uint8_t i = 0; i < commandCount; i++) {
+    String c = commands[i];
+    String lower = c;
+    lower.toLowerCase();
+    if (lower == "if" || lower.startsWith("if ")) {
+      if (ifBranchRunning) Serial.println(F("block: nested if not supported"));
+      else runIfExpression(c.substring(2), false);
+    } else if (ifBranchRunning && lower.startsWith("call ")) {
+      Serial.println(F("block: function calls in if not supported"));
+    } else if (ifBranchRunning && functionExists(c)) {
+      Serial.println(F("block: function calls in if not supported"));
+    }
+    else executeLine(c);
+    yield();
+  }
 }
 
 bool runCIfExpression(String expr, bool quiet) {
@@ -6388,8 +6653,14 @@ bool runCIfExpression(String expr, bool quiet) {
   }
   bool ok = false;
   if (!evalCCondition(condition, quiet, ok)) return true;
-  if (ok) executeLine(command);
+  String trueBlock, falseBlock;
+  bool hasElse = splitElseBlocks(command, trueBlock, falseBlock);
+  bool previousIfBranch = ifBranchRunning;
+  ifBranchRunning = true;
+  if (ok) runCommandBlock(trueBlock);
+  else if (hasElse && falseBlock.length()) runCommandBlock(falseBlock);
   else if (!quiet) Serial.println(F("false"));
+  ifBranchRunning = previousIfBranch;
   return true;
 }
 
@@ -6438,8 +6709,12 @@ bool runIfExpression(String expr, bool quiet) {
     if (!quiet) Serial.println(F("if: missing command"));
     return false;
   }
-  if (ok) executeLine(command);
-  else if (!quiet) Serial.println(F("false"));
+  if (ok) {
+    bool previousIfBranch = ifBranchRunning;
+    ifBranchRunning = true;
+    runCommandBlock(command);
+    ifBranchRunning = previousIfBranch;
+  } else if (!quiet) Serial.println(F("false"));
   return ok;
 }
 
@@ -6532,6 +6807,169 @@ void cmdWhen(String args[], int argc) {
   Serial.print(' ');
   Serial.print(edge);
   Serial.println(F(" OK"));
+}
+
+String normalizeVarKey(String key) {
+  key.trim();
+  if (key.startsWith("$")) key = key.substring(1);
+  key.toLowerCase();
+  return key;
+}
+
+bool validVarKey(const String& key) {
+  if (!key.length() || key.indexOf('=') >= 0) return false;
+  for (uint16_t i = 0; i < key.length(); i++) {
+    char c = key[i];
+    bool ok = isAlphaNumeric(c) || c == '_' || c == '-' || c == '.';
+    if (!ok) return false;
+  }
+  return true;
+}
+
+void cmdLet(String args[], int argc) {
+  String sub = argc >= 2 ? args[1] : "list";
+  sub.toLowerCase();
+  if (argc < 2 || sub == "list") {
+    String out = readWholeFile(CONF_STATE);
+    Serial.print(out.length() ? out : "(empty)\n");
+    return;
+  }
+  if (sub == "get") {
+    if (argc < 3) { Serial.println(F("usage: let get <name>")); return; }
+    Serial.println(kvGetFile(CONF_STATE, normalizeVarKey(args[2]), ""));
+    return;
+  }
+  if (sub == "rm" || sub == "unset") {
+    if (argc < 3) { Serial.println(F("usage: let rm <name>")); return; }
+    Serial.println(kvRemoveFile(CONF_STATE, normalizeVarKey(args[2])) ? F("OK") : F("let: not found"));
+    return;
+  }
+  String key = normalizeVarKey(args[1]);
+  uint8_t valueStart = 2;
+  if (argc >= 3 && args[2] == "=") valueStart = 3;
+  if (!validVarKey(key) || argc <= valueStart) { Serial.println(F("usage: let <name> = <value>")); return; }
+  Serial.println(kvSetFile(CONF_STATE, key, joinArgs(args, argc, valueStart)) ? F("OK") : F("let: set failed"));
+}
+
+void cmdDefine(String args[], int argc) {
+  String cmd = args[0];
+  cmd.toLowerCase();
+  if (cmd == "undef") {
+    if (argc < 2) { Serial.println(F("usage: undef <NAME>")); return; }
+    Serial.println(kvRemoveFile(CONF_DEFINES, normalizeVarKey(args[1])) ? F("OK") : F("define: not found"));
+    return;
+  }
+  String sub = argc >= 2 ? args[1] : "list";
+  sub.toLowerCase();
+  if (argc < 2 || sub == "list") {
+    String out = readWholeFile(CONF_DEFINES);
+    Serial.print(out.length() ? out : "(empty)\n");
+    return;
+  }
+  if (sub == "rm" || sub == "undef") {
+    if (argc < 3) { Serial.println(F("usage: define rm <NAME>")); return; }
+    Serial.println(kvRemoveFile(CONF_DEFINES, normalizeVarKey(args[2])) ? F("OK") : F("define: not found"));
+    return;
+  }
+  String key = normalizeVarKey(args[1]);
+  uint8_t valueStart = 2;
+  if (argc >= 3 && args[2] == "=") valueStart = 3;
+  if (!validVarKey(key) || argc <= valueStart) { Serial.println(F("usage: define <NAME> <value>")); return; }
+  Serial.println(kvSetFile(CONF_DEFINES, key, joinArgs(args, argc, valueStart)) ? F("OK") : F("define: set failed"));
+}
+
+String functionPath(String name) {
+  String safe = safeFunctionName(name);
+  return safe.length() ? String(FUNC_DIR) + "/" + safe + ".fn" : "";
+}
+
+bool functionExists(String name) {
+  String path = functionPath(name);
+  return path.length() && LittleFS.exists(path) && !isDirectory(path);
+}
+
+void runFunctionInline(String name) {
+  String path = functionPath(name);
+  if (!path.length() || !LittleFS.exists(path)) { Serial.println(F("function: not found")); return; }
+  String body = stripOuterBlock(readWholeFile(path));
+  body.replace("\r", "\n");
+  body.replace("\n", ";");
+  String current;
+  bool quoted = false;
+  char quoteChar = '\0';
+  for (uint16_t i = 0; i < body.length(); i++) {
+    char c = body[i];
+    if ((c == '"' || c == '\'') && (!quoted || quoteChar == c)) {
+      quoted = !quoted;
+      quoteChar = quoted ? c : '\0';
+      current += c;
+    } else if (!quoted && c == ';') {
+      current = stripCLineComment(current);
+      current.trim();
+      if (current.length() && !current.startsWith("#") && !current.startsWith("//")) executeLine(current);
+      current = "";
+      yield();
+    } else {
+      current += c;
+    }
+  }
+  current = stripCLineComment(current);
+  current.trim();
+  if (current.length() && !current.startsWith("#") && !current.startsWith("//")) executeLine(current);
+}
+
+void runFunctionName(String name) {
+  String path = functionPath(name);
+  if (!path.length() || !LittleFS.exists(path)) { Serial.println(F("function: not found")); return; }
+  runCommandBlock(readWholeFile(path));
+}
+
+void cmdFunction(String args[], int argc) {
+  if (!ensureFS()) return;
+  LittleFS.mkdir(FUNC_DIR);
+  String sub = argc >= 2 ? args[1] : "list";
+  sub.toLowerCase();
+  if (argc < 2 || sub == "list") {
+    Dir dir = LittleFS.openDir(FUNC_DIR);
+    bool any = false;
+    while (dir.next()) {
+      String name = basenameOf(dir.fileName());
+      if (name.endsWith(".fn")) name.remove(name.length() - 3);
+      Serial.println(name);
+      any = true;
+    }
+    if (!any) Serial.println(F("(empty)"));
+    return;
+  }
+  if (sub == "show") {
+    if (argc < 3) { Serial.println(F("usage: function show <name>")); return; }
+    String path = functionPath(args[2]);
+    if (!path.length() || !LittleFS.exists(path)) { Serial.println(F("function: not found")); return; }
+    Serial.print(readWholeFile(path));
+    return;
+  }
+  if (sub == "rm" || sub == "remove") {
+    if (argc < 3) { Serial.println(F("usage: function rm <name>")); return; }
+    String path = functionPath(args[2]);
+    Serial.println(path.length() && LittleFS.remove(path) ? F("OK") : F("function: not found"));
+    return;
+  }
+  if (sub == "run" || sub == "call") {
+    if (argc < 3) { Serial.println(F("usage: function run <name>")); return; }
+    runFunctionName(args[2]);
+    return;
+  }
+  String name = safeFunctionName(args[1]);
+  String body = joinArgs(args, argc, 2);
+  body.trim();
+  if (!name.length() || !body.length()) { Serial.println(F("usage: function <name> { cmd; cmd }")); return; }
+  body = stripOuterBlock(body);
+  Serial.println(writeWholeFile(functionPath(name), body + "\n") ? F("OK") : F("function: save failed"));
+}
+
+void cmdCall(String args[], int argc) {
+  if (argc < 2) { Serial.println(F("usage: call <function>")); return; }
+  runFunctionName(args[1]);
 }
 
 void cmdRepeat(String args[], int argc) {
@@ -7031,8 +7469,10 @@ void cmdDiag() {
 }
 
 void executeLine(String line) {
+  line = stripCLineComment(line);
   line.trim();
   if (!line.length()) return;
+  if (line.startsWith("//")) return;
 
   String args[MAX_ARGS];
   int argc = splitArgs(line, args, MAX_ARGS);
@@ -7077,6 +7517,10 @@ void executeLine(String line) {
   else if (cmd == "test" || cmd == "[") cmdTest(args, argc);
   else if (cmd == "if") cmdIf(args, argc);
   else if (cmd == "when") cmdWhen(args, argc);
+  else if (cmd == "let" || cmd == "var") cmdLet(args, argc);
+  else if (cmd == "define" || cmd == "undef") cmdDefine(args, argc);
+  else if (cmd == "function") cmdFunction(args, argc);
+  else if (cmd == "call") cmdCall(args, argc);
   else if (cmd == "basename" || cmd == "dirname") cmdPathTool(cmd, args, argc);
   else if (cmd == "repeat") cmdRepeat(args, argc);
   else if (cmd == "watch") cmdWatch(args, argc);
@@ -7333,6 +7777,7 @@ void executeLine(String line) {
   else if (cmd == "ip") cmdIp(args, argc);
   else if (cmd == "wifi") cmdWifi(args, argc);
   else if (cmd == "crontab") cmdCrontab(args, argc);
+  else if (functionExists(cmd)) runFunctionName(cmd);
   else Serial.println(F("unknown command; try help"));
 }
 

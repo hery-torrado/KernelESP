@@ -20,6 +20,16 @@ Create a pin watcher and conditional action in one command:
 
   when pin D2 pulse if (temp >= 40 && time < 10:00) relay on fan
 
+Use persistent variables, constants and functions:
+
+  let irrigation.enabled = 1
+  define MORNING_END 10:00
+  when pin D2 pulse if (irrigation.enabled == 1 && time < MORNING_END) { relay on trees; timer once 900000 relay off trees; logger trees_started }
+
+Use a block when one event should run several commands:
+
+  when input button low if (wifi == connected) { logger button_low; mail health "Button pressed" } else { logger button_low_no_wifi }
+
 Run a script:
 
   write /home/power-lost.sh mail send default "KernelESP power alert" "Power flow has stopped."

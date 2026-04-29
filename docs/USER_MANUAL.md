@@ -620,8 +620,26 @@ if (temp >= 40 && time < 10:00) relay on fan
 when pin D2 pulse if (temp >= 40 && time < 10:00) relay on fan
 ```
 
-Supported logical operators are `&&`, `||` and `!`. Legacy forms such as
-`if temp >= 40 if time < 10:00 then relay on fan` still work.
+Supported logical operators are `&&`, `||` and `!`. Blocks, `else`,
+persistent variables, constants and functions are also available:
+
+```text
+let irrigation.enabled = 1
+define HOT 40
+function heat_alert { relay on fan; mail health "Heat alert"; logger heat_alert }
+if (irrigation.enabled == 1 && temp >= HOT) { relay on fan; mail health "Heat alert"; logger heat_alert } else { logger heat_ok }
+```
+
+Functions can be used from cron and inputs:
+
+```text
+function water_zone1 { relay on valve1; timer once 600000 relay off valve1; logger zone1_started }
+cron add daily 06:00 call water_zone1
+when pin D2 pulse if (irrigation.enabled == 1 && time < 10:00) { relay on valve1; timer once 600000 relay off valve1; logger zone1_started }
+```
+
+Legacy forms such as `if temp >= 40 if time < 10:00 then relay on fan` still
+work.
 
 ## 11. Scripts
 

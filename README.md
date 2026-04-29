@@ -45,6 +45,7 @@ docs/SCREENSHOTS.md
 - Static web assets served from `/www`, so CSS/JS can be changed without recompiling.
 - Relay control by name, GPIO and active-low/active-high mode.
 - Timers, cron jobs, scenes, persistent state, digital inputs and sensor rules for automation.
+- Tiny C-like automation language with `if (...)`, `&&`, `||`, `!`, blocks, `else`, persistent variables, constants and persistent functions.
 - Debian-like shell helpers: `test`, `basename`, `dirname`, `source`, `run`, `repeat`, `logger`, `onboot`, `pkg`, `printenv`, `setenv`, `crontab`, `systemctl`, `ifconfig`, `ip`.
 - RAM-generated pseudo `/proc`, `stat`, `journalctl`, `dryrun`, `profile` snapshots and module `export`.
 - Professional support commands: `diag` for read-only diagnostic bundles and `board` for profile/pin guidance.
@@ -73,6 +74,7 @@ KernelESP/
   docs/
     USER_MANUAL.md           End-user manual and command examples
     COMMAND_REFERENCE.md     Full command reference
+    AUTOMATION_LANGUAGE.md   C-like automation language, variables, blocks and functions
     PROFESSIONAL_OPERATIONS.md Release, support and production workflow
     AUTOMATION_COOKBOOK.md   Relay, timer, cron, rule and sensor recipes
     WEB_AND_API.md           Web UI, JSON API and static assets

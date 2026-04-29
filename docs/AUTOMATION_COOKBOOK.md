@@ -175,11 +175,90 @@ Supported operators:
 == = != =! < > <= >= && || !
 ```
 
+Persistent variables and constants make input automations easier to read:
+
+```text
+let irrigation.enabled = 1
+define HOT 40
+define MORNING_END 10:00
+when pin D2 pulse if (irrigation.enabled == 1 && temp >= HOT && time < MORNING_END) relay on fan
+```
+
+Use blocks and `else` when the event should do more than one thing:
+
+```text
+when pin D2 low if (wifi == connected) { logger button_low; mail health "Button pressed" } else { logger button_low_no_wifi }
+```
+
 `pulse` means any stable input change after debounce. For buttons wired to GND,
 use `low` if you only want the press event:
 
 ```text
 when pin D2 low if (time < 10:00) relay pulse valve1 5000
+```
+
+## 10.1 C-like Automation Programs
+
+KernelESP can run tiny C-like automation fragments. The condition is C-like,
+while the action is still normal KernelESP shell.
+
+```text
+if (wifi == connected && armed == on) logger ready
+if ((temp >= 40 || hum > 70) && wifi == connected) mail health "Climate alert"
+if (!(armed == on)) logger paused
+```
+
+Multiple commands can be grouped with braces:
+
+```text
+if (temp >= 40) { relay on fan; logger fan_on; mail health "Fan started" }
+```
+
+Use `else` for a fallback:
+
+```text
+if (wifi == connected) { logger online } else { logger offline }
+```
+
+Keep `if` statements flat. Do not place an `if` inside another `if` branch on
+ESP8266; use a function for repeated actions instead.
+
+Variables persist across reboot:
+
+```text
+let irrigation.enabled = 1
+let max.temp = 35
+if (irrigation.enabled == 1 && temp < max.temp) relay on valve1
+```
+
+Constants make programs readable:
+
+```text
+define HOT 40
+define MORNING_END 10:00
+if (temp >= HOT && time < MORNING_END) relay on fan
+```
+
+Functions are persistent command blocks:
+
+```text
+function water_trees { relay on trees; timer once 900000 relay off trees; logger trees_started }
+function water_flowers { relay on flowers; timer once 300000 relay off flowers; logger flowers_started }
+cron add daily 06:00 call water_trees
+cron add daily 06:20 call water_flowers
+```
+
+Use functions from cron:
+
+```text
+function morning_irrigation { if (irrigation.enabled == 1 && temp < 35) { relay on trees; timer once 900000 relay off trees; logger irrigation_started } else { logger irrigation_skipped } }
+cron add daily 06:00 call morning_irrigation
+```
+
+Use functions from inputs:
+
+```text
+when pin D2 pulse if (irrigation.enabled == 1 && time < 10:00) { relay on trees; timer once 900000 relay off trees; logger trees_started }
 ```
 
 ## 11. Humidity Control

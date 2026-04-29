@@ -1025,6 +1025,16 @@ if ((temp > 40 || hum > 70) && wifi == connected) mail health "KernelESP health"
 if (!(armed == on)) echo automations_paused
 ```
 
+Blocks and `else`:
+
+```text
+if (wifi == connected) { logger online; mail health "KernelESP online" } else { logger offline }
+if (temp >= HOT) { relay on fan; logger fan_on } else { relay off fan }
+```
+
+Nested `if` statements inside another `if` branch are not supported. Keep
+conditions flat and put repeated actions in functions.
+
 `then` is optional after a parenthesized expression:
 
 ```text
@@ -1048,6 +1058,75 @@ time clock
 armed
 wifi
 ```
+
+Expressions can also read persistent variables from `/etc/state.txt` and
+constants from `/etc/defines.txt`.
+
+### `let|var <name> = <value>`
+
+Sets a persistent variable. Variables are stored as state entries and survive
+reboot.
+
+```text
+let irrigation.enabled = 1
+let max.temp = 35
+let mode = auto
+let list
+let get irrigation.enabled
+let rm mode
+```
+
+Use variables in expressions:
+
+```text
+if (irrigation.enabled == 1 && temp < max.temp) relay on valve1
+```
+
+### `define <NAME> <value>`, `undef <NAME>`
+
+Stores a persistent constant for expressions. Constants are checked before
+variables. Names are case-insensitive and are normalized internally.
+
+```text
+define HOT 40
+define MORNING_END 10:00
+define DRY_HUMIDITY 35
+define list
+undef HOT
+```
+
+Use constants in expressions:
+
+```text
+if (temp >= HOT && time < MORNING_END) relay on fan
+```
+
+### `function <name> { <command>; <command> }`
+
+Creates a persistent named command block under `/func`. Functions can be run
+with `call <name>` or directly by name.
+
+```text
+function water_zone1 { relay on valve1; timer once 600000 relay off valve1; logger zone1_started }
+call water_zone1
+water_zone1
+function list
+function show water_zone1
+function rm water_zone1
+```
+
+Functions are useful for repeated actions in cron, input triggers and
+conditional logic:
+
+```text
+function heat_alert { logger heat_alert; mail health "Heat alert" }
+if (temp >= HOT && wifi == connected) { logger heat_alert; mail health "Heat alert" }
+cron add daily 06:00 call water_zone1
+```
+
+Do not call functions from inside an `if` branch on ESP8266. Put the direct
+commands in the branch, or call the function directly from cron/input when no
+extra branch is needed.
 
 ### `when input|pin ... if (<expression>) <command>`
 

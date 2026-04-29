@@ -13,6 +13,24 @@ Example content:
   sleep 500
   relay off light
 
+C-like automation is supported inside scripts:
+
+  // Variables and constants persist across reboot.
+  let irrigation.enabled = 1
+  define HOT 40
+
+  function heat_alert { relay on fan; mail health "Heat alert"; logger heat_alert }
+
+  if (temp >= HOT && wifi == connected) { relay on fan; mail health "Heat alert"; logger heat_alert } else { logger heat_ok }
+
+In scripts, keep if blocks and function definitions on one line. Use direct
+commands inside if branches; call functions from cron, inputs or the shell as
+whole actions.
+
+Use timer commands instead of long sleeps for real actuators:
+
+  if (irrigation.enabled == 1 && time < 10:00) { relay on valve1; timer once 600000 relay off valve1; logger zone1_started }
+
 Create from the web UI:
 
   1. Open Scripts.
