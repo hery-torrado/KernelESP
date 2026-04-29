@@ -95,7 +95,7 @@ If upload fails with `Device not configured`, wait a few seconds and retry.
 ```text
 RAM global: 42532 / 80192 bytes, 53%
 IRAM:       62567 / 65536 bytes, 95%
-Flash app: 473008 / 1048576 bytes, 45%
+Flash app: 473824 / 1048576 bytes, 45%
 ```
 
 ## Last Verified Runtime State
