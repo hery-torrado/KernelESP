@@ -1,0 +1,35 @@
+MEMORIA
+=======
+
+Comprobar:
+
+  free
+  health
+  df
+
+Valores:
+
+  heap       RAM libre
+  frag       fragmentacion
+  max block  bloque libre continuo mayor
+  fs_free    espacio LittleFS libre
+
+Buenas senales:
+
+  - heap por encima de 20 KB
+  - fragmentacion controlada
+  - max block suficiente para peticiones web
+  - LittleFS con espacio libre
+
+El log persistente esta desactivado por defecto para cuidar la flash.
+
+Usa primero:
+
+  dmesg
+
+Si la web se vuelve inestable:
+
+  free
+  dmesg
+  service web restart
+

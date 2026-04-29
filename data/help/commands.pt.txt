@@ -1,0 +1,48 @@
+MAPA DE COMANDOS
+================
+
+Sistema:
+
+  health, diag, free, df, uname, uptime, ps, jobs, dmesg, reboot, board
+
+Rede:
+
+  wifi status
+  wifi scan
+  wifi save SSID PASS
+  wifi reconnect
+  wifi net
+  wifi diag
+  ifconfig
+  ip route
+  ping host port
+  httpget http://host/path
+
+Email:
+
+  mail status
+  mail config postfix.lan 25 kernelesp@lan admin@example.com
+  mail test "Manual test from KernelESP"
+  mail health "KernelESP daily health"
+  mail send default "KernelESP alert" "Temperature is high"
+
+Automação:
+
+  relay add light D1 active_low
+  relay pulse light 500
+  cron add daily 08:00 relay on pump
+  timer every 60000 health
+  rule add temp range 38 40 relay fan
+  input add button D2 pullup
+
+Ficheiros:
+
+  ls, cat, write, append, rm, mkdir, cp, mv, sh, backup, profile
+
+Pipes:
+
+  health | grep wifi
+  dmesg | tail -n 5
+  crontab -l | wc -l
+  cat /var/log/kernel.log | grep wifi | head -n 5
+  health | tee /home/health.txt

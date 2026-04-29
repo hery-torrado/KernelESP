@@ -91,7 +91,7 @@ Current panels:
 - automation builder for relay, schedule, climate and input commands, with preview before running
 - command history stored in browser `localStorage`, not on ESP flash
 - online indicator, retro terminal theme toggle, copy buttons for terminal blocks, console history keys and command templates
-- interface language switcher for English, Spanish and Portuguese; help/documentation content remains English
+- interface language switcher and web Help topics for English, Spanish and Portuguese; repository manuals under `docs/` remain English
 - ops view with quick checks for relays, rules, cron, timers, inputs and health
 - professional panel with release preflight, diagnostic export, board profiles and install checklist
 - help pinout SVG sheets for ESP-12F, NodeMCU/Wemos D1 mini and ESP-01

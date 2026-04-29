@@ -1,0 +1,37 @@
+SEGURIDAD ELECTRICA
+===================
+
+KernelESP conmuta GPIOs. No alimenta cargas de red directamente.
+
+Para 110/230 V, bombas, motores, cerraduras o calefactores:
+
+  - usa módulos certificados
+  - separa baja tension y red
+  - usa caja, fusible y aislamiento
+  - prueba primero sin la carga real
+
+Arranque seguro:
+
+  relay boot pump off
+  relay boot heater off
+  relay boot fan off
+
+Pausar automatizacion:
+
+  disarm
+
+Recuperacion:
+
+  safe next
+  reboot
+  cron clear
+  rule clear
+  timer clear
+
+Prueba con dry-run:
+
+  dryrun on
+  relay on pump
+  relay off pump
+  dryrun off
+

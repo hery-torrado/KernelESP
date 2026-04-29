@@ -14,7 +14,7 @@ for Arduino UNO created by
 KernelUNO established the original spirit of a tiny Arduino shell with familiar
 UNIX-style commands. KernelESP keeps that idea and extends it for ESP8266 with
 persistent LittleFS storage, Wi-Fi, a web UI, JSON API, automations, mail
-alerts, English help, diagnostics and release tooling.
+alerts, localized web help, diagnostics and release tooling.
 
 KernelUNO is distributed under the BSD 3-Clause License. KernelESP keeps the
 same license family and preserves the original copyright notice for copied or

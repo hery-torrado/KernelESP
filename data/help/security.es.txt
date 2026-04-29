@@ -1,0 +1,25 @@
+SEGURIDAD
+=========
+
+Cambia la clave web por defecto:
+
+  web key <new-key>
+
+O usa Settings en la web.
+
+El bloqueo por intentos fallidos esta activado por defecto.
+
+Comprobar:
+
+  health
+  config get web.lockout
+  config get web.lockout.max
+
+El AP de recuperacion debe tener clave fuerte:
+
+  ap status
+  config set ap.key <strong-key>
+
+El SMTP de la placa no usa TLS ni autenticación. Usalo solo con un relay
+interno de confianza.
+

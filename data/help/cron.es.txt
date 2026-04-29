@@ -1,0 +1,37 @@
+CRON Y HORARIOS
+===============
+
+Cron ejecuta comandos a una hora concreta. Necesita hora sincronizada:
+
+  ntp kick
+  date
+
+Tarea diaria:
+
+  cron add daily 08:00 relay on pump
+  cron add daily 08:05 relay off pump
+  cron list
+
+Atajo para horario diario:
+
+  schedule pump 08:00 08:05
+
+Días de semana:
+
+  cron add dow mon,tue,wed,thu,fri 07:30 relay on pump
+  cron add dow wed,fri 11:00 sh /home/check.sh
+
+Fecha anual:
+
+  cron add date 05-01 11:00 sh /home/may1.sh
+
+Gestión:
+
+  crontab -l
+  cron rm 1
+  cron clear
+  cron save
+  cron load
+
+Si el comando es largo, ponlo en un script.
+

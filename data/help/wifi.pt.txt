@@ -1,0 +1,37 @@
+WI-FI
+=====
+
+Estado e procura:
+
+  wifi status
+  wifi net
+  wifi scan
+  ip
+
+Guardar e ligar:
+
+  wifi save "SSID" "password"
+  wifi reconnect
+  wifi wait 30
+
+DHCP ou IP fixa:
+
+  wifi dhcp on
+  wifi static IP GATEWAY MASK DNS1 DNS2
+
+Recuperacao:
+
+  wifi recover
+  wifi sdkreset --yes
+  wifi diag
+
+Apos upload serie, tools/upload.sh ja executa wifi sdkreset.
+
+Erros comuns:
+
+  201 no_ap_found   SSID nao visivel para o ESP8266
+  202 auth_fail     verificar password e segurança do AP
+  beacon_timeout    sinal, interferencia ou carga do AP
+
+O ESP8266 so usa Wi-Fi 2.4 GHz.
+

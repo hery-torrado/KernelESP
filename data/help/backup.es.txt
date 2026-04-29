@@ -1,0 +1,27 @@
+BACKUP Y PERFILES
+=================
+
+Crear backup:
+
+  backup
+
+Descargar por web:
+
+  /backup?key=<key>
+
+Incluye ficheros importantes de /etc, /home, /pkg y /profiles.
+
+Restaurar solo si confias en la copia:
+
+  restore /home/backup.txt --yes
+
+Perfiles:
+
+  profile save known-good
+  profile list
+  profile show known-good
+  profile load known-good --yes
+  profile rm known-good
+
+Flujo recomendado: configurar, probar, guardar perfil y descargar backup.
+

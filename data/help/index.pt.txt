@@ -1,0 +1,33 @@
+AJUDA DO KERNELESP
+==================
+
+KernelESP transforma o ESP8266 num pequeno sistema de controlo com consola,
+web, ficheiros LittleFS, Wi-Fi, relés, sensores, cron, regras, entradas,
+scripts, cópias de segurança, diagnóstico e alertas por email.
+
+Fluxo recomendado:
+
+  1. Ligar Wi-Fi e verificar IP.
+  2. Sincronizar a hora com NTP.
+  3. Configurar relés com estado seguro no arranque.
+  4. Testar sensores e entradas.
+  5. Criar regras, cron ou scripts.
+  6. Ativar email se forem precisos alertas.
+  7. Fazer backup e guardar um perfil estável.
+
+Comandos úteis:
+
+  health
+  wifi status
+  date
+  relay status
+  sensor read
+  jobs
+  backup
+
+Tópicos principais:
+
+  quickstart, hardware, relay, sensor, climate, cron, email, inputs,
+  scripts, web, wifi, files, backup, memory, commands, safety,
+  troubleshooting.
+

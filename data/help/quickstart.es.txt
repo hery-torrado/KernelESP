@@ -1,0 +1,58 @@
+PRIMEROS PASOS
+==============
+
+Comprueba la placa:
+
+  version
+  health
+  free
+  df
+
+Wi-Fi:
+
+  wifi status
+  wifi scan
+  ip
+
+Hora:
+
+  ntp kick
+  date
+
+Relé básico:
+
+  relay add light D1 active_low
+  relay boot light off
+  relay pulse light 500
+
+Sensor:
+
+  sensor scan
+  sensor begin
+  sensor read
+
+Automatización diaria:
+
+  cron add daily 08:10 relay on light
+  cron add daily 08:20 relay off light
+
+Regla de temperatura:
+
+  relay add fan D5 active_low
+  sensor begin
+  rule add temp range 38 40 relay fan
+
+Email:
+
+  mail config postfix.lan 25 kernelesp@lan admin@example.com
+  mail test "Manual test from KernelESP"
+
+Antes de dejarlo solo:
+
+  relay status
+  rule list
+  crontab -l
+  input list
+  health
+  backup
+

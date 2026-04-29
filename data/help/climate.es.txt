@@ -1,0 +1,38 @@
+AUTOMATIZACION CLIMATICA
+========================
+
+Las reglas leen el sensor y ejecutan comandos cuando se cumple una condicion.
+Para evitar que un rele haga clic continuamente se usa histeresis.
+
+Ejemplo:
+
+  encender ventilador por encima de 40 C
+  apagar por debajo de 38 C
+
+Forma sencilla:
+
+  relay add fan D5 active_low
+  sensor begin
+  climate temp fan 38 40
+  rule list
+
+Regla nativa equivalente:
+
+  rule add temp range 38 40 relay fan
+
+Humedad requiere BME280:
+
+  relay add extractor D6 active_low
+  climate hum extractor 60 70
+
+Control de frecuencia:
+
+  rule every 30000
+  rule cooldown 300000
+
+Pausar o borrar:
+
+  disarm
+  arm
+  rule clear
+

@@ -1,0 +1,39 @@
+HARDWARE
+========
+
+El ESP8266 usa pines GPIO de baja potencia. Sirven para mandar senales a
+módulos de rele o sensores, no para alimentar cargas directamente.
+
+Pines comodos en NodeMCU/Wemos:
+
+  D1, D2, D5, D6, D7
+
+Pines delicados:
+
+  D0, D3, D4, D8, RX, TX
+
+Algunos influyen en el arranque o en la consola serie. Si dudas, usa D1 para
+un rele simple y D2/D1 para I2C.
+
+Relé:
+
+  GPIO -> IN del modulo
+  GND  -> GND
+  VCC  -> alimentacion del modulo
+
+El lado COM/NO/NC conmuta la carga externa. Para red eléctrica usa caja,
+fusible, aislamiento y módulos certificados.
+
+Sensor BMP280/BME280:
+
+  VCC -> 3.3 V
+  GND -> GND
+  SDA -> D2 / GPIO4
+  SCL -> D1 / GPIO5
+
+Prueba segura:
+
+  relay add test D1 active_low
+  relay pulse test 300
+  relay rm test
+

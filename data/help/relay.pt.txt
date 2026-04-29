@@ -1,0 +1,35 @@
+RELES
+=====
+
+Um rele com nome e mais facil do que lembrar um GPIO.
+
+Criar:
+
+  relay add light D1 active_low
+  relay add pump D2 active_high
+
+active_low e comum em muitas placas: LOW ativa o rele. active_high ativa com
+HIGH.
+
+Usar:
+
+  relay status
+  relay on light
+  relay off light
+  relay toggle light
+  relay pulse light 500
+
+Arranque seguro:
+
+  relay boot light off
+  relay boot pump off
+
+Usa "last" apenas se restaurar o estado anterior for seguro:
+
+  relay boot light last
+
+Se funcionar ao contrario:
+
+  relay rm light
+  relay add light D1 active_high
+

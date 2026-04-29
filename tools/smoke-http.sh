@@ -21,9 +21,11 @@ printf 'HTTP smoke test: %s\n' "$BASE"
 
 "$CURL" -sS --fail --max-time 15 "$BASE/api/status?key=$KEY" | grep -q '"name":"KernelESP"'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index" | grep -q 'KernelESP'
-"$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index&lang=es" | grep -q 'KernelESP'
-"$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index&lang=pt" | grep -q 'KernelESP'
+"$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index&lang=es" | grep -q 'AYUDA DE KERNELESP'
+"$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index&lang=pt" | grep -q 'AJUDA DO KERNELESP'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=email" | grep -q 'EMAIL ALERTS'
+"$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=email&lang=es" | grep -q 'AVISOS POR EMAIL'
+"$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=email&lang=pt" | grep -q 'ALERTAS POR EMAIL'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=mail" | grep -q 'MAIL ALERTS'
 "$CURL" -sS --fail --max-time 15 "$BASE/i18n.js?v=18" | grep -q 'i18n-help.js'
 "$CURL" -sS --fail --max-time 15 "$BASE/i18n.js?v=18" | grep -q 'Portugu'

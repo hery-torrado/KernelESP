@@ -1,0 +1,28 @@
+ENTRADAS
+========
+
+Las entradas vigilan pines digitales y ejecutan comandos en high, low o change.
+
+Crear:
+
+  input add button D2 pullup 50
+  input list
+
+Ejecutar comando al bajar:
+
+  input on button low relay toggle light
+
+Ejemplo de corte eléctrico:
+
+  input add power D2 pullup 50
+  write /home/power-lost.sh mail send default "KernelESP power alert" "Power flow has stopped."
+  input on power low sh /home/power-lost.sh
+
+Leer y borrar:
+
+  input read button
+  input rm button
+  input clear
+
+Si la placa tambien pierde alimentacion, necesita UPS o batería.
+

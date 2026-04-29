@@ -1,0 +1,37 @@
+SCRIPTS
+=======
+
+Un script es un fichero con un comando KernelESP por línea.
+
+Ejecutar:
+
+  sh /home/file.sh
+
+Crear desde consola:
+
+  write /home/pulse.sh relay pulse light 500
+  append /home/pulse.sh logger pulse_light
+  append /home/pulse.sh relay status
+  sh /home/pulse.sh
+
+Validar:
+
+  sh -n /home/pulse.sh
+
+Script de arranque:
+
+  boot set /etc/boot.sh
+  boot show
+
+Ejemplo de arranque:
+
+  ntp kick
+  sensor begin
+  relay status
+
+Consejos:
+
+  - un comando por línea
+  - probar manualmente antes de automatizar
+  - evitar escrituras de log cada pocos segundos
+

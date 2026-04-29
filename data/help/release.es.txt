@@ -1,0 +1,27 @@
+RELEASE
+=======
+
+Verificar localmente:
+
+  tools/verify.sh
+
+Crear paquete:
+
+  tools/release.sh
+
+Subir firmware:
+
+  tools/upload.sh /dev/cu.usbserial-02094OMK
+
+Subir web/help:
+
+  tools/upload-assets.sh http://<esp-ip> admin
+
+Pruebas:
+
+  tools/smoke-http.sh http://<esp-ip> admin
+  COUNT=120 DELAY=1 tools/stability-http.sh http://<esp-ip> admin
+
+Las notas de release deben centrarse en correcciones, estabilidad y limites
+conocidos.
+

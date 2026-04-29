@@ -1,0 +1,52 @@
+PROBLEMAS
+=========
+
+Começa por:
+
+  health
+  free
+  df
+  dmesg
+  wifi status
+  jobs
+
+Wi-Fi:
+
+  wifi scan
+  wifi diag
+  wifi recover
+  wifi sdkreset --yes
+
+O ESP8266 só suporta 2.4 GHz.
+
+Web:
+
+  wifi status
+  web status
+  service web restart
+  ap status
+
+Hora:
+
+  ntp sync
+  ntp status
+  date
+
+Sensor:
+
+  i2c scan
+  sensor begin 0x76 D2 D1
+  sensor begin 0x77 D2 D1
+
+Mail:
+
+  mail status
+  ping postfix.lan 25
+  dmesg
+
+Automação perigosa:
+
+  disarm
+  safe next
+  reboot
+

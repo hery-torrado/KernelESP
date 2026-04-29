@@ -117,8 +117,9 @@ The UI is served from LittleFS static files
 (`/www/index.html`, `/www/app.js` through `/www/app13.js`, `/www/style.css`) so
 large interface changes do not increase IRAM.
 
-The web Help section now has English topic files, including a dedicated `email`
-topic for SMTP alert workflows and a `mail` topic for the command reference.
+The web Help section has English, Spanish and Portuguese topic files, including
+a dedicated `email` topic for SMTP alert workflows and a `mail` topic for the
+command reference. Repository manuals under `docs/` remain English.
 
 Runtime address should be read from serial with `wifi status` or `web status`.
 When fallback AP is active, the ESP uses `192.168.4.1`.

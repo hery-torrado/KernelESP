@@ -1,0 +1,43 @@
+INTERFAZ WEB
+============
+
+Paginas principales:
+
+  /         panel simple
+  /ui       Live UI completa
+  /edit     editor de ficheros
+  /help     ayuda local
+  /settings configuración
+
+Paneles de Live UI:
+
+  Dashboard     estado general, relés, sensor y comandos
+  Processes     ps, jobs y arm/disarm
+  Network       Wi-Fi, rutas, ping y httpget
+  Cron          tareas por hora
+  System        memoria y filesystem
+  Logs          dmesg
+  Quick Add     relés, horarios, reglas y entradas
+  Scripts       editor
+  Mail          SMTP y avisos
+  Automations   reglas, cron, timers e inputs
+  Diagnostics   diagnóstico de solo lectura
+  Professional  release, diagnóstico y perfil de placa
+
+La UI base esta en ingles. Los botones de idioma cambian textos y ayuda, pero
+la salida de comandos conserva el formato tecnico de consola.
+
+Si la web no responde:
+
+  wifi status
+  web status
+  service web restart
+  health
+
+API:
+
+  /api/status?key=KEY
+  /api/cmd?key=KEY&c=health
+  /api/sensor?key=KEY
+  /api/relay?key=KEY&name=light&state=pulse&ms=500
+
