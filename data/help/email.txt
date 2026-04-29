@@ -22,7 +22,7 @@ Send a health report:
 
 Daily health at 08:00:
 
-  ntp sync
+  ntp kick
   cron add daily 08:00 mail health "KernelESP daily health"
   crontab -l
 

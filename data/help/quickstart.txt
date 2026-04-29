@@ -16,7 +16,7 @@ Check Wi-Fi:
 
 If time is not synced:
 
-  ntp sync
+  ntp kick
   date
 
 Configure a relay:
@@ -58,4 +58,3 @@ Before leaving the board unattended:
   input list
   health
   backup
-

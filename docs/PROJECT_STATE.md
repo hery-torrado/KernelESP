@@ -93,9 +93,9 @@ If upload fails with `Device not configured`, wait a few seconds and retry.
 ## Last Verified Compile Size
 
 ```text
-RAM global: 42692 / 80192 bytes, 53%
+RAM global: 42532 / 80192 bytes, 53%
 IRAM:       62567 / 65536 bytes, 95%
-Flash app: 473960 / 1048576 bytes, 45%
+Flash app: 473008 / 1048576 bytes, 45%
 ```
 
 ## Last Verified Runtime State
@@ -117,9 +117,8 @@ The UI is served from LittleFS static files
 (`/www/index.html`, `/www/app.js` through `/www/app13.js`, `/www/style.css`) so
 large interface changes do not increase IRAM.
 
-The web Help section now has localized topic files for English, Spanish and
-Portuguese, including a dedicated `email` topic for SMTP alert workflows and a
-`mail` topic for the command reference.
+The web Help section now has English topic files, including a dedicated `email`
+topic for SMTP alert workflows and a `mail` topic for the command reference.
 
 Runtime address should be read from serial with `wifi status` or `web status`.
 When fallback AP is active, the ESP uses `192.168.4.1`.

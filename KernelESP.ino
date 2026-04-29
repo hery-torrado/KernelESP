@@ -460,10 +460,10 @@ void ensureUnixDefaults() {
     writeWholeFile("/help/index.txt", "KernelESP help\nTopics: relay climate wifi cron web safety\nUse: help <topic> or /help?topic=<topic>\n");
   }
   if (!LittleFS.exists("/help/relay.txt")) {
-    writeWholeFile("/help/relay.txt", "relay add luz D1 active_low\nrelay on luz\nrelay off luz\nrelay pulse luz 500\n");
+    writeWholeFile("/help/relay.txt", "relay add light D1 active_low\nrelay on light\nrelay off light\nrelay pulse light 500\n");
   }
   if (!LittleFS.exists("/help/climate.txt")) {
-    writeWholeFile("/help/climate.txt", "climate temp ventilador 38 40\nclimate hum extractor 60 70\n");
+    writeWholeFile("/help/climate.txt", "climate temp fan 38 40\nclimate hum extractor 60 70\n");
   }
   if (!LittleFS.exists("/help/wifi.txt")) {
     writeWholeFile("/help/wifi.txt", "wifi status\nwifi reconnect\nap start\nap status\n");
@@ -943,7 +943,7 @@ void printHelpTopic(String topic) {
   else if (topic == "mount") Serial.println(F("mount - show mounted pseudo filesystems"));
   else if (topic == "motd") Serial.println(F("motd [text] - show or replace /etc/motd"));
   else if (topic == "wifi") Serial.println(F("wifi scan|status|connect|save|forget|dhcp|static|net|timeout|channel|phy|power|recover|sdkreset|wait|ip|mac|hostname"));
-  else if (topic == "ntp" || topic == "time") Serial.println(F("ntp sync|status|auto|server|tz"));
+  else if (topic == "ntp" || topic == "time") Serial.println(F("ntp kick|sync|status|auto|server|tz"));
   else if (topic == "mail" || topic == "email") Serial.println(F("mail status|config|send|test|health - plain SMTP via LAN relay"));
   else if (topic == "pipe" || topic == "pipes") Serial.println(F("Pipes: cmd | grep text | head -n 5 | tail -n 5 | wc [-l|-w|-c] | tee /path/file"));
   else Serial.println(F("help: no detailed help for that command"));
@@ -3014,13 +3014,13 @@ String cronModeName(uint8_t mode) {
 int cronDowFromToken(String token) {
   token.toLowerCase();
   token.trim();
-  if (token == "sun" || token == "dom" || token == "domingo" || token == "0" || token == "7") return 0;
-  if (token == "mon" || token == "lun" || token == "lunes" || token == "1") return 1;
-  if (token == "tue" || token == "mar" || token == "martes" || token == "2") return 2;
-  if (token == "wed" || token == "mie" || token == "miercoles" || token == "3") return 3;
-  if (token == "thu" || token == "jue" || token == "jueves" || token == "4") return 4;
-  if (token == "fri" || token == "vie" || token == "viernes" || token == "5") return 5;
-  if (token == "sat" || token == "sab" || token == "sabado" || token == "6") return 6;
+  if (token == "sun" || token == "0" || token == "7") return 0;
+  if (token == "mon" || token == "1") return 1;
+  if (token == "tue" || token == "2") return 2;
+  if (token == "wed" || token == "3") return 3;
+  if (token == "thu" || token == "4") return 4;
+  if (token == "fri" || token == "5") return 5;
+  if (token == "sat" || token == "6") return 6;
   return -1;
 }
 
@@ -3058,18 +3058,18 @@ int monthFromToken(String token) {
   token.toLowerCase();
   token.trim();
   if (isUnsignedNumber(token)) return token.toInt();
-  if (token == "jan" || token == "ene" || token == "enero" || token == "january") return 1;
-  if (token == "feb" || token == "febrero" || token == "february") return 2;
-  if (token == "mar" || token == "marzo" || token == "march") return 3;
-  if (token == "apr" || token == "abr" || token == "abril" || token == "april") return 4;
-  if (token == "may" || token == "mayo") return 5;
-  if (token == "jun" || token == "junio" || token == "june") return 6;
-  if (token == "jul" || token == "julio" || token == "july") return 7;
-  if (token == "aug" || token == "ago" || token == "agosto" || token == "august") return 8;
-  if (token == "sep" || token == "sept" || token == "septiembre" || token == "september") return 9;
-  if (token == "oct" || token == "octubre" || token == "october") return 10;
-  if (token == "nov" || token == "noviembre" || token == "november") return 11;
-  if (token == "dec" || token == "dic" || token == "diciembre" || token == "december") return 12;
+  if (token == "jan" || token == "january") return 1;
+  if (token == "feb" || token == "february") return 2;
+  if (token == "mar" || token == "march") return 3;
+  if (token == "apr" || token == "april") return 4;
+  if (token == "may") return 5;
+  if (token == "jun" || token == "june") return 6;
+  if (token == "jul" || token == "july") return 7;
+  if (token == "aug" || token == "august") return 8;
+  if (token == "sep" || token == "sept" || token == "september") return 9;
+  if (token == "oct" || token == "october") return 10;
+  if (token == "nov" || token == "november") return 11;
+  if (token == "dec" || token == "december") return 12;
   return 0;
 }
 
@@ -3284,7 +3284,7 @@ void cmdCron(String args[], int argc) {
       }
       mode = 1;
       if (!parseDowMask(args[3], dowMask)) {
-        Serial.println(F("cron: bad day list; use mon,tue or lun,mar"));
+        Serial.println(F("cron: bad day list; use mon,tue"));
         return;
       }
       timeArg = 4;
@@ -3674,7 +3674,7 @@ bool webAuthOk() {
   html += htmlEscape(webServer.uri());
   html += F("'><label for='key'>Web key</label><input id='key' name='key' type='password' placeholder='Enter the access key' autocomplete='current-password' autofocus><button>Sign in</button></form>");
   html += F("<div class='loginHelp'>Serial recovery: <code>config set web.key new_key</code>. If the network fails, use <code>wifi status</code> or <code>wifi recover</code>.</div>");
-  html += F("</div></section></div><script src='/i18n-es.js?v=15'></script><script src='/i18n-es2.js?v=15'></script><script src='/i18n-es3.js?v=15'></script><script src='/i18n-es4.js?v=15'></script><script src='/i18n-pt.js?v=15'></script><script src='/i18n-pt2.js?v=15'></script><script src='/i18n-pt3.js?v=15'></script><script src='/i18n-pt4.js?v=15'></script><script src='/i18n.js?v=15'></script></body></html>");
+  html += F("</div></section></div><script src='/i18n.js?v=17'></script></body></html>");
   webServer.send(401, "text/html; charset=utf-8", html);
   return false;
 }
@@ -3713,7 +3713,7 @@ String webHeader(const String& title, const String& keyArg) {
 }
 
 String webFooter() {
-  return F("</main><script src='/i18n-es.js?v=15'></script><script src='/i18n-es2.js?v=15'></script><script src='/i18n-es3.js?v=15'></script><script src='/i18n-es4.js?v=15'></script><script src='/i18n-es5.js?v=16'></script><script src='/i18n-pt.js?v=15'></script><script src='/i18n-pt2.js?v=15'></script><script src='/i18n-pt3.js?v=15'></script><script src='/i18n-pt4.js?v=15'></script><script src='/i18n-pt5.js?v=16'></script><script src='/i18n.js?v=15'></script></body></html>");
+  return F("</main><script src='/i18n.js?v=17'></script></body></html>");
 }
 
 String fsListToString(const String& rawPath) {
@@ -4169,7 +4169,7 @@ void handleWebRoot() {
   html += htmlEscape(timeStatusText());
   html += F("</pre><p><a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
-  html += F("c=ntp%20sync'>Sync NTP</a><a class='btn secondary' href='/cmd?");
+  html += F("c=ntp%20kick'>Kick NTP</a><a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
   html += F("c=date'>Date</a></p></section><section class='card'><h2>Sensor</h2><pre>");
   html += htmlEscape(sensorText());
@@ -4207,7 +4207,7 @@ void handleWebRoot() {
     html += htmlEscape(relays[i].name);
     html += F("&state=pulse&ms=500'>PULSE</a></div></div>");
   }
-  if (!anyRelay) html += F("<p class='muted'>No relays configured. Use serial or command: <code>relay add luz D1 active_low</code></p>");
+  if (!anyRelay) html += F("<p class='muted'>No relays configured. Use serial or command: <code>relay add light D1 active_low</code></p>");
   html += F("</section><div class='grid'><section class='card'><h2>Scripts</h2><p><a class='btn' href='/edit");
   html += keyArg.length() ? "?key=" + urlEscape(keyArg) + "&path=/boot.sh" : "?path=/boot.sh";
   html += F("'>Edit /boot.sh</a> <a class='btn secondary' href='/edit");
@@ -4283,7 +4283,7 @@ void handleWebRelaysPage() {
   }
   html += F("<h2>Add relay</h2><form action='/cmd'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
-  html += F("'><input name='c' value='relay add luz D1 active_low'><button>Run</button></form></section>");
+  html += F("'><input name='c' value='relay add light D1 active_low'><button>Run</button></form></section>");
   html += webFooter();
   webServer.send(200, "text/html", html);
 }
@@ -4304,7 +4304,7 @@ void handleWebAutomations() {
   html += htmlEscape(state.length() ? state : "(empty)\n");
   html += F("</pre></section></div><section class='card'><h2>Command</h2><form action='/cmd'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
-  html += F("'><input name='c' placeholder='cron add daily 08:00 relay on riego'><button>Run</button></form><p>");
+  html += F("'><input name='c' placeholder='cron add daily 08:00 relay on pump'><button>Run</button></form><p>");
   html += F("<a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
   html += F("c=cron%20list'>Cron</a><a class='btn secondary' href='/cmd?");
@@ -4378,7 +4378,7 @@ void handleWebEdit() {
   html += F("'>Set boot</a><a class='btn warn' href='/delete");
   html += keyArg.length() ? "?key=" + urlEscape(keyArg) + "&path=" : "?path=";
   html += urlEscape(path);
-  html += F("'>Delete</a></p><p class='muted'>Tip: scripts use one command per line. Example: <code>relay pulse luz 500</code></p></section>");
+  html += F("'>Delete</a></p><p class='muted'>Tip: scripts use one command per line. Example: <code>relay pulse light 500</code></p></section>");
   html += webFooter();
   webServer.send(200, "text/html", html);
 }
@@ -4623,7 +4623,7 @@ void handleWebSettings() {
   html += htmlEscape(configGetValue("ntp.tz", "0"));
   html += F("' placeholder='timezone hours, e.g. 1'></p><p><button>Save NTP</button><a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
-  html += F("c=ntp%20sync'>Sync now</a></p></form></section>");
+  html += F("c=ntp%20kick'>Kick now</a></p></form></section>");
   html += F("<section class='card'><h2>Sensor</h2><form method='POST' action='/settings'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
   html += F("'><p><select name='sensor.autostart'><option value='on'");
@@ -5035,7 +5035,7 @@ void handleWebWizard() {
   }
   html += F("<div class='grid'><section class='card'><h2>Relay</h2><form method='POST' action='/wizard'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
-  html += F("'><input name='kind' type='hidden' value='relay'><p><input name='name' placeholder='name' value='luz'><input name='pin' placeholder='D1'><select name='mode'><option value='active_low'>active_low</option><option value='active_high'>active_high</option></select></p><p><button>Add relay</button></p></form></section>");
+  html += F("'><input name='kind' type='hidden' value='relay'><p><input name='name' placeholder='name' value='light'><input name='pin' placeholder='D1'><select name='mode'><option value='active_low'>active_low</option><option value='active_high'>active_high</option></select></p><p><button>Add relay</button></p></form></section>");
   html += F("<section class='card'><h2>Schedule</h2><form method='POST' action='/wizard'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
   html += F("'><input name='kind' type='hidden' value='schedule'><p><input name='relay' placeholder='relay'><input name='on' placeholder='08:00'><input name='off' placeholder='20:00'></p><p><button>Add daily schedule</button></p></form></section></div>");
@@ -5401,7 +5401,8 @@ void cmdService(String args[], int argc) {
     else if (action != "status") { Serial.println(F("service: action must be status,start,stop,restart")); return; }
     Serial.println(webRunning ? F("running") : F("stopped"));
   } else if (name == "ntp" || name == "time") {
-    if (action == "start" || action == "restart" || action == "sync") ntpSync(true);
+    if (action == "start" || action == "restart" || action == "kick" || action == "async") ntpKick();
+    else if (action == "sync") ntpSync(true);
     else if (action == "stop") configSetValue("ntp.autosync", "off");
     Serial.print(timeStatusText());
   } else if (name == "sensor") {
@@ -5542,6 +5543,15 @@ bool ntpSync(bool waitForSync) {
   return ntpSyncedOnce;
 }
 
+bool ntpKick() {
+  if (WiFi.status() != WL_CONNECTED) return false;
+  ntpPendingSync = true;
+  ntpRetryCount = 0;
+  ntpSync(false);
+  eventLog("ntp kick");
+  return true;
+}
+
 void processNtp() {
   if (configGetValue("ntp.autosync", "on") != "on" || WiFi.status() != WL_CONNECTED) return;
   time_t now = time(nullptr);
@@ -5640,7 +5650,9 @@ void cmdDate(String args[], int argc) {
 void cmdTimeNet(String args[], int argc) {
   String sub = argc >= 2 ? args[1] : "status";
   sub.toLowerCase();
-  if (sub == "sync" || sub == "ntp") {
+  if (sub == "kick" || sub == "async") {
+    Serial.println(ntpKick() ? F("ntp kick queued") : F("ntp: wifi not connected"));
+  } else if (sub == "sync" || sub == "ntp") {
     if (!ntpSync(true)) Serial.println(F("time: not synced"));
     else Serial.print(timeStatusText());
   } else if (sub == "http") {
@@ -5681,7 +5693,7 @@ void cmdTimeNet(String args[], int argc) {
     }
     Serial.println(configSetValue("time.http_host", args[2]) ? F("OK") : F("ntp: httphost failed"));
   } else {
-    Serial.println(F("usage: ntp sync|http|status|auto|server|tz|fallback|httphost"));
+    Serial.println(F("usage: ntp kick|sync|http|status|auto|server|tz|fallback|httphost"));
   }
 }
 

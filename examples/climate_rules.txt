@@ -3,9 +3,9 @@
 
 sensor begin
 rule every 10000
-rule add temp gt 40 relay on ventilador
-rule add temp lt 38 relay off ventilador
-rule add temp range 38 40 relay ventilador
+rule add temp gt 40 relay on fan
+rule add temp lt 38 relay off fan
+rule add temp range 38 40 relay fan
 rule cooldown 60000
 rule add hum gt 70 relay on extractor
 rule add hum lt 60 relay off extractor

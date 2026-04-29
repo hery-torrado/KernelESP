@@ -139,19 +139,19 @@ They are connected to flash.
 Most relay modules are active-low:
 
 ```text
-relay add luz D1 active_low
+relay add light D1 active_low
 ```
 
 Some boards are active-high:
 
 ```text
-relay add luz D1 active_high
+relay add light D1 active_high
 ```
 
 Recommended:
 
 ```text
-relay boot luz off
+relay boot light off
 ```
 
 For multi-relay boards:
@@ -251,7 +251,7 @@ safe status
 Keep relays safe at boot:
 
 ```text
-relay boot bomba off
+relay boot pump off
 relay boot calefactor off
 ```
 

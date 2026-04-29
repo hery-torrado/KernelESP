@@ -87,7 +87,7 @@ unset MODE
 true
 false
 test -f /etc/boot.sh
-test luz = luz
+test light = light
 [ -d /etc ]
 basename /etc/boot.sh
 dirname /etc/boot.sh
@@ -198,7 +198,7 @@ Search or remove timer/rule/cron pseudo processes.
 ```text
 pgrep relay
 pgrep -a relay
-pidof riego
+pidof pump
 kill 301
 ```
 
@@ -651,7 +651,7 @@ hostname
 ### `hostname <name>`
 
 ```text
-hostname kernelesp-riego
+hostname kernelesp-pump
 ```
 
 ## Time and Network Diagnostics
@@ -662,7 +662,19 @@ hostname kernelesp-riego
 date
 ```
 
+### `ntp kick`
+
+Queue a non-blocking NTP refresh. This is the preferred command for scripts,
+cron jobs and automation because it returns immediately.
+
+```text
+ntp kick
+```
+
 ### `ntp sync`
+
+Run a blocking NTP sync and wait briefly for a valid clock. Use this manually
+from serial or the web console when you want immediate feedback.
 
 ```text
 ntp sync
@@ -685,6 +697,10 @@ ntp status
 ```
 
 ### `ntp auto on|off`
+
+Enable or disable the background NTP worker. When enabled, KernelESP queues a
+non-blocking NTP refresh after Wi-Fi connects and retries in the background; it
+does not wait inside the command loop.
 
 ```text
 ntp auto on
@@ -902,29 +918,29 @@ sensor autostart on
 ### `relay add <name> <pin> active_low|active_high`
 
 ```text
-relay add luz D1 active_low
-relay add bomba D2 active_high
+relay add light D1 active_low
+relay add pump D2 active_high
 ```
 
 ### `relay rm <name>`
 
 ```text
-relay rm luz
+relay rm light
 ```
 
 ### `relay on|off|toggle <name>`
 
 ```text
-relay on luz
-relay off luz
-relay toggle luz
+relay on light
+relay off light
+relay toggle light
 ```
 
 ### `relay pulse <name> [ms]`
 
 ```text
-relay pulse luz
-relay pulse luz 500
+relay pulse light
+relay pulse light 500
 ```
 
 ### `relay status`
@@ -936,8 +952,8 @@ relay status
 ### `relay boot <name> off|on|last`
 
 ```text
-relay boot luz off
-relay boot luz last
+relay boot light off
+relay boot light last
 ```
 
 ### `relay save`, `relay load`
@@ -958,7 +974,7 @@ timer every 5000 date
 ### `timer once <ms> <command>`
 
 ```text
-timer once 10000 relay off luz
+timer once 10000 relay off light
 ```
 
 ### `timer add <ms> <command>`
@@ -1001,7 +1017,7 @@ rule add press lt 980 echo pressure_low
 Native hysteresis/range rule. It runs `relay on <name>` above the high threshold and `relay off <name>` below the low threshold.
 
 ```text
-rule add temp range 38 40 relay ventilador
+rule add temp range 38 40 relay fan
 rule add hum range 60 70 relay extractor
 ```
 
@@ -1020,7 +1036,7 @@ rule cooldown 0
 Set the off command for a range rule.
 
 ```text
-rule off 1 relay off ventilador
+rule off 1 relay off fan
 ```
 
 ### `rule list`, `rule rm <id>`, `rule clear`
@@ -1054,22 +1070,22 @@ rule load
 Daily, old-compatible form.
 
 ```text
-cron add 08:00 relay on riego
+cron add 08:00 relay on pump
 ```
 
 ### `cron add daily HH:MM <command>`
 
 ```text
-cron add daily 08:15 relay off riego
+cron add daily 08:15 relay off pump
 ```
 
 ### `cron add dow <days> HH:MM <command>`
 
-English and Spanish short names are accepted.
+English short names and numeric days are accepted.
 
 ```text
 cron add dow wed,fri 11:00 sh /home/check.sh
-cron add dow mie,vie 11:00 sh /home/check.sh
+cron add dow wed,fri 11:00 sh /home/check.sh
 cron add dow 3,5 11:00 sh /home/check.sh
 ```
 
@@ -1080,7 +1096,6 @@ Annual date.
 ```text
 cron add date 05-01 11:00 sh /home/may1.sh
 cron add date 1-may 11:00 sh /home/may1.sh
-cron add date 1-mayo 11:00 sh /home/may1.sh
 ```
 
 ### `cron list`, `cron rm <id>`, `cron clear`
@@ -1113,7 +1128,7 @@ Small Debian-like wrapper for cron.
 
 ```text
 crontab -l
-crontab add daily 08:00 relay on riego
+crontab add daily 08:00 relay on pump
 crontab -r
 ```
 
@@ -1312,20 +1327,20 @@ scene list
 ### `scene add <name> <command[; command...]>`
 
 ```text
-scene add noche relay off luz; relay on seguridad
+scene add night relay off light; relay on security
 ```
 
 ### `scene run <name>`
 
 ```text
-scene run noche
+scene run night
 ```
 
 ### `scene show|rm|clear`
 
 ```text
-scene show noche
-scene rm noche
+scene show night
+scene rm night
 scene clear
 ```
 
@@ -1334,10 +1349,10 @@ scene clear
 ### `state list|get|set|rm|clear`
 
 ```text
-state set riego.last_run 2026-05-01
-state get riego.last_run
+state set pump.last_run 2026-05-01
+state get pump.last_run
 state list
-state rm riego.last_run
+state rm pump.last_run
 state clear
 ```
 
@@ -1367,7 +1382,7 @@ Small script packages live in `/pkg` as `.sh` files.
 
 ```text
 pkg list
-pkg add blink relay toggle luz
+pkg add blink relay toggle light
 pkg show blink
 pkg run blink
 pkg rm blink
@@ -1378,7 +1393,7 @@ Manage `/etc/boot.sh` without opening the editor:
 ```text
 onboot list
 onboot add wifi wait 30
-onboot add relay off luz
+onboot add relay off light
 onboot rm 2
 onboot clear
 ```
@@ -1389,10 +1404,10 @@ Profiles are manual snapshots in `/profiles`. They only write when you run `prof
 
 ```text
 profile list
-profile save riego
-profile show riego
-profile load riego --yes
-profile rm riego
+profile save pump
+profile show pump
+profile load pump --yes
+profile rm pump
 ```
 
 Export configuration modules without writing to flash:
@@ -1411,7 +1426,7 @@ Dry-run simulates relay/GPIO/PWM writes. It is useful before testing scripts aga
 ```text
 dryrun status
 dryrun on
-relay on bomba
+relay on pump
 gpio D1 on
 dryrun off
 ```
@@ -1438,9 +1453,9 @@ stat /etc/boot.sh
 These commands generate lower-level `cron` or `rule` entries.
 
 ```text
-schedule luz 08:00 20:00
-climate temp ventilador 35 40
-climate hum deshumidificador 55 70
+schedule light 08:00 20:00
+climate temp fan 35 40
+climate hum dehumidifier 55 70
 ```
 
 `climate` uses hysteresis: above the high value it turns the relay on, below the low value it turns it off.
@@ -1450,23 +1465,23 @@ climate hum deshumidificador 55 70
 ### `input add <name> <pin> pullup|float [debounce_ms]`
 
 ```text
-input add puerta D2 pullup 50
+input add door D2 pullup 50
 ```
 
 ### `input on <name> high|low|change <command>`
 
 ```text
-input on puerta low scene run alarma
-input on puerta high echo puerta cerrada
-input on puerta change append /var/log/kernel.log puerta_changed
+input on door low scene run alarm
+input on door high echo door closed
+input on door change append /var/log/kernel.log door_changed
 ```
 
 ### `input read|list|rm|clear|save|load`
 
 ```text
-input read puerta
+input read door
 input list
-input rm puerta
+input rm door
 input clear
 ```
 
@@ -1524,7 +1539,7 @@ Avoid GPIO0, GPIO2 and GPIO15 for relays unless the boot-state wiring is deliber
 service
 service web status
 service web restart
-service ntp sync
+service ntp kick
 service sensor start
 service wifi restart
 ```

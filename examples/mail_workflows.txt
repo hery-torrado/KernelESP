@@ -4,7 +4,7 @@
 #   mail config smtp.lan 25 kernelesp@example.lan admin@example.lan
 
 # Daily health email at 08:00. Requires synced time.
-ntp sync
+ntp kick
 cron add daily 08:00 mail health "KernelESP daily health"
 
 # Fan control plus one email when heat starts, and one when temperature returns.

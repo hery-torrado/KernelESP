@@ -568,7 +568,7 @@ sh -n /etc/boot.sh
 Check cron execution:
 
 ```text
-ntp sync
+ntp kick
 date
 cron add daily HH:MM write /cron_hit.txt fired
 cat /cron_hit.txt

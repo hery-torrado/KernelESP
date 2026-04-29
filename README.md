@@ -14,7 +14,7 @@ for Arduino UNO created by
 KernelUNO established the original spirit of a tiny Arduino shell with familiar
 UNIX-style commands. KernelESP keeps that idea and extends it for ESP8266 with
 persistent LittleFS storage, Wi-Fi, a web UI, JSON API, automations, mail
-alerts, localized help, diagnostics and release tooling.
+alerts, English help, diagnostics and release tooling.
 
 KernelUNO is distributed under the BSD 3-Clause License. KernelESP keeps the
 same license family and preserves the original copyright notice for copied or
@@ -219,9 +219,9 @@ SKIP_COMPILE=1 tools/verify.sh
 Last verified build for `0.10.0`:
 
 ```text
-RAM global: 42692 / 80192 bytes, 53%
+RAM global: 42532 / 80192 bytes, 53%
 IRAM:       62567 / 65536 bytes, 95%
-Flash app: 473960 / 1048576 bytes, 45%
+Flash app: 473008 / 1048576 bytes, 45%
 LittleFS:  about 1.00 MB free after web/help assets on the tested 4 MB module
 Runtime heap: around 30-33 KB free in normal web use
 ```

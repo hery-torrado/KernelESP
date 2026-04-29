@@ -1,9 +1,9 @@
 CRON AND SCHEDULES
 ==================
 
-Cron runs commands at a clock time. It needs synced time:
+Cron runs commands at a clock time. Queue a time refresh first:
 
-  ntp sync
+  ntp kick
   date
 
 Daily jobs:
@@ -41,4 +41,3 @@ Save and load:
 Tip: if the command is long, put it in a script:
 
   cron add daily 09:00 sh /home/morning.sh
-

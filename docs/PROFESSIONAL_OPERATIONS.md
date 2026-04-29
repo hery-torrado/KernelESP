@@ -1,90 +1,91 @@
-# Operación Profesional
+# Professional Operations
 
-Este documento resume cómo llevar KernelESP de prototipo a entorno de trabajo controlado sin castigar la memoria del ESP8266.
+This document summarizes how to move KernelESP from a prototype bench into a
+controlled working environment without stressing ESP8266 memory or flash.
 
-## Principios
+## Principles
 
-- Mantener el firmware pequeño.
-- Servir UI, ayuda y documentación desde LittleFS.
-- Evitar escrituras repetitivas en flash.
-- Usar diagnósticos bajo demanda.
-- Hacer backup antes de cada cambio importante.
-- Subir firmware por serie mientras OTA no demuestre margen de IRAM suficiente.
+- Keep the firmware small.
+- Serve UI, help and operational content from LittleFS.
+- Avoid repetitive flash writes.
+- Run diagnostics on demand.
+- Take a backup before every meaningful change.
+- Upload firmware over serial until OTA has proven enough IRAM margin.
 
-## Flujo De Release
+## Release Flow
 
-1. Ejecutar pruebas locales:
+1. Run local checks:
 
 ```sh
 tools/verify.sh
 ```
 
-2. Crear paquete:
+2. Create the release package:
 
 ```sh
 tools/release.sh
 ```
 
-3. Guardar backup del ESP:
+3. Save a backup from the ESP:
 
 ```text
 backup
-profile save antes_release
+profile save before_release
 ```
 
-4. Subir firmware por serie:
+4. Upload firmware over serial:
 
 ```sh
 tools/upload.sh
 ```
 
-5. Subir assets LittleFS:
+5. Upload LittleFS assets:
 
 ```sh
-tools/upload-assets.sh http://IP_DEL_ESP CLAVE
+tools/upload-assets.sh http://<esp-ip> <web-key>
 ```
 
-6. Probar por HTTP:
+6. Test over HTTP:
 
 ```sh
-tools/smoke-http.sh http://IP_DEL_ESP CLAVE
+tools/smoke-http.sh http://<esp-ip> <web-key>
+COUNT=40 DELAY=1 tools/stability-http.sh http://<esp-ip> <web-key>
 ```
 
-Si tras flashear el ESP8266 entra en bucles `auth_expire`, `assoc_expire` o
-`no_ap_found` con una red conocida, limpiar manualmente el estado Wi-Fi interno
-del SDK:
+If the ESP8266 enters repeated `auth_expire`, `assoc_expire` or `no_ap_found`
+loops after flashing, clear the ESP8266 SDK Wi-Fi state:
 
 ```sh
 tools/wifi-sdkreset.sh /dev/cu.usbserial-02094OMK
 ```
 
-Esto ejecuta `wifi sdkreset --yes` por serie y reinicia la placa. No formatea
-LittleFS ni borra los perfiles/configuración de KernelESP.
+That sends `wifi sdkreset --yes` over serial and restarts the board. It does
+not format LittleFS or delete KernelESP profiles/configuration.
 
-Antes de publicar en GitHub, revisar:
+Before publishing to GitHub, run:
 
 ```sh
 SKIP_COMPILE=1 tools/verify.sh
 rg -n "password|passwd|ssid|web.key|mail.smtp|token|secret" .
 ```
 
-Y seguir `docs/GITHUB_RELEASE_CHECKLIST.md`.
+Then follow `docs/GITHUB_RELEASE_CHECKLIST.md`.
 
-## Diagnóstico De Soporte
+## Support Diagnostics
 
-Desde el ordenador:
+From the computer:
 
 ```sh
-tools/diagnostic-bundle.sh http://IP_DEL_ESP CLAVE
+tools/diagnostic-bundle.sh http://<esp-ip> <web-key>
 ```
 
-Desde la web:
+From the web UI:
 
 ```text
 Live UI -> Professional -> Export diagnostics
 ```
 
-Desde consola:
+From the console:
 
 ```text
 diag
@@ -94,11 +95,12 @@ df
 dmesg
 ```
 
-El diagnóstico web se descarga en el navegador y no escribe en LittleFS.
+The web diagnostic export downloads in the browser and does not write to
+LittleFS.
 
-## Perfiles De Placa
+## Board Profiles
 
-Ver:
+Inspect available profiles:
 
 ```text
 board
@@ -106,7 +108,7 @@ board list
 board pins
 ```
 
-Guardar:
+Apply a profile:
 
 ```text
 board use nodemcu
@@ -115,24 +117,24 @@ board use esp12f
 board use esp01
 ```
 
-Esto solo escribe una clave de configuración:
+This only writes one configuration key:
 
 ```text
 board.profile=nodemcu
 ```
 
-Para un módulo ESP-12F, usa:
+For an ESP-12F module, use:
 
 ```text
 board use esp12f
 ```
 
-Ese perfil recomienda GPIO4, GPIO5, GPIO12, GPIO13 y GPIO14 para E/S normal.
-GPIO0, GPIO2 y GPIO15 son pines de arranque y conviene tratarlos como delicados.
+That profile recommends GPIO4, GPIO5, GPIO12, GPIO13 and GPIO14 for normal I/O.
+GPIO0, GPIO2 and GPIO15 are boot pins and should be treated carefully.
 
-## Seguridad
+## Security
 
-La web tiene bloqueo temporal tras varios intentos fallidos:
+The web interface has temporary lockout after repeated failed attempts:
 
 ```text
 config get web.lockout
@@ -140,7 +142,7 @@ config get web.lockout.max
 config get web.lockout.ms
 ```
 
-Valores por defecto:
+Defaults:
 
 ```text
 web.lockout=on
@@ -148,32 +150,34 @@ web.lockout.max=5
 web.lockout.ms=300000
 ```
 
-La consola serie no se bloquea, para mantener una vía de rescate.
+The serial console remains available as a recovery path.
 
 ## OTA
 
-No se ha activado OTA dentro del firmware. Motivo: el ESP8266 ya está cerca del límite de IRAM, y añadir soporte de actualización en caliente puede reducir estabilidad.
+OTA is intentionally not enabled in the firmware. The ESP8266 is already close
+to the IRAM limit, and runtime update support could reduce stability.
 
-Se incluye un preflight:
+A read-only preflight tool is included:
 
 ```sh
-tools/ota-preflight.sh http://IP_DEL_ESP CLAVE
+tools/ota-preflight.sh http://<esp-ip> <web-key>
 ```
 
-La política actual es:
+Current policy:
 
-- firmware por serie;
-- assets por `/save` con `tools/upload-assets.sh`;
-- OTA solo en una versión futura si la compilación mantiene margen de IRAM.
+- upload firmware over serial;
+- upload assets through `/save` with `tools/upload-assets.sh`;
+- consider OTA only if a future build keeps enough IRAM margin.
 
-## Presupuesto De Memoria
+## Memory Budget
 
-Última compilación de `0.10.0`:
+Latest verified `0.10.0` build:
 
 ```text
-RAM global: 42692 / 80192 bytes, 53%
+RAM global: 42532 / 80192 bytes, 53%
 IRAM:       62567 / 65536 bytes, 95%
-Flash app: 473688 / 1048576 bytes, 45%
+Flash app: 473008 / 1048576 bytes, 45%
 ```
 
-La IRAM no subió respecto al firmware anterior. Las mejoras grandes viven en LittleFS y herramientas del ordenador.
+IRAM remains the limiting resource. Larger UI/help changes should live in
+LittleFS assets and computer-side tools.

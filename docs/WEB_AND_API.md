@@ -80,7 +80,7 @@ Dashboard:
 
 ### `/ui`
 
-Authenticated Live UI served from `/www/index.html`. Most of the interface lives in LittleFS as static HTML/JS/CSS, so adding panels does not significantly affect IRAM. The JavaScript is split into small files (`app.js` through `app13.js`, plus the small `i18n*.js` language files) so the ESP8266 web editor can update them reliably.
+Authenticated Live UI served from `/www/index.html`. Most of the interface lives in LittleFS as static HTML/JS/CSS, so adding panels does not significantly affect IRAM. The JavaScript is split into small files (`app.js` through `app13.js`, plus the small English-only `i18n.js` and `i18n-help.js` helpers) so the ESP8266 web editor can update them reliably.
 
 Current panels:
 
@@ -91,7 +91,7 @@ Current panels:
 - automation builder for relay, schedule, climate and input commands, with preview before running
 - command history stored in browser `localStorage`, not on ESP flash
 - online indicator, retro terminal theme toggle, copy buttons for terminal blocks, console history keys and command templates
-- language switcher for English, Spanish and Portuguese; it translates interface labels only, not command output
+- English-only help topic navigation and pinout helpers
 - ops view with quick checks for relays, rules, cron, timers, inputs and health
 - professional panel with release preflight, diagnostic export, board profiles and install checklist
 - help pinout SVG sheets for ESP-12F, NodeMCU/Wemos D1 mini and ESP-01
@@ -441,9 +441,9 @@ ms=<milliseconds> optional for pulse
 Examples:
 
 ```sh
-curl 'http://<esp-ip>/api/relay?key=admin&name=luz&state=on'
-curl 'http://<esp-ip>/api/relay?key=admin&name=luz&state=off'
-curl 'http://<esp-ip>/api/relay?key=admin&name=luz&state=pulse&ms=500'
+curl 'http://<esp-ip>/api/relay?key=admin&name=light&state=on'
+curl 'http://<esp-ip>/api/relay?key=admin&name=light&state=off'
+curl 'http://<esp-ip>/api/relay?key=admin&name=light&state=pulse&ms=500'
 ```
 
 Response:

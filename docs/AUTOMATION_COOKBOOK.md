@@ -20,18 +20,18 @@ This means every automation can be tested manually before scheduling it.
 Configure a relay:
 
 ```text
-relay add luz D1 active_low
-relay boot luz off
+relay add light D1 active_low
+relay boot light off
 relay status
 ```
 
 Test:
 
 ```text
-relay on luz
-relay off luz
-relay toggle luz
-relay pulse luz 500
+relay on light
+relay off light
+relay toggle light
+relay pulse light 500
 ```
 
 Use `active_low` for many common relay boards where LOW energizes the relay.
@@ -41,32 +41,32 @@ Use `active_low` for many common relay boards where LOW energizes the relay.
 Pulse a gate or contactor input:
 
 ```text
-relay add puerta D1 active_low
-relay pulse puerta 700
+relay add door D1 active_low
+relay pulse door 700
 ```
 
 Create script:
 
 ```text
-write /home/open_gate.sh relay pulse puerta 700
+write /home/open_gate.sh relay pulse door 700
 sh /home/open_gate.sh
 ```
 
 ## 4. Daily Watering
 
 ```text
-relay add riego D1 active_low
-relay boot riego off
-ntp sync
-cron add daily 08:00 relay on riego
-cron add daily 08:05 relay off riego
+relay add pump D1 active_low
+relay boot pump off
+ntp kick
+cron add daily 08:00 relay on pump
+cron add daily 08:05 relay off pump
 cron list
 ```
 
 Manual stop:
 
 ```text
-relay off riego
+relay off pump
 ```
 
 ## 5. Weekday Schedule
@@ -74,14 +74,8 @@ relay off riego
 Run only Monday to Friday:
 
 ```text
-cron add dow mon,tue,wed,thu,fri 07:30 relay on bomba
-cron add dow mon,tue,wed,thu,fri 07:35 relay off bomba
-```
-
-Spanish names:
-
-```text
-cron add dow lun,mar,mie,jue,vie 07:30 relay on bomba
+cron add dow mon,tue,wed,thu,fri 07:30 relay on pump
+cron add dow mon,tue,wed,thu,fri 07:35 relay off pump
 ```
 
 ## 6. Annual Date
@@ -89,15 +83,15 @@ cron add dow lun,mar,mie,jue,vie 07:30 relay on bomba
 Run a script every May 1:
 
 ```text
-write /home/may1.sh echo Primero de mayo
-append /home/may1.sh relay pulse luz 1000
+write /home/may1.sh echo May Day
+append /home/may1.sh relay pulse light 1000
 cron add date 05-01 11:00 sh /home/may1.sh
 ```
 
 Equivalent:
 
 ```text
-cron add date 1-mayo 11:00 sh /home/may1.sh
+cron add date 1-may 11:00 sh /home/may1.sh
 ```
 
 ## 7. One-Shot Delay
@@ -105,11 +99,11 @@ cron add date 1-mayo 11:00 sh /home/may1.sh
 Turn something off after a delay:
 
 ```text
-relay on luz
-timer once 300000 relay off luz
+relay on light
+timer once 300000 relay off light
 ```
 
-This turns `luz` off after 5 minutes.
+This turns `light` off after 5 minutes.
 
 ## 8. Repeating Timer
 
@@ -131,11 +125,11 @@ timer rm 1
 Avoid turning a relay on and off rapidly by using two thresholds.
 
 ```text
-relay add ventilador D5 active_low
+relay add fan D5 active_low
 sensor begin
 rule every 10000
-rule add temp gt 40 relay on ventilador
-rule add temp lt 38 relay off ventilador
+rule add temp gt 40 relay on fan
+rule add temp lt 38 relay off fan
 rule list
 ```
 
@@ -148,7 +142,7 @@ Behavior:
 Native short form:
 
 ```text
-rule add temp range 38 40 relay ventilador
+rule add temp range 38 40 relay fan
 rule cooldown 60000
 ```
 
@@ -187,7 +181,7 @@ Edit `/etc/boot.sh`:
 
 ```text
 sensor begin
-ntp sync
+ntp kick
 ```
 
 Or configure autostart:
@@ -202,9 +196,9 @@ sensor autostart on
 Recommended:
 
 ```text
-relay boot bomba off
-relay boot ventilador off
-relay boot luz last
+relay boot pump off
+relay boot fan off
+relay boot light last
 ```
 
 Use `last` only where restoring the previous state is safe.
@@ -215,7 +209,7 @@ Example `/etc/boot.sh`:
 
 ```text
 motd KernelESP greenhouse controller
-ntp sync
+ntp kick
 sensor begin
 relay status
 jobs
@@ -234,7 +228,7 @@ Create script:
 ```text
 write /home/morning.sh date
 append /home/morning.sh sensor read
-append /home/morning.sh relay pulse luz 500
+append /home/morning.sh relay pulse light 500
 ```
 
 Schedule:
@@ -278,7 +272,7 @@ mail test "Manual KernelESP mail test"
 Send a daily alive message at 08:00:
 
 ```text
-ntp sync
+ntp kick
 cron add daily 08:00 mail health "KernelESP daily health"
 cron list
 ```
@@ -357,7 +351,7 @@ Before leaving a system unattended:
 ```text
 relay status
 sensor read
-ntp sync
+ntp kick
 date
 cron list
 rule list
@@ -371,24 +365,24 @@ backup
 ## 21. Scenes
 
 ```text
-scene add noche relay off luz; relay on seguridad
-scene run noche
-cron add daily 22:30 scene run noche
+scene add night relay off light; relay on security
+scene run night
+cron add daily 22:30 scene run night
 ```
 
 ## 22. Inputs
 
 ```text
-input add puerta D2 pullup 50
-scene add alarma relay on sirena; append /var/log/kernel.log puerta_abierta
-input on puerta low scene run alarma
+input add door D2 pullup 50
+scene add alarm relay on siren; append /var/log/kernel.log door_open
+input on door low scene run alarm
 input list
 ```
 
 ## 23. Persistent State
 
 ```text
-state set riego.last_run 2026-05-01
-state get riego.last_run
+state set pump.last_run 2026-05-01
+state get pump.last_run
 state list
 ```

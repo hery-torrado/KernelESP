@@ -38,7 +38,7 @@
   <text x="895" y="363" class="h">LittleFS</text>
   <text x="895" y="397" class="t">/etc config</text>
   <text x="895" y="425" class="t">/www UI assets</text>
-  <text x="895" y="453" class="t">/help localized docs</text>
+  <text x="895" y="453" class="t">/help English docs</text>
   <rect x="870" y="555" width="260" height="100" rx="10" class="card"/>
   <text x="895" y="593" class="h">Hardware</text>
   <text x="895" y="627" class="t">GPIO, relays, I2C sensors</text>

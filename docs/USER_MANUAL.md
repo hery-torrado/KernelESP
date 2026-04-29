@@ -171,7 +171,7 @@ alias save
 history save
 source /etc/boot.sh
 run /etc/boot.sh
-pkg add relay-test relay toggle luz
+pkg add relay-test relay toggle light
 pkg run relay-test
 onboot add wifi wait 30
 profile save casa
@@ -219,7 +219,7 @@ wifi net
 wifi ip
 wifi mac
 hostname
-hostname kernelesp-riego
+hostname kernelesp-pump
 ```
 
 Use a fixed IP address:
@@ -332,7 +332,13 @@ ntp status
 date
 ```
 
-Sync:
+Queue a non-blocking refresh:
+
+```text
+ntp kick
+```
+
+Manual blocking sync:
 
 ```text
 ntp sync
@@ -369,8 +375,8 @@ Cron and `date` use this configured time.
 Add a relay:
 
 ```text
-relay add luz D1 active_low
-relay add bomba D2 active_high
+relay add light D1 active_low
+relay add pump D2 active_high
 ```
 
 Use safe pins first: `D1`, `D2`, `D5`, `D6`, `D7`.
@@ -378,25 +384,25 @@ Use safe pins first: `D1`, `D2`, `D5`, `D6`, `D7`.
 Control:
 
 ```text
-relay on luz
-relay off luz
-relay toggle luz
-relay pulse luz 500
+relay on light
+relay off light
+relay toggle light
+relay pulse light 500
 relay status
 ```
 
 Boot behavior:
 
 ```text
-relay boot luz off
-relay boot luz on
-relay boot luz last
+relay boot light off
+relay boot light on
+relay boot light last
 ```
 
 Remove:
 
 ```text
-relay rm luz
+relay rm light
 ```
 
 Save/load is normally automatic, but can be forced:
@@ -419,7 +425,7 @@ timer every 5000 echo tick
 Run once after 10 seconds:
 
 ```text
-timer once 10000 relay off luz
+timer once 10000 relay off light
 ```
 
 Legacy alias:
@@ -438,44 +444,43 @@ timer clear
 
 ## 8. Cron
 
-Cron uses NTP/local time. Sync first:
+Cron uses NTP/local time. Queue a refresh first:
 
 ```text
-ntp sync
+ntp kick
 date
 ```
 
 Daily, old-compatible form:
 
 ```text
-cron add 08:00 relay on riego
+cron add 08:00 relay on pump
 ```
 
 Daily, explicit form:
 
 ```text
-cron add daily 08:15 relay off riego
+cron add daily 08:15 relay off pump
 ```
 
 Friendly relay schedule shortcut:
 
 ```text
-schedule riego 08:00 08:05
+schedule pump 08:00 08:05
 ```
 
 Specific weekdays:
 
 ```text
-cron add dow wed,fri 11:00 sh /home/mantenimiento.sh
-cron add dow mie,vie 11:00 sh /home/mantenimiento.sh
+cron add dow wed,fri 11:00 sh /home/maintenance.sh
+cron add dow wed,fri 11:00 sh /home/maintenance.sh
 ```
 
 Specific date every year:
 
 ```text
-cron add date 05-01 11:00 sh /home/primero_mayo.sh
-cron add date 1-may 11:00 sh /home/primero_mayo.sh
-cron add date 1-mayo 11:00 sh /home/primero_mayo.sh
+cron add date 05-01 11:00 sh /home/may1.sh
+cron add date 1-may 11:00 sh /home/may1.sh
 ```
 
 Manage:
@@ -538,21 +543,21 @@ rule every 10000
 Temperature:
 
 ```text
-rule add temp gt 40 relay on ventilador
-rule add temp lt 38 relay off ventilador
+rule add temp gt 40 relay on fan
+rule add temp lt 38 relay off fan
 ```
 
 Native hysteresis shortcut:
 
 ```text
-rule add temp range 38 40 relay ventilador
+rule add temp range 38 40 relay fan
 rule cooldown 60000
 ```
 
 Friendly climate shortcut:
 
 ```text
-climate temp ventilador 38 40
+climate temp fan 38 40
 ```
 
 Humidity:
@@ -586,25 +591,25 @@ For real actuators, use paired thresholds to create hysteresis, for example ON a
 Scenes group commands:
 
 ```text
-scene add noche relay off luz; relay on seguridad
-scene run noche
+scene add night relay off light; relay on security
+scene run night
 scene list
 ```
 
 Persistent state stores small values:
 
 ```text
-state set riego.last_run 2026-05-01
-state get riego.last_run
+state set pump.last_run 2026-05-01
+state get pump.last_run
 state list
 ```
 
 Digital inputs can trigger commands:
 
 ```text
-input add puerta D2 pullup 50
-input on puerta low scene run alarma
-input on puerta high echo puerta cerrada
+input add door D2 pullup 50
+input on door low scene run alarm
+input on door high echo door closed
 input list
 ```
 
@@ -615,7 +620,7 @@ Scripts are text files with one command per line. Blank lines and lines starting
 Create:
 
 ```text
-write /home/pulse.sh relay pulse luz 500
+write /home/pulse.sh relay pulse light 500
 append /home/pulse.sh date
 ```
 
@@ -698,7 +703,7 @@ log flash on
 log show
 log tail 20
 log status
-logger -p info mantenimiento iniciado
+logger -p info maintenance iniciado
 log save nota manual
 log compact
 log clear
@@ -838,27 +843,27 @@ arm
 ### Create a watering relay
 
 ```text
-relay add riego D1 active_low
-relay boot riego off
-relay pulse riego 1000
+relay add pump D1 active_low
+relay boot pump off
+relay pulse pump 1000
 ```
 
 ### Water daily
 
 ```text
-cron add daily 08:00 relay on riego
-cron add daily 08:05 relay off riego
+cron add daily 08:00 relay on pump
+cron add daily 08:05 relay off pump
 cron list
 ```
 
 ### Fan based on temperature
 
 ```text
-relay add ventilador D5 active_low
+relay add fan D5 active_low
 sensor begin
 rule every 10000
-rule add temp gt 40 relay on ventilador
-rule add temp lt 38 relay off ventilador
+rule add temp gt 40 relay on fan
+rule add temp lt 38 relay off fan
 rule list
 ```
 
@@ -877,5 +882,5 @@ rule add hum lt 60 relay off extractor
 write /home/check.sh date
 append /home/check.sh free
 append /home/check.sh df
-cron add dow mie,vie 11:00 sh /home/check.sh
+cron add dow wed,fri 11:00 sh /home/check.sh
 ```

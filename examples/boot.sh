@@ -2,6 +2,5 @@
 # Copy into /etc/boot.sh or edit it from the web editor.
 
 motd KernelESP ready
-ntp sync
+ntp kick
 log save
-

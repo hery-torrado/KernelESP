@@ -41,7 +41,7 @@ Boot script:
 
 Typical /etc/boot.sh:
 
-  ntp sync
+  ntp kick
   sensor begin
   relay status
 
@@ -63,4 +63,3 @@ Tips:
   - test manually before automation
   - use clear names such as /home/morning_water.sh
   - avoid writing logs every few seconds
-

@@ -1,10 +1,9 @@
 # Mini cron examples.
 
-cron add 08:00 relay on riego
-cron add daily 08:15 relay off riego
-cron add dow mie,vie 11:00 sh /home/mantenimiento.sh
-cron add dow wed,fri 11:00 sh /home/mantenimiento.sh
-cron add date 05-01 11:00 sh /home/primero_mayo.sh
-cron add date 1-may 11:00 sh /home/primero_mayo.sh
+cron add 08:00 relay on pump
+cron add daily 08:15 relay off pump
+cron add dow wed,fri 11:00 sh /home/maintenance.sh
+cron add dow mon,tue,wed,thu,fri 07:30 relay on pump
+cron add date 05-01 11:00 sh /home/may1.sh
+cron add date 1-may 11:00 sh /home/may1.sh
 cron list
-

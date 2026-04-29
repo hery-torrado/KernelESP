@@ -40,6 +40,7 @@ Time:
 
   date
   ntp status
+  ntp kick
   ntp sync
   ntp http
   ntp auto on
@@ -97,7 +98,7 @@ Scripts:
   sh -n /home/test.sh
   boot set /etc/boot.sh
   boot show
-  onboot add ntp sync
+  onboot add ntp kick
   scene add night relay off light; relay on security
   scene run night
 
