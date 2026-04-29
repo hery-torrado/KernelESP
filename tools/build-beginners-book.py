@@ -8,6 +8,7 @@ the firmware or web UI changes.
 
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import wrap
@@ -28,21 +29,25 @@ VERSION = (ROOT / "VERSION").read_text(encoding="utf-8").strip()
 
 
 PALETTE = {
-    "ink": colors.HexColor("#17202A"),
-    "muted": colors.HexColor("#5E6C76"),
-    "paper": colors.HexColor("#F8F3EA"),
-    "cream": colors.HexColor("#FFF9EE"),
-    "blue": colors.HexColor("#1F6FEB"),
-    "teal": colors.HexColor("#11A39A"),
+    "ink": colors.HexColor("#101010"),
+    "muted": colors.HexColor("#57534E"),
+    "paper": colors.HexColor("#F4EBD8"),
+    "cream": colors.HexColor("#FFF7E2"),
+    "blue": colors.HexColor("#0057B8"),
+    "blue_dark": colors.HexColor("#003B7A"),
+    "teal": colors.HexColor("#008C8C"),
     "green": colors.HexColor("#2E7D32"),
-    "orange": colors.HexColor("#F28C28"),
-    "red": colors.HexColor("#C2410C"),
-    "dark": colors.HexColor("#0B1220"),
-    "code": colors.HexColor("#111827"),
-    "line": colors.HexColor("#D9CDBB"),
-    "soft_blue": colors.HexColor("#E9F2FF"),
-    "soft_green": colors.HexColor("#E9F7EF"),
-    "soft_orange": colors.HexColor("#FFF1DE"),
+    "yellow": colors.HexColor("#F5C542"),
+    "orange": colors.HexColor("#E87722"),
+    "red": colors.HexColor("#E53935"),
+    "dark": colors.HexColor("#111111"),
+    "code": colors.HexColor("#151515"),
+    "line": colors.HexColor("#D7C6A3"),
+    "soft_blue": colors.HexColor("#E7F0FF"),
+    "soft_green": colors.HexColor("#E8F5E9"),
+    "soft_orange": colors.HexColor("#FFF0D1"),
+    "soft_red": colors.HexColor("#FFE8E5"),
+    "soft_yellow": colors.HexColor("#FFF5C2"),
 }
 
 
@@ -63,15 +68,27 @@ def clean(text: str) -> str:
     return " ".join(text.strip().split())
 
 
+def slugify(text: str, prefix: str = "") -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", text.lower()).strip("-")
+    if not slug:
+        slug = "section"
+    return f"{prefix}{slug}"
+
+
 class Book:
     def __init__(self, path: Path):
         path.parent.mkdir(parents=True, exist_ok=True)
         self.path = path
         self.c = canvas.Canvas(str(path), pagesize=letter)
+        self.c.setTitle(f"{TITLE}: Beginner's Guide")
+        self.c.setAuthor("KernelESP Project")
+        self.c.setSubject("Beginner book for KernelESP")
+        self.c.setCreator("tools/build-beginners-book.py")
         self.w, self.h = letter
         self.page = 0
         self.part = ""
         self.section = ""
+        self.destinations: set[str] = set()
 
     def save(self) -> None:
         self.c.save()
@@ -79,7 +96,7 @@ class Book:
     def show_page(self) -> None:
         self.c.showPage()
 
-    def new_page(self, section: str = "") -> None:
+    def new_page(self, section: str = "", dest: str = "", outline: str = "", level: int = 0) -> None:
         if self.page:
             self.show_page()
         self.page += 1
@@ -87,7 +104,27 @@ class Book:
             self.section = section
         self.c.setFillColor(PALETTE["cream"])
         self.c.rect(0, 0, self.w, self.h, fill=1, stroke=0)
+        self.draw_bauhaus_page_marks()
         self.draw_header_footer()
+        if dest:
+            self.bookmark(dest, outline or section or dest, level)
+
+    def bookmark(self, dest: str, title: str, level: int = 0, closed: bool = False) -> None:
+        if dest in self.destinations:
+            return
+        self.destinations.add(dest)
+        self.c.bookmarkPage(dest)
+        self.c.addOutlineEntry(title, dest, level=level, closed=closed)
+
+    def link_to(self, dest: str, x1: float, y1: float, x2: float, y2: float) -> None:
+        self.c.linkRect(
+            "",
+            dest,
+            (x1, y1, x2, y2),
+            relative=0,
+            thickness=0,
+            color=PALETTE["blue"],
+        )
 
     def draw_header_footer(self) -> None:
         c = self.c
@@ -102,31 +139,83 @@ class Book:
             c.drawCentredString(self.w / 2, self.h - 0.42 * inch, self.section[:70])
         c.drawRightString(self.w - 0.72 * inch, 0.28 * inch, str(self.page))
 
+    def draw_bauhaus_page_marks(self) -> None:
+        c = self.c
+        c.saveState()
+        c.setFillAlpha(0.08)
+        c.setFillColor(PALETTE["blue"])
+        c.rect(0, self.h - 1.2 * inch, 1.85 * inch, 1.2 * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["red"])
+        c.circle(self.w - 0.45 * inch, self.h - 0.95 * inch, 0.42 * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["yellow"])
+        self.triangle(self.w - 1.2 * inch, 0.0, self.w, 0.0, self.w, 0.8 * inch, fill=1, stroke=0)
+        c.setFillAlpha(1)
+        c.setStrokeColor(PALETTE["line"])
+        c.setLineWidth(0.35)
+        for i in range(6):
+            x = 0.68 * inch + i * 0.22 * inch
+            c.line(x, self.h - 0.72 * inch, x, self.h - 0.63 * inch)
+        c.restoreState()
+
+    def triangle(self, x1: float, y1: float, x2: float, y2: float, x3: float, y3: float, fill: int = 1, stroke: int = 0) -> None:
+        path = self.c.beginPath()
+        path.moveTo(x1, y1)
+        path.lineTo(x2, y2)
+        path.lineTo(x3, y3)
+        path.close()
+        self.c.drawPath(path, fill=fill, stroke=stroke)
+
     def cover(self) -> None:
         self.page += 1
         c = self.c
-        c.setFillColor(PALETTE["dark"])
+        self.bookmark("cover", "Cover", 0)
+        c.setFillColor(PALETTE["paper"])
         c.rect(0, 0, self.w, self.h, fill=1, stroke=0)
-        for i, color in enumerate([PALETTE["blue"], PALETTE["teal"], PALETTE["orange"]]):
-            c.setFillColor(color)
-            c.setFillAlpha(0.18)
-            c.circle((1.2 + i * 2.2) * inch, (8.3 - i * 0.75) * inch, (1.9 - i * 0.25) * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["blue"])
+        c.rect(0, 7.2 * inch, 2.2 * inch, 3.8 * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["red"])
+        c.circle(5.7 * inch, 8.35 * inch, 1.25 * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["yellow"])
+        self.triangle(4.25 * inch, 6.6 * inch, 6.95 * inch, 6.6 * inch, 6.95 * inch, 3.9 * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["dark"])
+        c.rect(0.78 * inch, 6.36 * inch, 4.05 * inch, 0.18 * inch, fill=1, stroke=0)
+        c.rect(0.78 * inch, 6.02 * inch, 2.92 * inch, 0.18 * inch, fill=1, stroke=0)
+        c.rect(0.78 * inch, 5.68 * inch, 3.45 * inch, 0.18 * inch, fill=1, stroke=0)
+        for i in range(8):
+            c.setStrokeColor(PALETTE["dark"])
+            c.setLineWidth(0.8)
+            x = 0.8 * inch + i * 0.32 * inch
+            c.line(x, 0.48 * inch, x, 1.24 * inch)
+        panel_y = 3.04 * inch
+        panel_h = 2.24 * inch
+        c.setFillColor(PALETTE["cream"])
+        c.rect(0.78 * inch, panel_y, 5.1 * inch, panel_h, fill=1, stroke=0)
+        c.setStrokeColor(PALETTE["dark"])
+        c.setLineWidth(2.5)
+        c.rect(0.78 * inch, panel_y, 5.1 * inch, panel_h, fill=0, stroke=1)
+        c.setFillColor(PALETTE["blue_dark"])
+        c.setFillAlpha(0.13)
+        c.circle(1.75 * inch, 4.92 * inch, 1.08 * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["red"])
+        c.circle(4.95 * inch, 3.42 * inch, 0.52 * inch, fill=1, stroke=0)
         c.setFillAlpha(1)
-        self.draw_chip(3.5 * inch, 4.55 * inch, 1.15, dark=True)
-        c.setFillColor(colors.white)
-        c.setFont("Helvetica-Bold", 48)
-        c.drawCentredString(self.w / 2, 3.15 * inch, TITLE)
-        c.setFont("Helvetica", 17)
-        c.setFillColor(colors.HexColor("#D9E6FF"))
-        c.drawCentredString(self.w / 2, 2.72 * inch, SUBTITLE)
-        c.setFont("Helvetica", 10)
-        c.setFillColor(colors.HexColor("#B9C7D6"))
-        c.drawCentredString(self.w / 2, 1.2 * inch, f"Version {VERSION} - Modern beginner edition")
+        self.draw_chip(3.35 * inch, 4.18 * inch, 0.78, dark=True)
+        c.setFillColor(PALETTE["dark"])
+        c.setFont("Helvetica-Bold", 46)
+        c.drawString(0.95 * inch, 2.08 * inch, TITLE)
+        c.setFont("Helvetica-Bold", 14)
+        c.setFillColor(PALETTE["blue_dark"])
+        c.drawString(0.98 * inch, 1.68 * inch, "A Beginner's Guide to a Tiny UNIX")
+        c.setFillColor(PALETTE["dark"])
+        c.drawString(0.98 * inch, 1.45 * inch, "for the ESP8266")
+        c.setFont("Helvetica", 9.5)
+        c.setFillColor(PALETTE["muted"])
+        c.drawString(0.98 * inch, 1.05 * inch, f"Version {VERSION} - Bauhaus navigation edition")
         c.setFont("Helvetica-Bold", 9)
-        c.drawCentredString(self.w / 2, 0.92 * inch, "Serial shell - Web UI - Automation - Hardware - Recovery - Real projects")
+        c.drawString(0.98 * inch, 0.79 * inch, "Serial shell - Web UI - Automation - Hardware - Recovery - Real projects")
 
     def title_page(self) -> None:
-        self.new_page("Welcome")
+        self.new_page("Welcome", dest="welcome", outline="Welcome", level=0)
         self.h1("KernelESP Beginner's Book", 1.2 * inch)
         self.p(
             "This book is written for people who are new to microcontrollers, new to "
@@ -145,7 +234,7 @@ class Book:
         self.diagram_system_map(1.1 * inch, 2.0 * inch, 4.25 * inch, 2.25 * inch)
 
     def copyright_page(self) -> None:
-        self.new_page("About This Book")
+        self.new_page("About This Book", dest="about", outline="About This Book", level=0)
         self.h2("About this edition")
         self.p(
             "This generated edition is part of the KernelESP repository. It is not "
@@ -170,24 +259,48 @@ class Book:
             ]
         )
 
-    def toc(self, parts: list[tuple[str, list[str]]]) -> None:
-        self.new_page("Table of Contents")
+    def toc(self, parts: list[tuple[str, list[str]]], part_dests: dict[int, str], topic_dests: dict[str, str]) -> None:
+        self.new_page("Table of Contents", dest="toc", outline="Table of Contents", level=0)
         self.h1("Table of Contents", 0.95 * inch)
+        self.p("This index is clickable in PDF viewers that support internal links. Use it like a control panel for the book.", size=9.2, leading=12.2, width=80)
         y = self.y
         for idx, (part, chapters) in enumerate(parts, start=1):
             if y < 1.25 * inch:
                 self.new_page("Table of Contents")
                 y = self.y
-            self.c.setFillColor(PALETTE["blue"])
+            self.c.setFillColor([PALETTE["blue"], PALETTE["red"], PALETTE["yellow"]][(idx - 1) % 3])
+            self.c.rect(0.9 * inch, y - 0.04 * inch, 0.13 * inch, 0.13 * inch, fill=1, stroke=0)
+            self.c.setFillColor(PALETTE["blue_dark"])
             self.c.setFont("Helvetica-Bold", 13)
-            self.c.drawString(0.9 * inch, y, f"Part {idx}: {part}")
+            label = f"Part {idx}: {part}"
+            self.c.drawString(1.12 * inch, y, label)
+            self.link_to(part_dests[idx], 1.08 * inch, y - 0.03 * inch, self.w - 0.88 * inch, y + 0.16 * inch)
             y -= 0.22 * inch
             self.c.setFillColor(PALETTE["ink"])
             self.c.setFont("Helvetica", 9.2)
             for chapter in chapters:
-                self.c.drawString(1.08 * inch, y, chapter)
+                self.c.setFillColor(PALETTE["line"])
+                self.c.rect(1.12 * inch, y + 0.045 * inch, 0.18 * inch, 0.015 * inch, fill=1, stroke=0)
+                self.c.setFillColor(PALETTE["ink"])
+                self.c.drawString(1.38 * inch, y, chapter)
+                self.c.setFillColor(PALETTE["blue"])
+                self.c.setFont("Helvetica-Bold", 7.2)
+                self.c.drawRightString(self.w - 0.9 * inch, y, "JUMP")
+                self.link_to(topic_dests[chapter], 1.34 * inch, y - 0.03 * inch, self.w - 0.86 * inch, y + 0.15 * inch)
+                self.c.setFont("Helvetica", 9.2)
                 y -= 0.16 * inch
             y -= 0.08 * inch
+        for label, dest in [("Part 11: Command Atlas", "part-11-command-atlas"), ("Final Notes", "final-notes")]:
+            if y < 1.25 * inch:
+                self.new_page("Table of Contents")
+                y = self.y
+            self.c.setFillColor(PALETTE["dark"])
+            self.c.rect(0.9 * inch, y - 0.04 * inch, 0.13 * inch, 0.13 * inch, fill=1, stroke=0)
+            self.c.setFillColor(PALETTE["blue_dark"])
+            self.c.setFont("Helvetica-Bold", 13)
+            self.c.drawString(1.12 * inch, y, label)
+            self.link_to(dest, 1.08 * inch, y - 0.03 * inch, self.w - 0.88 * inch, y + 0.16 * inch)
+            y -= 0.24 * inch
         self.y = y
 
     @property
@@ -201,21 +314,31 @@ class Book:
     def h1(self, text: str, y: float | None = None) -> None:
         if y is not None:
             self.y = self.h - y
+        self.c.setFillColor(PALETTE["red"])
+        self.c.rect(0.85 * inch, self.y + 0.06 * inch, 0.18 * inch, 0.18 * inch, fill=1, stroke=0)
+        self.c.setFillColor(PALETTE["yellow"])
+        self.c.circle(1.18 * inch, self.y + 0.15 * inch, 0.09 * inch, fill=1, stroke=0)
         self.c.setFillColor(PALETTE["ink"])
         self.c.setFont("Helvetica-Bold", 24)
-        self.c.drawString(0.85 * inch, self.y, text)
+        self.c.drawString(1.42 * inch, self.y, text)
+        self.c.setStrokeColor(PALETTE["blue"])
+        self.c.setLineWidth(2)
+        self.c.line(1.42 * inch, self.y - 0.08 * inch, min(self.w - 0.85 * inch, 1.42 * inch + len(text) * 0.13 * inch), self.y - 0.08 * inch)
         self.y -= 0.38 * inch
 
     def h2(self, text: str) -> None:
         self.c.setFillColor(PALETTE["blue"])
+        self.c.rect(0.85 * inch, self.y + 0.02 * inch, 0.12 * inch, 0.12 * inch, fill=1, stroke=0)
         self.c.setFont("Helvetica-Bold", 15)
-        self.c.drawString(0.85 * inch, self.y, text)
+        self.c.drawString(1.05 * inch, self.y, text)
         self.y -= 0.27 * inch
 
     def h3(self, text: str) -> None:
+        self.c.setFillColor(PALETTE["yellow"])
+        self.triangle(0.86 * inch, self.y + 0.02 * inch, 0.98 * inch, self.y + 0.02 * inch, 0.92 * inch, self.y + 0.16 * inch)
         self.c.setFillColor(PALETTE["ink"])
         self.c.setFont("Helvetica-Bold", 11)
-        self.c.drawString(0.9 * inch, self.y, text)
+        self.c.drawString(1.08 * inch, self.y, text)
         self.y -= 0.22 * inch
 
     def p(self, text: str, size: float = 10.2, leading: float = 13.2, x: float = 0.9 * inch, width: int = 86) -> None:
@@ -280,26 +403,32 @@ class Book:
             yy -= 0.16 * inch
         self.y = y - 0.16 * inch
 
-    def part_page(self, number: int, title: str, promise: str, diagram: str) -> None:
-        self.new_page(f"Part {number}: {title}")
+    def part_page(self, number: int, title: str, promise: str, diagram: str, dest: str = "") -> None:
+        self.new_page(f"Part {number}: {title}", dest=dest, outline=f"Part {number}: {title}", level=0)
         self.c.setFillColor(PALETTE["dark"])
-        self.c.roundRect(0.85 * inch, 6.65 * inch, self.w - 1.7 * inch, 2.25 * inch, 18, fill=1, stroke=0)
-        self.c.setFillColor(PALETTE["orange"])
+        self.c.rect(0.85 * inch, 6.65 * inch, self.w - 1.7 * inch, 2.25 * inch, fill=1, stroke=0)
+        self.c.setFillColor(PALETTE["blue"])
+        self.c.rect(0.85 * inch, 6.65 * inch, 0.55 * inch, 2.25 * inch, fill=1, stroke=0)
+        self.c.setFillColor(PALETTE["red"])
+        self.c.circle(self.w - 1.25 * inch, 8.35 * inch, 0.33 * inch, fill=1, stroke=0)
+        self.c.setFillColor(PALETTE["yellow"])
+        self.triangle(self.w - 1.15 * inch, 6.65 * inch, self.w - 0.85 * inch, 6.65 * inch, self.w - 0.85 * inch, 6.95 * inch)
+        self.c.setFillColor(PALETTE["yellow"])
         self.c.setFont("Helvetica-Bold", 12)
-        self.c.drawString(1.15 * inch, 8.35 * inch, f"PART {number}")
+        self.c.drawString(1.62 * inch, 8.35 * inch, f"PART {number}")
         self.c.setFillColor(colors.white)
-        self.c.setFont("Helvetica-Bold", 25)
-        self.c.drawString(1.15 * inch, 7.85 * inch, title)
+        self.c.setFont("Helvetica-Bold", 27)
+        self.c.drawString(1.62 * inch, 7.85 * inch, title)
         self.c.setFillColor(colors.HexColor("#D9E6FF"))
         self.c.setFont("Helvetica", 12)
         for idx, line in enumerate(wrap(clean(promise), 68)):
-            self.c.drawString(1.15 * inch, (7.45 - idx * 0.22) * inch, line)
+            self.c.drawString(1.62 * inch, (7.45 - idx * 0.22) * inch, line)
         self.y = 6.05 * inch
         self.draw_named_diagram(diagram, 1.15 * inch, 2.15 * inch, 4.2 * inch, 2.7 * inch)
         self.callout("Beginner promise", "You do not have to memorize this part. Run the commands, observe the output, and build confidence one small success at a time.", PALETTE["soft_green"])
 
-    def topic_pair(self, idx: int, topic: Topic) -> None:
-        self.new_page(topic.title)
+    def topic_pair(self, idx: int, topic: Topic, dest: str = "") -> None:
+        self.new_page(topic.title, dest=dest, outline=f"{idx}. {topic.title}", level=1)
         self.h1(f"{idx}. {topic.title}", 0.95 * inch)
         self.p(topic.goal)
         self.draw_named_diagram(topic.diagram, 1.05 * inch, 4.55 * inch, 4.6 * inch, 1.85 * inch)
@@ -310,7 +439,8 @@ class Book:
         self.h3("Common beginner mistake")
         self.p(topic.mistake, size=9.5, leading=12.5)
 
-        self.new_page(topic.title + " - Lab")
+        lab_dest = f"{dest}-lab" if dest else ""
+        self.new_page(topic.title + " - Lab", dest=lab_dest, outline=f"Lab {idx}: {topic.title}", level=2)
         self.h1(f"Lab {idx}: {topic.title}", 0.95 * inch)
         self.p(
             "The goal of this lab is not speed. Type the commands slowly, read the "
@@ -329,8 +459,8 @@ class Book:
             self.callout("Project step", topic.project, PALETTE["soft_green"])
         self.callout("Try this next", topic.try_this, PALETTE["soft_orange"])
 
-    def command_atlas_page(self, title: str, commands: list[str], explanation: str) -> None:
-        self.new_page("Command Atlas")
+    def command_atlas_page(self, title: str, commands: list[str], explanation: str, dest: str = "") -> None:
+        self.new_page("Command Atlas", dest=dest, outline=title, level=1)
         self.h1(title, 0.95 * inch)
         self.p(explanation)
         columns = 2
@@ -390,27 +520,56 @@ class Book:
         diagrams.get(name, self.diagram_chip)(x, y, w, h)
 
     def diagram_frame(self, x: float, y: float, w: float, h: float, title: str) -> None:
-        self.c.setFillColor(colors.white)
-        self.c.setStrokeColor(PALETTE["line"])
-        self.c.roundRect(x, y, w, h, 12, fill=1, stroke=1)
-        self.c.setFillColor(PALETTE["muted"])
-        self.c.setFont("Helvetica-Bold", 8)
-        self.c.drawString(x + 0.14 * inch, y + h - 0.22 * inch, title)
+        c = self.c
+        c.saveState()
+        c.setFillColor(colors.white)
+        c.rect(x, y, w, h, fill=1, stroke=0)
+        c.setStrokeColor(PALETTE["dark"])
+        c.setLineWidth(1.4)
+        c.rect(x, y, w, h, fill=0, stroke=1)
+        c.setStrokeColor(PALETTE["line"])
+        c.setLineWidth(0.25)
+        step = 0.22 * inch
+        gx = x + step
+        while gx < x + w:
+            c.line(gx, y, gx, y + h)
+            gx += step
+        gy = y + step
+        while gy < y + h:
+            c.line(x, gy, x + w, gy)
+            gy += step
+        c.setFillColor(PALETTE["blue"])
+        c.rect(x, y + h - 0.22 * inch, 0.7 * inch, 0.22 * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["red"])
+        c.circle(x + w - 0.22 * inch, y + h - 0.21 * inch, 0.13 * inch, fill=1, stroke=0)
+        c.setFillColor(PALETTE["yellow"])
+        self.triangle(x + w - 0.58 * inch, y, x + w, y, x + w, y + 0.58 * inch)
+        c.setFillColor(PALETTE["dark"])
+        c.setFont("Helvetica-Bold", 8.5)
+        c.drawString(x + 0.82 * inch, y + h - 0.18 * inch, title.upper())
+        c.restoreState()
 
     def box(self, x: float, y: float, w: float, h: float, text: str, fill=PALETTE["soft_blue"]) -> None:
+        self.c.setFillColor(colors.HexColor("#000000"))
+        self.c.setFillAlpha(0.12)
+        self.c.rect(x + 3, y - 3, w, h, fill=1, stroke=0)
+        self.c.setFillAlpha(1)
         self.c.setFillColor(fill)
-        self.c.roundRect(x, y, w, h, 8, fill=1, stroke=0)
+        self.c.rect(x, y, w, h, fill=1, stroke=0)
+        self.c.setStrokeColor(PALETTE["dark"])
+        self.c.setLineWidth(0.8)
+        self.c.rect(x, y, w, h, fill=0, stroke=1)
         self.c.setFillColor(PALETTE["ink"])
-        self.c.setFont("Helvetica-Bold", 8.2)
+        self.c.setFont("Helvetica-Bold", 8.0)
         for idx, line in enumerate(wrap(text, 16)):
             self.c.drawCentredString(x + w / 2, y + h / 2 + (0.06 - idx * 0.14) * inch, line)
 
     def arrow(self, x1: float, y1: float, x2: float, y2: float) -> None:
-        self.c.setStrokeColor(PALETTE["muted"])
-        self.c.setLineWidth(1.1)
+        self.c.setStrokeColor(PALETTE["dark"])
+        self.c.setLineWidth(1.35)
         self.c.line(x1, y1, x2, y2)
-        self.c.setFillColor(PALETTE["muted"])
-        self.c.circle(x2, y2, 2.0, fill=1, stroke=0)
+        self.c.setFillColor(PALETTE["red"])
+        self.c.circle(x2, y2, 2.8, fill=1, stroke=0)
 
     def diagram_chip(self, x: float, y: float, w: float, h: float) -> None:
         self.diagram_frame(x, y, w, h, "Tiny computer")
@@ -655,11 +814,21 @@ COMMAND_ATLAS = [
 
 def build() -> int:
     book = Book(OUT)
+    part_dests = {
+        idx: slugify(f"part-{idx}-{part_title}")
+        for idx, (part_title, _chapters) in enumerate(PARTS, start=1)
+    }
+    topic_dests: dict[str, str] = {}
+    chapter_idx = 1
+    for _part_title, chapters in PARTS:
+        for chapter in chapters:
+            topic_dests[chapter] = slugify(f"topic-{chapter_idx:03d}-{chapter}")
+            chapter_idx += 1
     book.cover()
     book.title_page()
     book.copyright_page()
-    book.toc(PARTS)
-    book.new_page("Learning Map")
+    book.toc(PARTS, part_dests, topic_dests)
+    book.new_page("Learning Map", dest="learning-map", outline="Learning Map", level=0)
     book.h1("The Learning Map", 0.95 * inch)
     book.p("Every chapter pair follows the same rhythm: first a plain-English explanation, then a lab page with commands, checks and a safe next step.")
     book.diagram_system_map(1.0 * inch, 4.9 * inch, 4.6 * inch, 2.0 * inch)
@@ -675,16 +844,16 @@ def build() -> int:
     topic_by_title = {t.title: t for t in TOPICS}
     for part_idx, (part_title, chapters) in enumerate(PARTS, start=1):
         diagram = ["system", "files", "wifi", "relay", "sensor", "automation", "web", "irrigation", "recovery", "api"][part_idx - 1]
-        book.part_page(part_idx, part_title, f"This part covers {', '.join(chapters[:3])} and builds toward practical confidence.", diagram)
+        book.part_page(part_idx, part_title, f"This part covers {', '.join(chapters[:3])} and builds toward practical confidence.", diagram, dest=part_dests[part_idx])
         for chapter in chapters:
-            book.topic_pair(idx, topic_by_title[chapter])
+            book.topic_pair(idx, topic_by_title[chapter], dest=topic_dests[chapter])
             idx += 1
 
-    book.part_page(11, "Command Atlas", "A compact appendix for commands you will use again and again.", "system")
+    book.part_page(11, "Command Atlas", "A compact appendix for commands you will use again and again.", "system", dest="part-11-command-atlas")
     for title, commands, explanation in COMMAND_ATLAS:
-        book.command_atlas_page(title, commands, explanation)
+        book.command_atlas_page(title, commands, explanation, dest=slugify(f"atlas-{title}"))
 
-    book.new_page("Final Notes")
+    book.new_page("Final Notes", dest="final-notes", outline="Final Notes", level=0)
     book.h1("Final Notes", 0.95 * inch)
     book.p("KernelESP is deliberately small. That is its charm and its discipline. The board will reward careful habits: name things well, keep actions short, use timers, log important decisions, back up before experiments and keep a serial rescue path close.")
     book.callout("The beginner's rule", "If you can inspect it, explain it and undo it, you are ready to automate it.", PALETTE["soft_green"])
