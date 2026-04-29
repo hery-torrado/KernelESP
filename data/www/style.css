@@ -28,6 +28,7 @@ form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
 form p{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 form input,form select,form p input,form p select{flex:1 1 180px}
 .pinPick{display:flex;gap:6px;flex:1 1 220px}.pinPick select{flex:1 1 120px}.pinPick input{display:none;flex:1 1 80px}.pinPick.custom input{display:block}
+.clockPick{display:flex;align-items:center;gap:4px;flex:0 1 190px}.clockPick select{flex:1 1 78px;min-width:70px}.clockSep{font-weight:700;color:var(--muted)}
 textarea{min-height:430px;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;resize:vertical}
 pre{background:var(--code);color:var(--codeText);border-radius:7px;padding:13px;overflow:auto;white-space:pre-wrap;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .row,.relay{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid var(--line);padding:10px 0}

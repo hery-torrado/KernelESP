@@ -7,7 +7,7 @@ function addMailUi(){
 <section class="card"><h2>Send Mail</h2><form id="mailTestForm"><input name="message" value="Manual test from KernelESP"><button>Test Email</button></form><form id="mailHealthForm"><input name="subject" value="KernelESP daily health"><button>Send Health Report</button></form><pre class="formOut"></pre></section>
 </div>
 <div class="grid">
-<section class="card"><h2>Daily Health Email</h2><form id="mailDailyForm"><input name="time" type="text" inputmode="numeric" pattern="^([01][0-9]|2[0-3]):[0-5][0-9]$" placeholder="HH:MM" value="08:00" data-clock><input name="subject" value="KernelESP daily health"><button>Add Daily Job</button></form><div class="quick"><button data-cmd="crontab -l">Cron Entries</button></div><pre class="formOut"></pre></section>
+<section class="card"><h2>Daily Health Email</h2><form id="mailDailyForm">${window.kespClockField("time","08:00")}<input name="subject" value="KernelESP daily health"><button>Add Daily Job</button></form><div class="quick"><button data-cmd="crontab -l">Cron Entries</button></div><pre class="formOut"></pre></section>
 <section class="card"><h2>Sensor Email Rule</h2><form id="mailRuleForm"><select name="metric"><option value="temp">temperature</option><option value="hum">humidity</option><option value="press">pressure</option></select><select name="op"><option value="gt">above</option><option value="lt">below</option></select><input name="threshold" value="40"><input name="cooldown" value="300000"><input name="subject" value="KernelESP sensor alert"><input name="message" value="Sensor threshold reached."><button>Add Rule</button></form><pre class="formOut"></pre></section>
 </div>
 <div class="grid">
@@ -17,5 +17,5 @@ function addMailUi(){
 </section>`);
 }
 addMailUi();
-import("/app13.js?v=3");
+import("/app13.js?v=4");
 })();

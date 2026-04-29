@@ -5,5 +5,5 @@ document.addEventListener("click",async e=>{let P=window.kespPro;if(!P)return;if
 document.addEventListener("submit",async e=>{if(e.target.id=="boardForm"){e.preventDefault();await window.kespPro.saveProfile()}});
 document.addEventListener("change",e=>{if(e.target.id=="boardProfile")window.kespPro.paintProfile(e.target.value)});
 addPro();
-import("/app12.js?v=3");
+import("/app12.js?v=4");
 })();
