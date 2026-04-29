@@ -22,6 +22,6 @@ $("#tabs")?.insertAdjacentHTML("beforeend",`<button class="tab" data-tab="autov"
 $("#panels")?.insertAdjacentHTML("beforeend",`<section class="panel" id="autov"><section class="card"><h2>Automation View</h2><p><button id="autoRefresh" type="button">Refresh</button></p><div class="autoGrid"><article><h2>Relays</h2><div id="autoRelays"></div></article><article><h2>Rules</h2><div id="autoRules"></div></article><article><h2>Cron</h2><div id="autoCron"></div></article><article><h2>Timers</h2><div id="autoTimers"></div></article><article><h2>Inputs</h2><div id="autoInputs"></div></article><article><h2>Affected relays</h2><div id="autoAffected"></div></article></div></section></section><section class="panel" id="diagv"><section class="card"><h2>Diagnostics</h2><p><button id="runDiag" type="button">Run diagnostics</button></p><div id="diagOut" class="diagGrid"></div></section></section>`);
 }
 document.addEventListener("click",async e=>{if(e.target.id=="autoRefresh")await autoView();if(e.target.id=="runDiag")await runDiag();let t=e.target.closest(".tab");if(t?.dataset.tab=="autov")setTimeout(autoView,80)},true);
-setInterval(()=>{if($("#autov")?.classList.contains("active"))autoView()},12000);
+setInterval(()=>{if($("#autov")?.classList.contains("active"))autoView()},60000);
 addAutoDiag();
 })();

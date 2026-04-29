@@ -11,6 +11,6 @@ function fill(t,f){syncClockFields(f);new FormData(f).forEach((v,n)=>t=t.split("
 async function relayAction(n,s){let ms=Number($("#pulseMs")?.value||500),r=await fetch(apiUrl(`/api/relay?name=${encodeURIComponent(n)}&state=${encodeURIComponent(s)}&ms=${Math.max(50,Math.min(60000,ms))}`),{cache:"no-store",credentials:"same-origin"});if(!r.ok)throw Error("relay HTTP "+r.status);await refreshAll(false)}
 function makeOut(c){let o=$(".formOut",c);if(!o){c.insertAdjacentHTML("beforeend",`<pre class="formOut"></pre>`);o=$(".formOut",c);if(window.kespEnhancePre)window.kespEnhancePre()}return o}
 function outFor(x){let c=x.closest(".card");return c?makeOut(c):$(".panel.active .formOut")||$("#cmdOut")}
-window.kespBoot=function(){keepKey();setupUi();setupMore();refreshAll(true);setTimeout(()=>refreshAll(false),2500);setInterval(()=>refreshAll(true),12000)}
+window.kespBoot=function(){keepKey();setupUi();setupMore();refreshAll(true);setTimeout(()=>refreshAll(false),2500);setInterval(()=>refreshAll(true),60000)}
 window.kespReady=1;
 if(window.kespStart)window.kespStart();

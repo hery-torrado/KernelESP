@@ -16,6 +16,6 @@ function enhancePre(){document.querySelectorAll(".card").forEach(c=>{if(c.datase
 window.kespEnhancePre=enhancePre;
 $(".actions")?.insertAdjacentHTML("afterbegin",`<span id="netDot" class="netdot wait">checking</span><button id="retroBtn" type="button">Retro</button>`);
 $(".toolbar")?.insertAdjacentHTML("afterend",`<section class="card topOutCard hide"><h2>Output</h2><pre id="topOut"></pre></section>`);
-theme(localStorage.getItem(PKEY)=="1");conn("wait");enhancePre();setInterval(enhancePre,2500);
+theme(localStorage.getItem(PKEY)=="1");conn("wait");enhancePre();setInterval(enhancePre,15000);
 document.addEventListener("click",async e=>{let top=e.target.closest(".toolbar [data-cmd]");if(top){e.preventDefault();e.stopImmediatePropagation();let c=top.dataset.cmd,o=$("#topOut"),box=$(".topOutCard");if(o&&box){box.classList.remove("hide");o.textContent="$ "+c+"\\n"+await apiCmd(c);await refreshAll(false)}return}if(e.target.id=="retroBtn")theme(!document.body.classList.contains("retro"));let b=e.target.closest(".copyBtn");if(b){let ps=$$("pre",b.closest(".card")).map(p=>p.textContent).join("\\n\\n");copyText(ps);b.textContent="copied";setTimeout(()=>b.textContent="copy",900)}},true);
 })();
