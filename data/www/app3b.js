@@ -2,7 +2,7 @@ let liveRun=0;
 function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 async function apiJsonTimeout(p,ms=4500){let c=new AbortController(),t=setTimeout(()=>c.abort(),ms);try{let r=await fetch(apiUrl(p),{cache:"no-store",credentials:"same-origin",signal:c.signal});if(!r.ok)throw Error("HTTP "+r.status);return await r.json()}finally{clearTimeout(t)}}
 async function apiCmdLive(c){try{let d=await apiJsonTimeout("/api/cmd?c="+encodeURIComponent(c));return d.output||"(no output)"}catch(e){return"timeout or error: "+e.message}}
-function refreshLive(){let a=$(".panel.active");if(!a)return Promise.resolve();let run=++liveRun,jobs=[];$$("[data-live]",a).forEach(e=>{let c=e.dataset.live;e.textContent="loading "+c+"...";jobs.push(async()=>{let t=await apiCmdLive(c);if(run==liveRun&&document.contains(e))e.textContent=t})});let s=$("#sensor");if(s)jobs.push(async()=>{s.textContent="loading sensor...";try{let j=await apiJsonTimeout("/api/sensor");if(run==liveRun&&document.contains(s))s.textContent=j.ok?JSON.stringify(j,null,2):"sensor: not found"}catch(e){if(run==liveRun&&document.contains(s))s.textContent="sensor: timeout or error "+e.message}});(async()=>{for(let j of jobs){if(run!=liveRun)return;await j();await sleep(40)}})();return Promise.resolve()}
+function refreshLive(){let a=$(".panel.active");if(!a)return Promise.resolve();let run=++liveRun,jobs=[];$$("[data-live]",a).forEach(e=>{let c=e.dataset.live;e.textContent="loading "+c+"...";jobs.push(async()=>{let t=await apiCmdLive(c);if(run==liveRun&&document.contains(e))e.textContent=t})});let s=$("#sensor",a);if(s)jobs.push(async()=>{s.textContent="loading sensor...";try{let j=await apiJsonTimeout("/api/sensor");if(run==liveRun&&document.contains(s))s.textContent=j.ok?JSON.stringify(j,null,2):"sensor: not found"}catch(e){if(run==liveRun&&document.contains(s))s.textContent="sensor: timeout or error "+e.message}});(async()=>{for(let j of jobs){if(run!=liveRun)return;await j();await sleep(40)}})();return Promise.resolve()}
 async function refreshAll(live=true){try{await refreshStatus();if(live)refreshLive()}catch(e){$("#summary").textContent="offline or unauthorized: "+e.message}}
 function keepKey(){if(!key)return;$$("nav a").forEach(a=>{let u=new URL(a.href,location.href);u.searchParams.set("key",key);a.href=u.pathname+u.search})}
 function validateClockFields(f){syncClockFields(f);for(let e of $$("[data-clock]",f)){let v=String(e.value||"").trim();e.value=v;e.setCustomValidity(clockOk(v)?"":"Use 24-hour time as HH:MM, for example 08:00 or 23:30.");if(!clockOk(v)){e.reportValidity();return false}}return true}
@@ -13,8 +13,9 @@ function makeOut(c){let o=$(".formOut",c);if(!o){c.insertAdjacentHTML("beforeend
 function outFor(x){let c=x.closest(".card");return c?makeOut(c):$(".panel.active .formOut")||$("#cmdOut")}
 let refreshTimer=0;
 function activePanelId(){let p=$(".panel.active");return p?p.id:"dash"}
-function autoRefreshMs(){return activePanelId()=="net"?300000:60000}
-function scheduleRefresh(){clearTimeout(refreshTimer);refreshTimer=setTimeout(async()=>{await refreshAll(true);scheduleRefresh()},autoRefreshMs())}
+const refreshPolicies={dash:[60000,1],proc:[120000,1],net:[300000,1],cron:[300000,1],sys:[300000,1],logs:[300000,1],mail:[60000,0],autov:[60000,0],diagv:[60000,0],builder:[60000,0],hist:[60000,0],ops:[60000,0],scripts:[60000,0],pro:[60000,0]};
+function autoRefreshPolicy(){let p=refreshPolicies[activePanelId()]||[60000,0];return{ms:p[0],live:!!p[1]}}
+function scheduleRefresh(){clearTimeout(refreshTimer);let p=autoRefreshPolicy();refreshTimer=setTimeout(async()=>{await refreshAll(p.live);scheduleRefresh()},p.ms)}
 window.kespScheduleRefresh=scheduleRefresh;
 window.kespBoot=function(){keepKey();setupUi();setupMore();refreshAll(true);setTimeout(()=>refreshAll(false),2500);scheduleRefresh()}
 window.kespReady=1;
