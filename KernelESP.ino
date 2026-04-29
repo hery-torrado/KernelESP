@@ -323,6 +323,8 @@ String sensorJson();
 String sensorText();
 void cmdTimeNet(String args[], int argc);
 void cmdMail(String args[], int argc);
+void cmdIf(String args[], int argc);
+void cmdWhen(String args[], int argc);
 bool ntpSync(bool waitForSync);
 void compactLogIfNeeded();
 void loadRules();
@@ -332,6 +334,7 @@ void processCrons();
 void loadInputs();
 void processInputs();
 void processHealthGuard();
+bool compareFloat(float left, uint8_t op, float right);
 void beginWifiConnect(const String& ssid, const String& password);
 String wifiStatusText();
 String wifiNetText();
@@ -430,6 +433,15 @@ String joinArgs(String args[], int argc, int start) {
     out += args[i];
   }
   return out;
+}
+
+String safeNameToken(String token) {
+  String out;
+  for (uint16_t i = 0; i < token.length(); i++) {
+    char c = token[i];
+    out += isAlphaNumeric(c) ? c : '_';
+  }
+  return out.length() ? out : "pin";
 }
 
 void ensureSystemDirs() {
@@ -881,6 +893,7 @@ bool isKnownCommand(const String& cmd) {
     "help", "man", "clear", "echo", "history", "alias", "unalias", "env", "printenv", "set", "setenv", "unset", "export",
     "arm", "disarm", "armed",
     "true", "false", "test", "[", "basename", "dirname", "repeat", "watch",
+    "if", "when",
     "id", "groups", "who", "w", "sync",
     "uname", "uptime", "free", "heap", "mem", "ps", "top", "pgrep", "pidof", "kill", "dmesg", "reboot", "resetreason",
     "chip", "flash", "sysinfo", "pwd", "cd", "ls", "cat", "head", "tail", "grep", "find", "stat",
@@ -909,12 +922,14 @@ void printHelpTopic(String topic) {
   else if (topic == "wc") Serial.println(F("wc <file> - count lines words bytes"));
   else if (topic == "du") Serial.println(F("du [path] - show file/directory byte usage"));
   else if (topic == "cron") Serial.println(F("cron add HH:MM|daily|dow|date ...; cron list|rm|clear"));
-  else if (topic == "rule") Serial.println(F("rule add temp|hum|press gt|lt|range ...; cooldown|every|list"));
+  else if (topic == "rule") Serial.println(F("rule add temp|hum|press =|!=|<|>|<=|>=|range ...; cooldown|every|list"));
   else if (topic == "timer") Serial.println(F("timer every|once <ms> <command>; timer list|rm|clear"));
   else if (topic == "relay") Serial.println(F("relay add|rm|on|off|toggle|pulse|status|boot"));
   else if (topic == "scene") Serial.println(F("scene add <name> <cmd[;cmd]>; scene run|list|show|rm|clear"));
   else if (topic == "state") Serial.println(F("state set|get|rm|list|clear persistent key values"));
   else if (topic == "input") Serial.println(F("input add <name> <pin> pullup|float; input on <name> high|low|change <cmd>"));
+  else if (topic == "if") Serial.println(F("if (temp >= 40 && time < 10:00) relay on fan; ops: == != < > <= >= && || !"));
+  else if (topic == "when") Serial.println(F("when input|pin <name|pin> high|low|pulse if (<expr>) <cmd>"));
   else if (topic == "health") Serial.println(F("health [guard <min_heap>|off] - system summary and heap guard"));
   else if (topic == "diag") Serial.println(F("diag - read-only diagnostic bundle for support"));
   else if (topic == "board") Serial.println(F("board list|show|pins|use <profile> - board profile and pin guidance"));
@@ -955,7 +970,7 @@ void cmdHelp(String args[], int argc) {
     return;
   }
   Serial.println(F("Commands:"));
-  Serial.println(F("  help clear echo history alias unalias env printenv set setenv unset true false test arm disarm armed"));
+  Serial.println(F("  help clear echo history alias unalias env printenv set setenv unset true false test if when arm disarm armed"));
   Serial.println(F("  id groups who w sync uname uptime free heap mem ps top pgrep pidof kill dmesg reboot resetreason chip flash sysinfo"));
   Serial.println(F("  pwd cd ls cat head tail grep find wc du stat basename dirname touch write append rm mkdir rmdir cp mv df fsformat"));
   Serial.println(F("  mount which whoami hostname jobs motd health diag service board"));
@@ -2729,12 +2744,22 @@ uint8_t ruleOpFromToken(String token) {
   if (token == "gt" || token == ">" || token == "above") return 1;
   if (token == "lt" || token == "<" || token == "below") return 2;
   if (token == "range" || token == "band" || token == "hyst" || token == "hysteresis") return 3;
+  if (token == "=" || token == "==" || token == "eq" || token == "is") return 4;
+  if (token == "!=" || token == "=!" || token == "<>" || token == "ne" || token == "not") return 5;
+  if (token == "<=" || token == "=<" || token == "le") return 6;
+  if (token == ">=" || token == "=>" || token == "ge") return 7;
   return 0;
 }
 
 String ruleOpName(uint8_t op) {
   if (op == 3) return "range";
-  return op == 1 ? "gt" : "lt";
+  if (op == 1) return "gt";
+  if (op == 2) return "lt";
+  if (op == 4) return "=";
+  if (op == 5) return "!=";
+  if (op == 6) return "<=";
+  if (op == 7) return ">=";
+  return "?";
 }
 
 void saveRules() {
@@ -2866,7 +2891,7 @@ void processRules() {
       }
       continue;
     }
-    bool match = rules[i].op == 1 ? value > rules[i].threshold : value < rules[i].threshold;
+    bool match = compareFloat(value, rules[i].op == 1 ? 4 : (rules[i].op == 2 ? 3 : (rules[i].op == 4 ? 1 : (rules[i].op == 5 ? 2 : (rules[i].op == 6 ? 5 : 6)))), rules[i].threshold);
     if (match) {
       rules[i].lastRunMs = now;
       Serial.print(F("[rule "));
@@ -2886,11 +2911,11 @@ void cmdRule(String args[], int argc) {
   String sub = args[1];
   sub.toLowerCase();
   if (sub == "add") {
-    if (argc < 6) { Serial.println(F("usage: rule add temp|hum|press gt|lt <value> <cmd> | range <low> <high> relay <name>")); return; }
+    if (argc < 6) { Serial.println(F("usage: rule add temp|hum|press <op> <value> <cmd> | range <low> <high> relay <name>")); return; }
     uint8_t metric = ruleMetricFromToken(args[2]);
     uint8_t op = ruleOpFromToken(args[3]);
     if (!metric) { Serial.println(F("rule: metric must be temp, hum, or press")); return; }
-    if (!op) { Serial.println(F("rule: op must be gt, lt, or range")); return; }
+    if (!op) { Serial.println(F("rule: op must be = != < > <= >= gt lt or range")); return; }
     if (op == 3 && argc < 8) { Serial.println(F("usage: rule add <metric> range <low> <high> relay <name>|<on_cmd> ; off optional via rule off")); return; }
     for (uint8_t i = 0; i < MAX_RULES; i++) {
       if (rules[i].active) continue;
@@ -3849,7 +3874,7 @@ int findPipeOutsideQuotes(const String& line) {
     if ((c == '"' || c == '\'') && (!quoted || quoteChar == c)) {
       quoted = !quoted;
       quoteChar = quoted ? c : '\0';
-    } else if (c == '|' && !quoted) {
+    } else if (c == '|' && !quoted && (i + 1 >= line.length() || line[i + 1] != '|') && (i == 0 || line[i - 1] != '|')) {
       return i;
     }
   }
@@ -3872,7 +3897,7 @@ int splitPipeline(String line, String parts[], int maxParts) {
       quoted = !quoted;
       quoteChar = quoted ? c : '\0';
       current += c;
-    } else if (c == '|' && !quoted) {
+    } else if (c == '|' && !quoted && (i + 1 >= line.length() || line[i + 1] != '|') && (i == 0 || line[i - 1] != '|')) {
       current.trim();
       if (!current.length()) return -1;
       if (count >= maxParts) return -2;
@@ -5973,6 +5998,542 @@ void cmdTest(String args[], int argc) {
   Serial.println(ok ? F("true") : F("false"));
 }
 
+uint8_t condOpFromToken(String token) {
+  token.toLowerCase();
+  if (token == "=" || token == "==" || token == "eq" || token == "is") return 1;
+  if (token == "!=" || token == "=!" || token == "<>" || token == "ne" || token == "not") return 2;
+  if (token == "<" || token == "lt" || token == "before") return 3;
+  if (token == ">" || token == "gt" || token == "after") return 4;
+  if (token == "<=" || token == "=<" || token == "le") return 5;
+  if (token == ">=" || token == "=>" || token == "ge") return 6;
+  return 0;
+}
+
+bool compareFloat(float left, uint8_t op, float right) {
+  if (op == 1) return fabs(left - right) < 0.001f;
+  if (op == 2) return fabs(left - right) >= 0.001f;
+  if (op == 3) return left < right;
+  if (op == 4) return left > right;
+  if (op == 5) return left <= right;
+  if (op == 6) return left >= right;
+  return false;
+}
+
+bool compareStringValue(String left, uint8_t op, String right) {
+  if (op == 1) return left == right;
+  if (op == 2) return left != right;
+  return false;
+}
+
+bool currentMinuteOfDay(int& minuteOfDay) {
+  time_t now = time(nullptr);
+  if (now < 1600000000) return false;
+  struct tm* tm = localtime(&now);
+  if (!tm) return false;
+  minuteOfDay = tm->tm_hour * 60 + tm->tm_min;
+  return true;
+}
+
+bool isNumericLiteral(String token) {
+  token.trim();
+  if (!token.length()) return false;
+  if (token[0] == '-') token = token.substring(1);
+  if (!token.length()) return false;
+  bool digit = false;
+  bool dot = false;
+  for (uint16_t i = 0; i < token.length(); i++) {
+    char c = token[i];
+    if (c == '.' && !dot) {
+      dot = true;
+    } else if (isDigit(c)) {
+      digit = true;
+    } else {
+      return false;
+    }
+  }
+  return digit;
+}
+
+bool conditionValue(String token, float& value, bool& numeric, String& text) {
+  token.toLowerCase();
+  numeric = true;
+  uint8_t metric = ruleMetricFromToken(token);
+  if (metric) {
+    SensorReading reading = readBme();
+    return ruleMetricValue(reading, metric, value);
+  }
+  if (token == "time" || token == "clock") {
+    int minutes;
+    if (!currentMinuteOfDay(minutes)) return false;
+    value = minutes;
+    return true;
+  }
+  if (token == "armed") {
+    numeric = false;
+    text = automationsArmed ? "on" : "off";
+    return true;
+  }
+  if (token == "wifi") {
+    numeric = false;
+    text = WiFi.status() == WL_CONNECTED ? "connected" : "disconnected";
+    return true;
+  }
+  if (isNumericLiteral(token)) {
+    value = token.toFloat();
+    return true;
+  }
+  numeric = false;
+  text = token;
+  return true;
+}
+
+bool conditionRightValue(const String& lhs, String token, float& value, bool& numeric, String& text) {
+  String left = lhs;
+  left.toLowerCase();
+  if (left == "time" || left == "clock") {
+    uint8_t h, m;
+    if (!parseClockTime(token, h, m)) return false;
+    numeric = true;
+    value = h * 60 + m;
+    return true;
+  }
+  return conditionValue(token, value, numeric, text);
+}
+
+bool evalCondition(String lhs, String opText, String rhs) {
+  uint8_t op = condOpFromToken(opText);
+  if (!op) return false;
+  float leftValue = 0, rightValue = 0;
+  bool leftNumeric = true, rightNumeric = true;
+  String leftText, rightText;
+  if (!conditionValue(lhs, leftValue, leftNumeric, leftText)) return false;
+  if (!conditionRightValue(lhs, rhs, rightValue, rightNumeric, rightText)) return false;
+  if (leftNumeric && rightNumeric) return compareFloat(leftValue, op, rightValue);
+  return compareStringValue(leftText, op, rightText);
+}
+
+bool isWordChar(char c) {
+  return isAlphaNumeric(c) || c == '_';
+}
+
+String lowerCopy(String value) {
+  value.toLowerCase();
+  return value;
+}
+
+String unquoteValue(String token) {
+  token.trim();
+  if (token.length() >= 2) {
+    char first = token[0];
+    char last = token[token.length() - 1];
+    if ((first == '"' || first == '\'') && first == last) return token.substring(1, token.length() - 1);
+  }
+  return token;
+}
+
+bool truthyConditionValue(String token) {
+  float value = 0;
+  bool numeric = true;
+  String text;
+  if (!conditionValue(unquoteValue(token), value, numeric, text)) return false;
+  if (numeric) return fabs(value) >= 0.001f;
+  text.toLowerCase();
+  return text == "on" || text == "true" || text == "yes" || text == "connected" || text == "high" || text == "1";
+}
+
+class ConditionParser {
+public:
+  ConditionParser(const String& expression) : text(expression), pos(0), failed(false) {}
+
+  bool parse(bool& result) {
+    result = parseOr();
+    skipSpaces();
+    if (pos < (int)text.length()) failed = true;
+    return !failed;
+  }
+
+private:
+  String text;
+  int pos;
+  bool failed;
+
+  void skipSpaces() {
+    while (pos < (int)text.length() && isSpace(text[pos])) pos++;
+  }
+
+  bool matchChar(char expected) {
+    skipSpaces();
+    if (pos < (int)text.length() && text[pos] == expected) {
+      pos++;
+      return true;
+    }
+    return false;
+  }
+
+  bool matchOp(const char* op) {
+    skipSpaces();
+    int len = strlen(op);
+    if (text.substring(pos, pos + len) == op) {
+      pos += len;
+      return true;
+    }
+    return false;
+  }
+
+  bool matchWord(const char* word) {
+    skipSpaces();
+    int len = strlen(word);
+    if (pos + len > (int)text.length()) return false;
+    String part = text.substring(pos, pos + len);
+    part.toLowerCase();
+    if (part != word) return false;
+    if (pos > 0 && isWordChar(text[pos - 1])) return false;
+    if (pos + len < (int)text.length() && isWordChar(text[pos + len])) return false;
+    pos += len;
+    return true;
+  }
+
+  String readQuoted() {
+    char quote = text[pos++];
+    String out;
+    while (pos < (int)text.length()) {
+      char c = text[pos++];
+      if (c == quote) break;
+      out += c;
+    }
+    return out;
+  }
+
+  String readOperand() {
+    skipSpaces();
+    if (pos >= (int)text.length()) return "";
+    if (text[pos] == '"' || text[pos] == '\'') return readQuoted();
+    String out;
+    while (pos < (int)text.length()) {
+      char c = text[pos];
+      if (isSpace(c) || c == '(' || c == ')' || c == '&' || c == '|' || c == '<' || c == '>' || c == '=' || c == '!') break;
+      out += c;
+      pos++;
+    }
+    out.trim();
+    return out;
+  }
+
+  String readComparisonOp() {
+    skipSpaces();
+    if (pos >= (int)text.length()) return "";
+    const char* ops[] = {"<=", ">=", "==", "!=", "=!", "<>", "<", ">", "="};
+    for (uint8_t i = 0; i < sizeof(ops) / sizeof(ops[0]); i++) {
+      int len = strlen(ops[i]);
+      if (text.substring(pos, pos + len) == ops[i]) {
+        pos += len;
+        return String(ops[i]);
+      }
+    }
+    int start = pos;
+    String word = readOperand();
+    String lw = lowerCopy(word);
+    if (condOpFromToken(lw)) return word;
+    pos = start;
+    return "";
+  }
+
+  bool parseComparison() {
+    String left = readOperand();
+    if (!left.length()) {
+      failed = true;
+      return false;
+    }
+    String op = readComparisonOp();
+    if (!op.length()) return truthyConditionValue(left);
+    String right = readOperand();
+    if (!right.length()) {
+      failed = true;
+      return false;
+    }
+    return evalCondition(unquoteValue(left), op, unquoteValue(right));
+  }
+
+  bool parseUnary() {
+    skipSpaces();
+    if (matchOp("!")) return !parseUnary();
+    if (matchWord("not")) return !parseUnary();
+    if (matchChar('(')) {
+      bool value = parseOr();
+      if (!matchChar(')')) failed = true;
+      return value;
+    }
+    return parseComparison();
+  }
+
+  bool parseAnd() {
+    bool value = parseUnary();
+    while (!failed) {
+      if (matchOp("&&") || matchWord("and")) value = parseUnary() && value;
+      else break;
+      yield();
+    }
+    return value;
+  }
+
+  bool parseOr() {
+    bool value = parseAnd();
+    while (!failed) {
+      if (matchOp("||") || matchWord("or")) value = parseAnd() || value;
+      else break;
+      yield();
+    }
+    return value;
+  }
+};
+
+bool findIfCommandSeparator(const String& expr, int& sepStart, int& sepEnd) {
+  bool quoted = false;
+  char quoteChar = '\0';
+  int depth = 0;
+  for (int i = 0; i < (int)expr.length(); i++) {
+    char c = expr[i];
+    if ((c == '"' || c == '\'') && (!quoted || quoteChar == c)) {
+      quoted = !quoted;
+      quoteChar = quoted ? c : '\0';
+      continue;
+    }
+    if (quoted) continue;
+    if (c == '(') depth++;
+    else if (c == ')' && depth > 0) depth--;
+    if (depth != 0) continue;
+    if ((i == 0 || !isWordChar(expr[i - 1])) && (expr.substring(i, i + 4) == "then") && (i + 4 >= (int)expr.length() || !isWordChar(expr[i + 4]))) {
+      sepStart = i;
+      sepEnd = i + 4;
+      return true;
+    }
+    if ((i == 0 || !isWordChar(expr[i - 1])) && (expr.substring(i, i + 2) == "do") && (i + 2 >= (int)expr.length() || !isWordChar(expr[i + 2]))) {
+      sepStart = i;
+      sepEnd = i + 2;
+      return true;
+    }
+  }
+  return false;
+}
+
+bool extractParenIfExpression(String expr, String& condition, String& command) {
+  expr.trim();
+  if (!expr.startsWith("(")) return false;
+  bool quoted = false;
+  char quoteChar = '\0';
+  int depth = 0;
+  for (int i = 0; i < (int)expr.length(); i++) {
+    char c = expr[i];
+    if ((c == '"' || c == '\'') && (!quoted || quoteChar == c)) {
+      quoted = !quoted;
+      quoteChar = quoted ? c : '\0';
+      continue;
+    }
+    if (quoted) continue;
+    if (c == '(') depth++;
+    else if (c == ')') {
+      depth--;
+      if (depth == 0) {
+        condition = expr.substring(1, i);
+        command = expr.substring(i + 1);
+        command.trim();
+        String cmdLower = lowerCopy(command);
+        if (cmdLower.startsWith("then ")) command = command.substring(5);
+        else if (cmdLower == "then") command = "";
+        else if (cmdLower.startsWith("do ")) command = command.substring(3);
+        else if (cmdLower == "do") command = "";
+        command.trim();
+        if (command.startsWith("{") && command.endsWith("}") && command.length() >= 2) {
+          command = command.substring(1, command.length() - 1);
+          command.trim();
+        }
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool looksLikeCCondition(const String& expr) {
+  return expr.indexOf("&&") >= 0 || expr.indexOf("||") >= 0 || expr.indexOf('!') >= 0 || expr.indexOf('(') >= 0;
+}
+
+bool evalCCondition(String condition, bool quiet, bool& ok) {
+  condition.trim();
+  ConditionParser parser(condition);
+  if (!parser.parse(ok)) {
+    if (!quiet) Serial.println(F("if: bad C-like condition"));
+    return false;
+  }
+  return true;
+}
+
+bool runCIfExpression(String expr, bool quiet) {
+  String condition, command;
+  if (!extractParenIfExpression(expr, condition, command)) {
+    int sepStart = -1, sepEnd = -1;
+    if (!findIfCommandSeparator(expr, sepStart, sepEnd)) return false;
+    condition = expr.substring(0, sepStart);
+    command = expr.substring(sepEnd);
+    condition.trim();
+    command.trim();
+  }
+  if (!condition.length()) {
+    if (!quiet) Serial.println(F("if: missing condition"));
+    return true;
+  }
+  if (!command.length()) {
+    if (!quiet) Serial.println(F("if: missing command"));
+    return true;
+  }
+  bool ok = false;
+  if (!evalCCondition(condition, quiet, ok)) return true;
+  if (ok) executeLine(command);
+  else if (!quiet) Serial.println(F("false"));
+  return true;
+}
+
+bool runIfExpression(String expr, bool quiet) {
+  expr.trim();
+  if (expr.startsWith("(") || looksLikeCCondition(expr)) {
+    if (runCIfExpression(expr, quiet)) return true;
+  }
+
+  String parts[24];
+  int count = splitArgs(expr, parts, 24);
+  if (count < 5) {
+    if (!quiet) Serial.println(F("if: usage if (temp >= 40 && time < 10:00) relay on fan"));
+    return false;
+  }
+  int pos = 0;
+  bool ok = true;
+  while (pos < count) {
+    String marker = parts[pos];
+    marker.toLowerCase();
+    if (marker == "then") { pos++; break; }
+    if (marker == "if" || marker == "and") pos++;
+    if (pos + 2 >= count) {
+      if (!quiet) Serial.println(F("if: bad condition"));
+      return false;
+    }
+    ok = ok && evalCondition(parts[pos], parts[pos + 1], parts[pos + 2]);
+    pos += 3;
+    if (pos < count) {
+      String next = parts[pos];
+      next.toLowerCase();
+      if (next == "then") { pos++; break; }
+      if (next != "if" && next != "and" && next != "&&") {
+        if (!quiet) Serial.println(F("if: expected if, and, &&, or then"));
+        return false;
+      }
+    }
+    yield();
+  }
+  if (pos >= count) {
+    if (!quiet) Serial.println(F("if: missing then command"));
+    return false;
+  }
+  String command = joinArgs(parts, count, pos);
+  if (!command.length()) {
+    if (!quiet) Serial.println(F("if: missing command"));
+    return false;
+  }
+  if (ok) executeLine(command);
+  else if (!quiet) Serial.println(F("false"));
+  return ok;
+}
+
+void cmdIf(String args[], int argc) {
+  if (argc < 2) {
+    Serial.println(F("usage: if (temp >= 40 && time < 10:00) relay on fan"));
+    return;
+  }
+  runIfExpression(joinArgs(args, argc, 1), false);
+}
+
+String inputEdgeName(String edge) {
+  edge.toLowerCase();
+  if (edge == "pulse" || edge == "change") return "change";
+  if (edge == "high" || edge == "on" || edge == "rising") return "high";
+  if (edge == "low" || edge == "off" || edge == "falling") return "low";
+  return "";
+}
+
+int ensurePinInput(const String& pinToken, const String& modeToken) {
+  String name = "pin_" + safeNameToken(pinToken);
+  int idx = findInput(name);
+  if (idx >= 0) return idx;
+  int pin;
+  if (!resolvePin(pinToken, pin)) return -1;
+  bool pullup = modeToken != "float";
+  for (uint8_t i = 0; i < MAX_INPUTS; i++) {
+    if (inputs[i].active) continue;
+    inputs[i] = InputWatcher();
+    inputs[i].name = name;
+    inputs[i].pin = pin;
+    inputs[i].pullup = pullup;
+    inputs[i].debounceMs = 50;
+    pinMode(pin, pullup ? INPUT_PULLUP : INPUT);
+    inputs[i].stableState = digitalRead(pin);
+    inputs[i].lastRead = inputs[i].stableState;
+    inputs[i].lastChangeMs = millis();
+    inputs[i].active = true;
+    return i;
+  }
+  Serial.println(F("input: table full"));
+  return -1;
+}
+
+void setInputEdgeCommand(uint8_t idx, const String& edge, const String& command) {
+  if (edge == "high") inputs[idx].highCommand = command;
+  else if (edge == "low") inputs[idx].lowCommand = command;
+  else inputs[idx].changeCommand = command;
+}
+
+void cmdWhen(String args[], int argc) {
+  String parts[24];
+  int count = splitArgs(joinArgs(args, argc, 1), parts, 24);
+  if (count < 7) {
+    Serial.println(F("usage: when input <name> high|low|pulse if (<expr>) <cmd>"));
+    Serial.println(F("   or: when pin <pin> high|low|pulse [pullup|float] if (<expr>) <cmd>"));
+    return;
+  }
+  String target = parts[0];
+  target.toLowerCase();
+  int idx = -1;
+  int pos = 3;
+  if (target == "input") {
+    idx = findInput(parts[1]);
+    if (idx < 0) { Serial.println(F("input: not found")); return; }
+  } else if (target == "pin") {
+    String mode = "pullup";
+    if (count > 3) {
+      String maybeMode = parts[3];
+      maybeMode.toLowerCase();
+      if (maybeMode == "pullup" || maybeMode == "float") {
+        mode = maybeMode;
+        pos = 4;
+      }
+    }
+    idx = ensurePinInput(parts[1], mode);
+    if (idx < 0) return;
+  } else {
+    Serial.println(F("when: target must be input or pin"));
+    return;
+  }
+  String edge = inputEdgeName(parts[2]);
+  if (!edge.length()) { Serial.println(F("when: edge must be high, low, pulse, or change")); return; }
+  if (pos >= count || parts[pos] != "if") { Serial.println(F("when: expected if condition")); return; }
+  String command = joinArgs(parts, count, pos);
+  setInputEdgeCommand(idx, edge, command);
+  saveInputs();
+  Serial.print(F("when "));
+  Serial.print(inputs[idx].name);
+  Serial.print(' ');
+  Serial.print(edge);
+  Serial.println(F(" OK"));
+}
+
 void cmdRepeat(String args[], int argc) {
   if (argc < 3) { Serial.println(F("usage: repeat <count> <command>")); return; }
   int count = args[1].toInt();
@@ -6514,6 +7075,8 @@ void executeLine(String line) {
   else if (cmd == "true") Serial.println(F("true"));
   else if (cmd == "false") Serial.println(F("false"));
   else if (cmd == "test" || cmd == "[") cmdTest(args, argc);
+  else if (cmd == "if") cmdIf(args, argc);
+  else if (cmd == "when") cmdWhen(args, argc);
   else if (cmd == "basename" || cmd == "dirname") cmdPathTool(cmd, args, argc);
   else if (cmd == "repeat") cmdRepeat(args, argc);
   else if (cmd == "watch") cmdWatch(args, argc);

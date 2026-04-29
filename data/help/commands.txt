@@ -43,6 +43,13 @@ Time:
   ntp kick       non-blocking refresh for scripts/cron
   ntp sync       blocking manual sync for testing
   ntp http
+
+Conditional automation:
+
+  if (temp >= 40 && time < 10:00) relay on fan
+  if ((temp > 40 || hum > 70) && wifi == connected) mail health "KernelESP health"
+  if (!(armed == on)) echo automations_paused
+  when pin D2 pulse if (temp > 40 && time < 10:00) relay on fan
   ntp auto on
   ntp fallback on
   ntp server pool.ntp.org time.nist.gov

@@ -1003,10 +1003,79 @@ timer clear
 
 ## Rules
 
-### `rule add temp|hum|press gt|lt <value> <command>`
+### `if (<expression>) <command>`
+
+Runs a command only when the expression is true. The recommended form is a
+small C-like expression with parentheses, `&&`, `||` and `!`. Conditions
+support sensor values, time, automation state and Wi-Fi state.
+
+Operators:
+
+```text
+== = != =! < > <= >=
+&& || !
+eq ne lt gt le ge before after
+```
+
+Examples:
+
+```text
+if (temp >= 40 && time < 10:00) relay on fan
+if ((temp > 40 || hum > 70) && wifi == connected) mail health "KernelESP health"
+if (!(armed == on)) echo automations_paused
+```
+
+`then` is optional after a parenthesized expression:
+
+```text
+if (wifi == connected) then echo online
+```
+
+Legacy scripts remain supported:
+
+```text
+if temp >= 40 if time < 10:00 then relay on fan
+if armed = on and wifi = connected then mail health "KernelESP health"
+```
+
+Supported left-hand values:
+
+```text
+temp temperature
+hum humidity
+press pressure
+time clock
+armed
+wifi
+```
+
+### `when input|pin ... if (<expression>) <command>`
+
+Attaches a conditional command to a digital input event. `pulse` is an alias
+for `change`.
+
+Use an existing input:
+
+```text
+input add button D2 pullup 50
+when input button pulse if (temp > 40 && time < 10:00) relay on fan
+```
+
+Or let KernelESP create a simple input watcher for a pin:
+
+```text
+when pin D2 pulse if (temp > 40 && time < 10:00) relay on fan
+when pin D5 high float if (time >= 20:00) mail send default "Input" "D5 is high"
+```
+
+The generated action is stored as a normal input command, so it persists in
+`/etc/inputs.txt` and is visible with `input list`.
+
+### `rule add temp|hum|press gt|lt|<|>|<=|>=|=|!= <value> <command>`
 
 ```text
 rule add temp gt 40 relay on fan
+rule add temp > 40 relay on fan
 rule add temp lt 38 relay off fan
 rule add hum gt 70 relay on extractor
 rule add press lt 980 echo pressure_low

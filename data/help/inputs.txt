@@ -12,6 +12,14 @@ Run a command when the input goes low:
 
   input on button low relay toggle light
 
+Run a command only when extra conditions are true:
+
+  when input button pulse if (temp > 40 && time < 10:00) relay on fan
+
+Create a pin watcher and conditional action in one command:
+
+  when pin D2 pulse if (temp >= 40 && time < 10:00) relay on fan
+
 Run a script:
 
   write /home/power-lost.sh mail send default "KernelESP power alert" "Power flow has stopped."
@@ -26,4 +34,3 @@ Read and remove:
 
 Use pullup for buttons wired to GND. If the board loses power at the same time
 as the monitored circuit, it needs a UPS or battery to send the alert.
-

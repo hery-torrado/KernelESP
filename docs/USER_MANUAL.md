@@ -613,6 +613,16 @@ input on door high echo door closed
 input list
 ```
 
+Conditional actions can use a compact C-like expression:
+
+```text
+if (temp >= 40 && time < 10:00) relay on fan
+when pin D2 pulse if (temp >= 40 && time < 10:00) relay on fan
+```
+
+Supported logical operators are `&&`, `||` and `!`. Legacy forms such as
+`if temp >= 40 if time < 10:00 then relay on fan` still work.
+
 ## 11. Scripts
 
 Scripts are text files with one command per line. Blank lines and lines starting with `#` are ignored.

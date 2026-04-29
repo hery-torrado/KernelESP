@@ -146,7 +146,43 @@ rule add temp range 38 40 relay fan
 rule cooldown 60000
 ```
 
-## 10. Humidity Control
+## 10. Conditional Input Trigger
+
+Use `when` when an input event should only act if extra conditions are true.
+The recommended syntax is intentionally close to C, but much smaller: use
+parentheses, `&&`, `||` and `!` around simple comparisons.
+
+Example: when a pulse is detected on D2, turn on the fan only if temperature is
+above 40 C and it is before 10:00.
+
+```text
+relay add fan D5 active_low
+sensor begin
+when pin D2 pulse if (temp > 40 && time < 10:00) relay on fan
+input list
+```
+
+Equivalent form using a named input:
+
+```text
+input add button D2 pullup 50
+when input button pulse if (temp >= 40 && time < 10:00) relay on fan
+```
+
+Supported operators:
+
+```text
+== = != =! < > <= >= && || !
+```
+
+`pulse` means any stable input change after debounce. For buttons wired to GND,
+use `low` if you only want the press event:
+
+```text
+when pin D2 low if (time < 10:00) relay pulse valve1 5000
+```
+
+## 11. Humidity Control
 
 Requires BME280.
 
@@ -162,7 +198,7 @@ Behavior:
 - Above 70% humidity: extractor on.
 - Below 60% humidity: extractor off.
 
-## 11. Pressure Alarm
+## 12. Pressure Alarm
 
 ```text
 rule add press lt 980 echo pressure_low
@@ -175,7 +211,7 @@ To persist an alarm in a file:
 rule add press lt 980 append /var/log/kernel.log pressure_low
 ```
 
-## 12. Sensor Setup at Boot
+## 13. Sensor Setup at Boot
 
 Edit `/etc/boot.sh`:
 
