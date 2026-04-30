@@ -17,6 +17,39 @@ api_cmd() {
     --data-urlencode "c=$cmd"
 }
 
+expect_output() {
+  cmd="$1"
+  out="$2"
+  pattern="$3"
+  if ! printf '%s' "$out" | grep -Eq "$pattern"; then
+    echo "unexpected output for: $cmd" >&2
+    echo "expected pattern: $pattern" >&2
+    echo "$out" >&2
+    exit 1
+  fi
+}
+
+expected_pattern() {
+  case "$1" in
+    version) printf 'KernelESP' ;;
+    health) printf 'wifi:' ;;
+    free) printf 'free heap:' ;;
+    df) printf 'free:' ;;
+    "wifi status") printf 'ssid:' ;;
+    date) printf 'epoch:' ;;
+    "relay status") printf 'relay|no relays' ;;
+    "rule list") printf 'rules|no rules|every:' ;;
+    "crontab -l") printf 'daily|no cron|every:' ;;
+    "timer list") printf 'timers|no timers' ;;
+    "input list") printf 'inputs|no inputs' ;;
+    "mail status") printf 'mail.smtp.host' ;;
+    "health | grep wifi") printf 'wifi:' ;;
+    board) printf 'profile:' ;;
+    diag) printf '== health ==' ;;
+    *) printf '.' ;;
+  esac
+}
+
 printf 'HTTP smoke test: %s\n' "$BASE"
 
 "$CURL" -sS --fail --max-time 15 "$BASE/api/status?key=$KEY" | grep -q '"name":"KernelESP"'
@@ -59,6 +92,7 @@ printf '%s\n' "$commands" | while IFS= read -r cmd; do
   case "$out" in
     *'"output":""'*) echo "empty output for: $cmd" >&2; exit 1 ;;
   esac
+  expect_output "$cmd" "$out" "$(expected_pattern "$cmd")"
   printf 'ok: %s\n' "$cmd"
 done
 

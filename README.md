@@ -71,6 +71,7 @@ KernelESP/
   THIRD_PARTY_NOTICES.md     Third-party source-code notices
   CONTRIBUTING.md            Contribution rules and verification workflow
   SECURITY.md                Security assumptions and reporting guidance
+  CHANGELOG.md               Release history
   docs/
     USER_MANUAL.md           End-user manual and command examples
     COMMAND_REFERENCE.md     Full command reference
@@ -82,6 +83,10 @@ KernelESP/
     HARDWARE.md              ESP8266 pins, relays, sensors and memory notes
     GITHUB_RELEASE_CHECKLIST.md Pre-publish checklist for GitHub
     SCREENSHOTS.md           Screenshot gallery and architecture diagrams
+    PROJECT_STATE.md         Current build, upload and continuation notes
+  book/
+    KernelESP_Beginners_Book.pdf Beginner-friendly illustrated PDF guide
+    assets/cover-hero.png    Book cover image source
   examples/
     boot.sh                  Example boot script
     relay_pulse.sh           Example relay script
@@ -92,18 +97,24 @@ KernelESP/
     index.html               Live UI application shell
     app.js                   Live UI JavaScript core, served from LittleFS
     app2.js                  Live UI panel builder
-    app3.js                  Live UI actions and refresh loop
-    app4.js                  Live UI automation builder and browser command history
+    app3.js                  Live UI cron/system/log panel builder
+    app3b.js                 Live UI refresh loop, API timeout and output routing
+    app3c.js                 Live UI form handlers and clock validation
+    app3d.js                 Live UI status cards, alerts and heap chart
+    app4.js                  Live UI relay rendering and command buttons
+    app4b.js                 Live UI automation builder and browser command history
     app5.js                  Live UI network configuration panel
     app6.js                  Live UI polish: online indicator, retro theme, copy buttons
     app7.js                  Live UI ops panel, templates and console keyboard helpers
     app8.js                  Live UI script editor improvements
+    app8b.js                 Live UI file browser and script save/run helpers
     app9.js                  Live UI automation view and diagnostics
     app10.js                 Live UI professional panel logic
     app11.js                 Live UI professional panel markup/styles
     app12.js                 Live UI mail alerts panel markup
     app13.js                 Live UI mail alerts actions and workflow builders
     style.css                Current web stylesheet for LittleFS
+    style2.css               Additional responsive Live UI styling
   tools/
     compile.sh               Compile with arduino-cli
     upload.sh                Upload firmware to the ESP8266
@@ -116,6 +127,8 @@ KernelESP/
     diagnostic-bundle.sh     Export a support bundle from a running ESP
     ota-preflight.sh         Check update readiness without enabling OTA
     serial-monitor.sh        Open a serial monitor
+    build-beginners-book.py  Generate the PDF book
+    requirements-book.txt    Python dependencies for the PDF book
   .github/workflows/         Lightweight static checks for pull requests
 ```
 
@@ -221,9 +234,9 @@ SKIP_COMPILE=1 tools/verify.sh
 Last verified build for `0.10.0`:
 
 ```text
-RAM global: 42532 / 80192 bytes, 53%
+RAM global: 42756 / 80192 bytes, 53%
 IRAM:       62567 / 65536 bytes, 95%
-Flash app: 473824 / 1048576 bytes, 45%
+Flash app: 488872 / 1048576 bytes, 46%
 LittleFS:  about 1.00 MB free after web/help assets on the tested 4 MB module
 Runtime heap: around 30-33 KB free in normal web use
 ```

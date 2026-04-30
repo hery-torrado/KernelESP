@@ -93,9 +93,9 @@ If upload fails with `Device not configured`, wait a few seconds and retry.
 ## Last Verified Compile Size
 
 ```text
-RAM global: 42532 / 80192 bytes, 53%
+RAM global: 42756 / 80192 bytes, 53%
 IRAM:       62567 / 65536 bytes, 95%
-Flash app: 473824 / 1048576 bytes, 45%
+Flash app: 488872 / 1048576 bytes, 46%
 ```
 
 ## Last Verified Runtime State
@@ -114,8 +114,8 @@ health | tee /home/health.txt
 ```
 
 The UI is served from LittleFS static files
-(`/www/index.html`, `/www/app.js` through `/www/app13.js`, `/www/style.css`) so
-large interface changes do not increase IRAM.
+(`/www/index.html`, split `app*.js`, `i18n*.js`, `/www/style.css` and
+`/www/style2.css`) so large interface changes do not increase IRAM.
 
 The web Help section has English, Spanish and Portuguese topic files, including
 a dedicated `email` topic for SMTP alert workflows and a `mail` topic for the
@@ -156,6 +156,7 @@ examples/
 tools/
 data/www/
 data/help/
+book/
 .github/workflows/
 ```
 
