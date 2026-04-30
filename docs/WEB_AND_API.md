@@ -55,6 +55,11 @@ The UI accepts either:
 
 After login, the firmware redirects back to the page that requested authentication, for example `/ui`.
 
+Use `/logout` or the `Logout` link in the top navigation to clear the `KESP`
+browser cookie and return to the login page. If a page was opened with
+`?key=<key>` in the address bar, close that tab or remove the query parameter
+after logging out.
+
 Example:
 
 ```text

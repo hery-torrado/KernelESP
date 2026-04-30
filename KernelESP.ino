@@ -3920,6 +3920,7 @@ bool webAuthOk() {
   }
   bool badKey = webServer.hasArg("key") && webServer.arg("key").length();
   if (badKey) webAuthRegisterFailure();
+  bool loggedOut = webServer.arg("logout") == "1";
   String html = F("<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'><title>KernelESP Login</title>");
   html += F("<link rel='stylesheet' href='/style.css'><style>");
   html += F(".loginWrap{min-height:100vh;display:grid;place-items:center;padding:18px;background:#eef2f6}");
@@ -3929,7 +3930,8 @@ bool webAuthOk() {
   html += F(".loginNote{border-radius:7px;padding:9px 10px;margin:10px 0;background:#ebf2ff;color:#244f96}.loginWarn{background:#fff2e8;color:#8a3f1c}.loginOk{background:#e7f6ef;color:#0f684d}.loginForm{display:block}.loginForm label{display:block;font-weight:700;margin:12px 0 6px}.loginForm button{width:100%;margin:10px 0 0}.loginHelp{border-top:1px solid #d6dde7;margin-top:14px;padding-top:12px;color:#667085;font-size:13px}");
   html += F("@media(max-width:520px){.loginGrid{grid-template-columns:1fr}.loginTop,.loginBody{padding:16px}}");
   html += F("</style></head><body><div class='loginWrap'><section class='loginBox'><div class='loginTop'><h1>KernelESP</h1><p>Local microcontroller console</p></div><div class='loginBody'>");
-  if (badKey) html += F("<div class='loginNote loginWarn'>Incorrect key. Check the web key or use the serial console to change it.</div>");
+  if (loggedOut) html += F("<div class='loginNote loginOk'>Signed out. Enter the web key to continue.</div>");
+  else if (badKey) html += F("<div class='loginNote loginWarn'>Incorrect key. Check the web key or use the serial console to change it.</div>");
   else if (webKey() == "admin") html += F("<div class='loginNote loginWarn'>The web key is still the factory default. Change it after setup.</div>");
   else html += F("<div class='loginNote loginOk'>Access is protected. Enter the web key to continue.</div>");
   html += F("<div class='loginGrid'><div class='loginItem'><span>Firmware</span><strong>");
@@ -3975,7 +3977,7 @@ String webHeader(const String& title, const String& keyArg) {
   html += query;
   html += F("'>Logs</a><a href='/settings");
   html += query;
-  html += F("'>Settings</a></nav></header><main>");
+  html += F("'>Settings</a><a href='/logout'>Logout</a></nav></header><main>");
   return html;
 }
 
@@ -4997,6 +4999,14 @@ void handleWebLogin() {
   webAuthOk();
 }
 
+void handleWebLogout() {
+  webAuthResetFailures();
+  webServer.sendHeader("Set-Cookie", "KESP=; Max-Age=0; Path=/; SameSite=Strict");
+  webServer.sendHeader("Cache-Control", "no-store");
+  webServer.sendHeader("Location", "/?logout=1");
+  webServer.send(303);
+}
+
 void appendBackupFile(String& out, const String& path) {
   if (!LittleFS.exists(path) || isDirectory(path)) return;
   String content = readWholeFile(path);
@@ -5561,6 +5571,7 @@ void startWeb() {
   webServer.collectHeaders("Cookie");
   webServer.on("/style.css", handleWebStyle);
   webServer.on("/login", HTTP_POST, handleWebLogin);
+  webServer.on("/logout", handleWebLogout);
   webServer.on("/", handleWebRoot);
   webServer.on("/ui", handleWebUi);
   webServer.on("/relay", handleWebRelay);

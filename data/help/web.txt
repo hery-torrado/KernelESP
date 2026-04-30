@@ -8,6 +8,7 @@ Main pages:
   /automations Automation fallback hub
   /help    Local help
   /settings Settings
+  /logout  Clear the browser session and return to login
 
 Live UI panels:
 
@@ -35,6 +36,11 @@ Settings can change:
   - Wi-Fi recovery and fallback AP
   - NTP
   - sensor autostart
+
+Use Logout from the top navigation when you finish. It clears the KESP browser
+cookie and opens the login screen again. If you opened a URL that contains
+?key=YOUR_KEY, close that tab or remove the key from the address bar after
+logging out.
 
 If the web UI does not respond, use serial:
 

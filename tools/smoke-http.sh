@@ -10,6 +10,10 @@ if [ -z "$BASE" ]; then
   exit 2
 fi
 
+COOKIE_JAR="${TMPDIR:-/tmp}/kernelesp-smoke-cookies-$$.txt"
+HEADER_OUT="${TMPDIR:-/tmp}/kernelesp-smoke-headers-$$.txt"
+trap 'rm -f "$COOKIE_JAR" "$HEADER_OUT"' EXIT INT HUP TERM
+
 api_cmd() {
   cmd="$1"
   "$CURL" -sS --fail --max-time 20 -G "$BASE/api/cmd" \
@@ -56,6 +60,13 @@ expected_pattern() {
 printf 'HTTP smoke test: %s\n' "$BASE"
 
 "$CURL" -sS --fail --max-time 15 "$BASE/api/status?key=$KEY" | grep -q '"name":"KernelESP"'
+"$CURL" -sS --fail --max-time 15 -c "$COOKIE_JAR" \
+  -d "key=$KEY" -d "next=/" "$BASE/login" -o /dev/null
+"$CURL" -sS --fail --max-time 15 -b "$COOKIE_JAR" "$BASE/" | grep -q 'Logout'
+"$CURL" -sS --max-time 15 -b "$COOKIE_JAR" -c "$COOKIE_JAR" \
+  -D "$HEADER_OUT" "$BASE/logout" -o /dev/null
+grep -qi 'Set-Cookie: KESP=.*Max-Age=0' "$HEADER_OUT"
+"$CURL" -sS --max-time 15 -b "$COOKIE_JAR" "$BASE/" | grep -q 'KernelESP Login'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index" | grep -q 'KernelESP'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index&lang=es" | grep -q 'AYUDA DE KERNELESP'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index&lang=pt" | grep -q 'AJUDA DO KERNELESP'

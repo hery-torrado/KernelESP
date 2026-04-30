@@ -8,6 +8,7 @@ Paginas principales:
   /automations centro clásico de automatización
   /help     ayuda local
   /settings configuración
+  /logout   cierra la sesion del navegador y vuelve al login
 
 Paneles de Live UI:
 
@@ -26,6 +27,11 @@ Paneles de Live UI:
 
 La UI base esta en ingles. Los botones de idioma cambian textos y ayuda, pero
 la salida de comandos conserva el formato tecnico de consola.
+
+Usa Logout en el menu superior al terminar. Borra la cookie KESP del navegador
+y vuelve a mostrar la pantalla de login. Si abriste una URL con ?key=KEY,
+cierra esa pestana o elimina la clave de la barra de direcciones despues de
+salir.
 
 Si la web no responde:
 
