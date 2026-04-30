@@ -1,5 +1,5 @@
 textarea{min-height:430px;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;resize:vertical}
-pre{background:var(--code);color:var(--codeText);border-radius:7px;padding:13px;overflow:auto;white-space:pre-wrap;font:13px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+pre{max-width:100%;background:var(--code);color:var(--codeText);border:1px solid #22313f;border-radius:7px;padding:13px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
 .row,.relay{display:flex;justify-content:space-between;align-items:center;gap:10px;border-top:1px solid var(--line);padding:10px 0}
 .row:first-child,.relay:first-child{border-top:0}
 code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:#eef2f6;border:1px solid #dde3ea;border-radius:5px;padding:1px 5px}
