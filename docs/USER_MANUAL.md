@@ -51,7 +51,7 @@ The web UI has:
 - Dashboard
 - Live UI at `/ui`
 - Command runner
-- Automation
+- Automation, opening the richer Live UI automation workspace
 - Time and sensor panels
 - Diagnostics
 - Wi-Fi Profiles

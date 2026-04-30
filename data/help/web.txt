@@ -5,7 +5,7 @@ Main pages:
 
   /        Dashboard
   /ui      Full Live UI
-  /automations Automation hub
+  /automations Automation fallback hub
   /help    Local help
   /settings Settings
 

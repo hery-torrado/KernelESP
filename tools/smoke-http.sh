@@ -73,7 +73,7 @@ ui_html="$("$CURL" -sS --fail --max-time 15 "$BASE/ui?key=$KEY")"
 printf '%s' "$home_html" | grep -q '/automations'
 printf '%s' "$home_html" | grep -q '/wifi-profiles'
 printf '%s' "$home_html" | grep -q '/system-profiles'
-printf '%s' "$ui_html" | grep -q '/automations'
+printf '%s' "$ui_html" | grep -q '/ui#autov'
 printf '%s' "$ui_html" | grep -q '/wifi-profiles'
 printf '%s' "$ui_html" | grep -q '/system-profiles'
 if printf '%s\n%s' "$home_html" "$ui_html" | grep -Eq ">Editor</a>|>Auto</a>|>Wizard</a>|>Relays</a>|href=['\"]/(edit|wizard|relays)['\"]"; then
@@ -83,6 +83,9 @@ fi
 "$CURL" -sS --fail --max-time 15 "$BASE/automations?key=$KEY" | grep -q 'Schedules, Rules and Timers'
 "$CURL" -sS --fail --max-time 15 "$BASE/automations?key=$KEY" | grep -q 'Relay Setup'
 "$CURL" -sS --fail --max-time 15 "$BASE/automations?key=$KEY" | grep -q 'Scripts'
+"$CURL" -sS --fail --max-time 15 "$BASE/automations?key=$KEY" | grep -q 'Advanced Cron Editor'
+"$CURL" -sS --fail --max-time 15 "$BASE/automations?key=$KEY" | grep -q '#cron'
+"$CURL" -sS --fail --max-time 15 "$BASE/automations?key=$KEY" | grep -q '#scripts'
 "$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Open Wi-Fi Profiles'
 "$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Open System Profiles'
 "$CURL" -sS --fail --max-time 15 "$BASE/system-profiles?key=$KEY" | grep -q 'System Profiles'

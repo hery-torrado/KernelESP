@@ -113,7 +113,9 @@ Command runner.
 ### `/automations`
 
 Main automation hub. It gathers relay controls, setup forms, schedules, cron,
-rules, timers, scenes, inputs and script links in one place.
+rules, timers, scenes, inputs and script links in one place. The main menu
+opens the richer Live UI automation workspace, while this route remains as a
+classic fallback and compatibility hub.
 
 ```text
 /automations?key=admin

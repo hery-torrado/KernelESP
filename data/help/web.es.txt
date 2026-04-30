@@ -5,7 +5,7 @@ Paginas principales:
 
   /         panel simple
   /ui       Live UI completa
-  /automations centro de automatización
+  /automations centro clásico de automatización
   /help     ayuda local
   /settings configuración
 
