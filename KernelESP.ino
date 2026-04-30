@@ -3849,9 +3849,9 @@ String webHeader(const String& title, const String& keyArg) {
   html += query;
   html += F("'>Dashboard</a><a href='/ui");
   html += query;
-  html += F("'>Live UI</a><a href='/ui");
+  html += F("'>Live UI</a><a href='/automations");
   html += query;
-  html += F("#autov'>Automation</a><a href='/diag");
+  html += F("'>Automation</a><a href='/diag");
   html += query;
   html += F("'>Diag</a><a href='/wifi-profiles");
   html += query;

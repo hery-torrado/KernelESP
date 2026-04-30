@@ -73,7 +73,7 @@ ui_html="$("$CURL" -sS --fail --max-time 15 "$BASE/ui?key=$KEY")"
 printf '%s' "$home_html" | grep -q '/automations'
 printf '%s' "$home_html" | grep -q '/wifi-profiles'
 printf '%s' "$home_html" | grep -q '/system-profiles'
-printf '%s' "$ui_html" | grep -q '/ui#autov'
+printf '%s' "$ui_html" | grep -q '/automations'
 printf '%s' "$ui_html" | grep -q '/wifi-profiles'
 printf '%s' "$ui_html" | grep -q '/system-profiles'
 if printf '%s\n%s' "$home_html" "$ui_html" | grep -Eq ">Editor</a>|>Auto</a>|>Wizard</a>|>Relays</a>|href=['\"]/(edit|wizard|relays)['\"]"; then
