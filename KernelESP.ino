@@ -4637,18 +4637,20 @@ void handleWebAutomations() {
     html += htmlEscape(result);
     html += F("</pre></section>");
   }
-  String liveBase = "/ui" + authQuery();
+  String liveFocusBase = "/ui?focus=1";
+  String liveKey = webPropagatedKey(keyArg);
+  if (liveKey.length()) liveFocusBase += "&key=" + urlEscape(liveKey);
   html += F("<section class='card'><h2>Advanced Automation Workspace</h2><p class='muted'>Use the Live UI automation tools for the richer editors and dashboards.</p><p><a class='btn' href='");
-  html += liveBase;
-  html += F("#cron'>Advanced Cron Editor</a><a class='btn secondary' href='");
-  html += liveBase;
-  html += F("#autov'>Automation View</a><a class='btn secondary' href='");
-  html += liveBase;
-  html += F("#builder'>Quick Add</a><a class='btn secondary' href='");
-  html += liveBase;
-  html += F("#scripts'>Script Editor</a><a class='btn secondary' href='");
-  html += liveBase;
-  html += F("#mail'>Mail Workflows</a></p></section>");
+  html += liveFocusBase;
+  html += F("&tab=cron'>Advanced Cron Editor</a><a class='btn secondary' href='");
+  html += liveFocusBase;
+  html += F("&tab=autov'>Automation View</a><a class='btn secondary' href='");
+  html += liveFocusBase;
+  html += F("&tab=builder'>Quick Add</a><a class='btn secondary' href='");
+  html += liveFocusBase;
+  html += F("&tab=scripts'>Script Editor</a><a class='btn secondary' href='");
+  html += liveFocusBase;
+  html += F("&tab=mail'>Mail Workflows</a></p></section>");
   html += F("<div class='grid'><section class='card'><h2>Automation Overview</h2><pre>");
   html += htmlEscape(captureOutputForLine("jobs"));
   html += F("</pre></section><section class='card'><h2>Inputs</h2><pre>");
@@ -4675,15 +4677,15 @@ void handleWebAutomations() {
   html += F("c=scene%20list'>Scenes</a><a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
   html += F("c=input%20list'>Inputs</a><a class='btn secondary' href='");
-  html += liveBase;
-  html += F("#cron'>Advanced Cron Editor</a></p></section>");
+  html += liveFocusBase;
+  html += F("&tab=cron'>Advanced Cron Editor</a></p></section>");
   html += F("<section class='card'><h2>Scripts</h2><p><a class='btn' href='/edit");
   html += keyArg.length() ? "?key=" + urlEscape(keyArg) + "&path=/boot.sh" : "?path=/boot.sh";
   html += F("'>Edit /boot.sh</a><a class='btn secondary' href='/edit");
   html += authQuery();
   html += F("'>Open script editor</a><a class='btn secondary' href='");
-  html += liveBase;
-  html += F("#scripts'>Live script editor</a></p>");
+  html += liveFocusBase;
+  html += F("&tab=scripts'>Live script editor</a></p>");
   html += fileRowsHtml("/", keyArg);
   html += F("</section>");
   appendWebWizardForms(html, keyArg, "/automations");
@@ -4848,9 +4850,7 @@ void handleWebStyle() {
     webServer.send(404, "text/plain", "style not found");
     return;
   }
-  File file = LittleFS.open("/www/style.css", "r");
-  webServer.streamFile(file, "text/css; charset=utf-8");
-  file.close();
+  sendFsFile("/www/style.css", "text/css; charset=utf-8");
 }
 
 String contentTypeForPath(const String& path) {
@@ -4865,6 +4865,38 @@ String contentTypeForPath(const String& path) {
   return "application/octet-stream";
 }
 
+void sendFsFile(const String& path, const String& contentType) {
+  File file = LittleFS.open(path, "r");
+  if (!file) {
+    webServer.send(404, "text/plain", "not found");
+    return;
+  }
+  WiFiClient client = webServer.client();
+  webServer.sendHeader("Connection", "close");
+  webServer.setContentLength(file.size());
+  webServer.send(200, contentType, "");
+  uint8_t buf[256];
+  while (file.available() && client.connected()) {
+    size_t n = file.read(buf, sizeof(buf));
+    size_t off = 0;
+    uint8_t stalls = 0;
+    while (off < n && client.connected()) {
+      size_t w = client.write(buf + off, n - off);
+      if (w == 0) {
+        if (++stalls > 50) break;
+        delay(1);
+      } else {
+        off += w;
+        stalls = 0;
+      }
+      yield();
+    }
+    yield();
+  }
+  client.flush();
+  file.close();
+}
+
 void handleWebNotFound() {
   if (!fsReady) { webServer.send(404, "text/plain", "not found"); return; }
   String uri = webServer.uri();
@@ -4874,9 +4906,7 @@ void handleWebNotFound() {
     webServer.send(404, "text/plain", "not found");
     return;
   }
-  File file = LittleFS.open(path, "r");
-  webServer.streamFile(file, contentTypeForPath(path));
-  file.close();
+  sendFsFile(path, contentTypeForPath(path));
 }
 
 void handleWebUi() {
@@ -4885,9 +4915,7 @@ void handleWebUi() {
     webServer.send(404, "text/plain", "ui not installed: missing /www/index.html");
     return;
   }
-  File file = LittleFS.open("/www/index.html", "r");
-    webServer.streamFile(file, "text/html; charset=utf-8");
-  file.close();
+  sendFsFile("/www/index.html", "text/html; charset=utf-8");
 }
 
 void handleWebSettings() {
