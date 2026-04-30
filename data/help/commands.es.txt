@@ -1,22 +1,91 @@
 MAPA DE COMANDOS
 ================
 
+La mayoria de comandos funcionan desde serial, la caja Command de la web,
+/api/cmd, scripts, cron, reglas y entradas. Usa `help <comando>` para una
+sintaxis corta, por ejemplo `help who` o `help wifi`.
+
+Shell basico:
+
+  help [cmd]       lista comandos o explica uno
+  clear            limpia la vista del terminal con lineas en blanco
+  echo texto       imprime texto
+  history          muestra comandos recientes
+  alias            lista o crea atajos
+  unalias nombre   elimina un atajo
+  env, printenv    lista variables volatiles de shell
+  set nombre valor crea o cambia una variable volatil
+  unset nombre     elimina una variable volatil
+  true, false      comandos simples para scripts y pruebas
+  test -f ruta     comprueba ficheros, directorios o valores
+
+Usuario y procesos:
+
+  whoami           usuario actual, siempre root
+  id               identidad root fija usada por la shell
+  groups           grupos de la shell
+  who              sesion de shell activa, por ejemplo root ttyS0
+  w                uptime, heap y sesion activa
+  ps, top          pseudoprocesos: shell, wifi, LittleFS, timers, reglas, cron
+  jobs             timers, reglas y cron
+  pgrep texto      busca pseudoprocesos que contienen texto
+  pidof texto      imprime ids de pseudoprocesos coincidentes
+  kill pid         elimina un timer, regla o cron
+  sync             compatibilidad; LittleFS escribe inmediatamente
+
 Sistema:
 
-  health, diag, free, df, uname, uptime, ps, jobs, dmesg, reboot, board
+  version          version del firmware
+  uname            firmware, placa y sistema de ficheros
+  uptime, uptime -p
+  health           resumen completo del sistema
+  diag             paquete de diagnostico de solo lectura
+  board            perfil de placa y pines seguros
+  free, heap, mem  heap, fragmentacion y bloque libre mayor
+  df, df -h        espacio de LittleFS
+  du, du -h ruta   uso de fichero o directorio
+  dmesg            log de eventos en RAM
+  log              herramientas de log en flash/RAM
+  logger texto     anade una linea al log
+  journalctl       muestra eventos o la cola del log en flash
+  resetreason      motivo del ultimo reinicio
+  chip             chip id, flash id y version del SDK
+  flash            tamano y velocidad de flash
+  sysinfo          resumen de chip, flash, memoria y reinicio
+  reboot           reinicia la placa
+  safe             confirmacion de seguridad por pasos
+  dryrun           simula escrituras GPIO/relay
+  arm, disarm      activa o pausa automatizaciones
+  armed            muestra el estado de automatizacion
 
 Red:
 
-  wifi status
-  wifi scan
+  wifi status      conexion, SSID, RSSI, DHCP, IP y reintentos
+  wifi scan        lista redes visibles de 2.4 GHz
+  wifi connect SSID PASS
   wifi save SSID PASS
   wifi reconnect
-  wifi net
-  wifi diag
-  ifconfig
-  ip route
-  ping host port
-  httpget http://host/path
+  wifi recover
+  wifi sdkreset --yes
+  wifi net         IP, mascara, gateway y DNS
+  wifi profile list|save|use|show|rm
+  wifi dhcp on|off
+  wifi static IP GW MASK DNS1 DNS2
+  wifi timeout ms
+  wifi channel auto|n
+  wifi phy 11b|11g|11n
+  wifi power dbm
+  wifi ip, wifi mac, wifi hostname
+  ifconfig         resumen de interfaz Wi-Fi
+  ip addr          resumen de interfaz
+  ip route         ruta de gateway
+  hostname         muestra o cambia hostname
+  ap start|stop|status
+  ping host port   prueba TCP
+  httpget URL      HTTP GET simple
+  web status       estado del servidor web y acceso
+  service status   wrapper de servicios web, ntp y sensor
+  systemctl ...    wrapper compatible con service
 
 Email:
 
@@ -26,31 +95,102 @@ Email:
   mail health "KernelESP daily health"
   mail send default "KernelESP alert" "Temperature is high"
 
-Automatización:
-
-  relay add light D1 active_low
-  relay pulse light 500
-  cron add daily 08:00 relay on pump
-  timer every 60000 health
-  rule add temp range 38 40 relay fan
-  input add button D2 pullup
-
 Tiempo:
 
-  date
+  date             hora local de la placa
+  date -u          hora UTC
   ntp status
-  ntp kick       actualización no bloqueante para scripts/cron
-  ntp sync       sincronización manual bloqueante para pruebas
+  ntp kick         refresco no bloqueante para scripts/cron
+  ntp sync         sincronizacion manual bloqueante para pruebas
+  ntp auto on|off
+  ntp fallback on|off
   ntp server pool.ntp.org time.nist.gov
-  ntp tz 1
+  ntp tz -4
 
 Nota NTP: los campos de servidor contienen nombres de host. ntp tz solo es el
-desfase UTC numérico en horas, por ejemplo 0, 1, 2, -5 o 5.5. No pongas un
+desfase UTC numerico en horas, por ejemplo 0, 1, 2, -5 o 5.5. No pongas un
 servidor como hora.roa.es en ntp tz.
 
 Ficheros:
 
-  ls, cat, write, append, rm, mkdir, cp, mv, sh, backup, profile
+  pwd              directorio actual
+  cd dir           cambia de directorio
+  ls ruta          lista ficheros
+  cat fichero      imprime un fichero
+  head, tail       primeras o ultimas lineas
+  grep texto file  lineas coincidentes
+  find dir texto   lista ficheros, opcionalmente filtrando texto
+  wc fichero       lineas, palabras y bytes
+  stat ruta        metadatos de fichero, directorio o pseudo-fichero
+  basename ruta    ultimo componente de la ruta
+  dirname ruta     directorio padre
+  touch fichero    crea un fichero
+  write file texto reemplaza el fichero con texto
+  append file txt  anade texto
+  rm fichero
+  mkdir dir
+  rmdir dir
+  cp src dst
+  cp -r dir dst
+  mv src dst
+  mount            pseudosistemas de ficheros
+  which cmd        indica si el comando esta integrado
+  fsformat --yes   borra LittleFS
+
+Hardware:
+
+  pins             guia de GPIO seguros para la placa
+  pinmode pin in|out|pullup
+  gpio pin on|off|toggle
+  writepin pin on|off|toggle
+  toggle pin
+  read pin
+  pwm pin 0-1023
+  adc
+  i2c scan
+  pcf read|write addr
+  mcp init|read|write addr
+  sensor begin|scan|read|status|save|autostart
+
+Reles y automatizacion:
+
+  relay add light D1 active_low
+  relay on|off|toggle light
+  relay pulse light 500
+  relay boot light off
+  relay status
+  cron add daily 08:00 relay on pump
+  cron add dow thu 08:20 relay off pump
+  cron add date 05-01 11:00 sh /home/may1.sh
+  crontab -l
+  timer once 300000 relay off light
+  timer every 60000 health
+  rule add temp range 38 40 relay fan
+  input add button D2 pullup
+  scene add night relay off light; relay on security
+  scene run night
+  schedule pump 08:00 08:05
+  climate hum extractor 60 70
+
+Expresiones y scripts:
+
+  if (temp >= 40 && time < 10:00) relay on fan
+  if (wifi == connected) { logger online } else { logger offline }
+  when pin D2 pulse if (armed == on) mail health "Door pulse"
+  let irrigation.enabled = 1
+  define HOT 40
+  function water_zone1 { relay on valve1; timer once 600000 relay off valve1 }
+  call water_zone1
+  repeat 5 relay status
+  watch 10000 health
+  sleep 500
+  sh /home/test.sh
+  sh -n /home/test.sh
+  source /home/test.sh
+  run /home/test.sh
+  boot show|set|run
+  onboot list|add|rm|clear
+  pkg list|add|run|show|rm
 
 Pipes:
 
@@ -59,3 +199,15 @@ Pipes:
   crontab -l | wc -l
   cat /var/log/kernel.log | grep wifi | head -n 5
   health | tee /home/health.txt
+
+Configuracion y backup:
+
+  config list|get|set|rm
+  state set|get|rm|list|clear
+  motd [texto]
+  backup
+  restore backup-file --yes
+  profile save known-good
+  profile list
+  profile load known-good --yes
+  export all|config|relays|rules|cron|inputs|scenes|aliases

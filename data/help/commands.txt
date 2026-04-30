@@ -1,36 +1,94 @@
 COMMAND MAP
 ===========
 
+Most commands work from serial, the web Command box, /api/cmd, scripts, cron,
+rules and input triggers. Use `help <command>` for short syntax, for example
+`help who` or `help wifi`.
+
+Shell basics:
+
+  help [cmd]       list commands or explain one command
+  clear            clear the terminal view with blank lines
+  echo text        print text
+  history          show recent commands
+  alias            list or create command shortcuts
+  unalias name     remove a shortcut
+  env, printenv    list volatile shell variables
+  set name value   set a volatile variable
+  unset name       remove a volatile variable
+  true, false      simple script/test commands
+  test -f path     test files, directories or values
+
+User and process style commands:
+
+  whoami           current user, always root
+  id               fixed root identity used by the shell
+  groups           shell groups
+  who              active shell session, for example root ttyS0
+  w                uptime, heap and active shell session
+  ps, top          pseudo processes: shell, wifi, LittleFS, timers, rules, cron
+  jobs             timers, rules and cron entries
+  pgrep text       find pseudo processes matching text
+  pidof text       print matching pseudo process ids
+  kill pid         remove a timer, rule or cron pseudo process
+  sync             compatibility no-op; LittleFS writes commit immediately
+
 System:
 
-  health        system summary
-  diag          read-only diagnostic bundle
-  free          heap status
-  df, df -h     LittleFS space
-  du, du -h     file or directory usage
-  uname         firmware and board info
-  uptime        time since boot
-  ps            pseudo process list
-  jobs          timers, rules and cron
-  dmesg         RAM event log
-  reboot        restart the board
-  board         board profile and pin guidance
+  version          firmware version
+  uname            firmware, board and filesystem identity
+  uptime, uptime -p
+  health           full system summary
+  diag             read-only diagnostic bundle
+  board            board profile and safe pin guidance
+  free, heap, mem  heap, fragmentation and largest free block
+  df, df -h        LittleFS space
+  du, du -h path   file or directory usage
+  dmesg            RAM event log
+  log              flash/RAM log tools
+  logger text      add a log line
+  journalctl       show event log or tail flash log
+  resetreason      last reset reason
+  chip             chip id, flash id and SDK version
+  flash            flash size and speed
+  sysinfo          combined chip, flash, memory and reset summary
+  reboot           restart the board
+  safe             staged safety confirmation helper
+  dryrun           simulate GPIO/relay writes
+  arm, disarm      enable or pause automations
+  armed            show automation arm state
 
 Network:
 
-  wifi status
-  wifi scan
+  wifi status      connection state, SSID, RSSI, DHCP, IP and retry data
+  wifi scan        list visible 2.4 GHz networks
+  wifi connect SSID PASS
   wifi save SSID PASS
   wifi reconnect
-  wifi net
-  wifi diag
-  wifi profile save work
-  wifi profile use work
+  wifi recover
+  wifi sdkreset --yes
+  wifi net         IP, mask, gateway and DNS
+  wifi profile list|save|use|show|rm
+  wifi dhcp on|off
   wifi static IP GW MASK DNS1 DNS2
-  ifconfig
-  ip route
-  ping host port
-  httpget http://host/path
+  wifi timeout ms
+  wifi channel auto|n
+  wifi phy 11b|11g|11n
+  wifi power dbm
+  wifi ip, wifi mac, wifi hostname
+  ifconfig         Wi-Fi interface summary
+  ip addr          interface summary
+  ip route         gateway route
+  hostname         show or set hostname
+  ap start|stop|status
+  ping host port   TCP reachability test
+  httpget URL      simple HTTP GET
+  web status       web server and access state
+  service status   service wrapper for web, ntp and sensor
+  systemctl ...    service-compatible wrapper
+
+Mail:
+
   mail status
   mail config postfix.lan 25 kernelesp@lan admin@example.com
   mail test "Manual test from KernelESP"
@@ -39,47 +97,68 @@ Network:
 
 Time:
 
-  date
+  date             local board time
+  date -u          UTC board time
   ntp status
-  ntp kick       non-blocking refresh for scripts/cron
-  ntp sync       blocking manual sync for testing
-  ntp http
-
-Conditional automation:
-
-  if (temp >= 40 && time < 10:00) relay on fan
-  if ((temp > 40 || hum > 70) && wifi == connected) mail health "KernelESP health"
-  if (!(armed == on)) echo automations_paused
-  if (wifi == connected) { logger online; mail health "KernelESP online" } else { logger offline }
-  let irrigation.enabled = 1
-  define HOT 40
-  function water_zone1 { relay on valve1; timer once 600000 relay off valve1; logger zone1_started }
-  call water_zone1
-  when pin D2 pulse if (temp > 40 && time < 10:00) relay on fan
-  ntp auto on
-  ntp fallback on
+  ntp kick         non-blocking refresh for scripts/cron
+  ntp sync         blocking manual sync for testing
+  ntp auto on|off
+  ntp fallback on|off
   ntp server pool.ntp.org time.nist.gov
-  ntp tz 1
+  ntp tz -4
 
 NTP note: ntp server fields contain host names. ntp tz is only the numeric UTC
 offset in hours, for example 0, 1, 2, -5 or 5.5. Do not put a server such as
 hora.roa.es in ntp tz.
 
-Relay and GPIO:
+Files:
 
-  pins
+  pwd              current directory
+  cd dir           change directory
+  ls path          list files
+  cat file         print a file
+  head, tail       first or last lines
+  grep text file   matching lines
+  find dir text    list files, optionally matching text
+  wc file          lines, words and bytes
+  stat path        metadata for file, directory or pseudo-file
+  basename path    final path component
+  dirname path     parent directory
+  touch file       create a file
+  write file text  replace file with text
+  append file text append text
+  rm file
+  mkdir dir
+  rmdir dir
+  cp src dst
+  cp -r dir dst
+  mv src dst
+  mount            pseudo filesystems
+  which cmd        whether a command is built in
+  fsformat --yes   erase LittleFS
+
+Hardware:
+
+  pins             safe GPIO guidance for the selected board
+  pinmode pin in|out|pullup
+  gpio pin on|off|toggle
+  writepin pin on|off|toggle
+  toggle pin
+  read pin
+  pwm pin 0-1023
+  adc
+  i2c scan
+  pcf read|write addr
+  mcp init|read|write addr
+  sensor begin|scan|read|status|save|autostart
+
+Relay and automation:
+
   relay add light D1 active_low
-  relay on light
-  relay off light
+  relay on|off|toggle light
   relay pulse light 500
   relay boot light off
   relay status
-  gpio D1 on
-  read D2
-  adc
-
-Automation:
-
   cron add daily 08:00 relay on pump
   cron add dow thu 08:20 relay off pump
   cron add date 05-01 11:00 sh /home/may1.sh
@@ -87,19 +166,31 @@ Automation:
   timer once 300000 relay off light
   timer every 60000 health
   rule add temp range 38 40 relay fan
-  climate hum extractor 60 70
+  input add button D2 pullup
+  scene add night relay off light; relay on security
+  scene run night
   schedule pump 08:00 08:05
+  climate hum extractor 60 70
 
-Files:
+Expressions and scripts:
 
-  ls /
-  cat /home/test.sh
-  write /home/test.sh relay status
-  append /home/test.sh free
-  rm /home/test.sh
-  mkdir /home
-  cp source dest
-  mv source dest
+  if (temp >= 40 && time < 10:00) relay on fan
+  if (wifi == connected) { logger online } else { logger offline }
+  when pin D2 pulse if (armed == on) mail health "Door pulse"
+  let irrigation.enabled = 1
+  define HOT 40
+  function water_zone1 { relay on valve1; timer once 600000 relay off valve1 }
+  call water_zone1
+  repeat 5 relay status
+  watch 10000 health
+  sleep 500
+  sh /home/test.sh
+  sh -n /home/test.sh
+  source /home/test.sh
+  run /home/test.sh
+  boot show|set|run
+  onboot list|add|rm|clear
+  pkg list|add|run|show|rm
 
 Pipes:
 
@@ -109,32 +200,14 @@ Pipes:
   cat /var/log/kernel.log | grep wifi | head -n 5
   health | tee /home/health.txt
 
-Scripts:
+Configuration and backup:
 
-  sh /home/test.sh
-  sh -n /home/test.sh
-  boot set /etc/boot.sh
-  boot show
-  onboot add ntp kick
-  scene add night relay off light; relay on security
-  scene run night
-
-Safety:
-
-  disarm
-  arm
-  armed
-  safe next
-  safe status
-  dryrun on
-  dryrun off
-  config get web.lockout
-  config set web.lockout on
-
-Backup:
-
+  config list|get|set|rm
+  state set|get|rm|list|clear
+  motd [text]
   backup
+  restore backup-file --yes
   profile save known-good
   profile list
   profile load known-good --yes
-  export all
+  export all|config|relays|rules|cron|inputs|scenes|aliases

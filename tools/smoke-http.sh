@@ -46,6 +46,7 @@ expected_pattern() {
     "input list") printf 'inputs|no inputs' ;;
     "mail status") printf 'mail.smtp.host' ;;
     "health | grep wifi") printf 'wifi:' ;;
+    "help who") printf 'active shell session' ;;
     board) printf 'profile:' ;;
     diag) printf '== health ==' ;;
     *) printf '.' ;;
@@ -62,6 +63,7 @@ printf 'HTTP smoke test: %s\n' "$BASE"
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=email&lang=es" | grep -q 'AVISOS POR EMAIL'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=email&lang=pt" | grep -q 'ALERTAS POR EMAIL'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=mail" | grep -q 'MAIL ALERTS'
+"$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=commands" | grep -q 'who'
 "$CURL" -sS --fail --max-time 15 "$BASE/i18n.js?v=19" | grep -q 'i18n-help.js'
 "$CURL" -sS --fail --max-time 15 "$BASE/i18n.js?v=19" | grep -q 'Portugu'
 "$CURL" -sS --fail --max-time 15 "$BASE/i18n-es.js?v=19" | grep -q 'Configuraci'
@@ -125,6 +127,7 @@ timer list
 input list
 mail status
 health | grep wifi
+help who
 board
 wifi profile list
 diag'
