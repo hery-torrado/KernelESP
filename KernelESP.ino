@@ -980,6 +980,7 @@ void printHelpTopic(String topic) {
   else if (topic == "find") Serial.println(F("find [dir] [text] - list files, optionally matching text"));
   else if (topic == "wc") Serial.println(F("wc <file> - count lines words bytes"));
   else if (topic == "du") Serial.println(F("du [path] - show file/directory byte usage"));
+  else if (topic == "df") Serial.println(F("df [-h] - show LittleFS space; -h uses human units like K/M"));
   else if (topic == "cron") Serial.println(F("cron add HH:MM|daily|dow|date ...; cron list|rm|clear"));
   else if (topic == "rule") Serial.println(F("rule add temp|hum|press =|!=|<|>|<=|>=|range ...; cooldown|every|list"));
   else if (topic == "timer") Serial.println(F("timer every|once <ms> <command>; timer list|rm|clear"));
@@ -1295,13 +1296,34 @@ void writeFileCommand(String args[], int argc, bool append) {
   Serial.println(F("OK"));
 }
 
-void cmdDf() {
+String humanBytes(unsigned long bytes) {
+  char buf[24];
+  if (bytes >= 1048576UL) {
+    snprintf(buf, sizeof(buf), "%.2fM", bytes / 1048576.0f);
+  } else if (bytes >= 1024UL) {
+    snprintf(buf, sizeof(buf), "%.2fK", bytes / 1024.0f);
+  } else {
+    snprintf(buf, sizeof(buf), "%luB", bytes);
+  }
+  return String(buf);
+}
+
+void cmdDf(bool human = false) {
   if (!ensureFS()) return;
   FSInfo info;
   LittleFS.info(info);
+  unsigned long freeBytes = info.totalBytes - info.usedBytes;
+  if (human) {
+    Serial.print(F("total: ")); Serial.println(humanBytes(info.totalBytes));
+    Serial.print(F("used:  ")); Serial.println(humanBytes(info.usedBytes));
+    Serial.print(F("free:  ")); Serial.println(humanBytes(freeBytes));
+    Serial.print(F("block: ")); Serial.println(humanBytes(info.blockSize));
+    Serial.print(F("page:  ")); Serial.println(humanBytes(info.pageSize));
+    return;
+  }
   Serial.print(F("total: ")); Serial.println(info.totalBytes);
   Serial.print(F("used:  ")); Serial.println(info.usedBytes);
-  Serial.print(F("free:  ")); Serial.println(info.totalBytes - info.usedBytes);
+  Serial.print(F("free:  ")); Serial.println(freeBytes);
   Serial.print(F("block: ")); Serial.println(info.blockSize);
   Serial.print(F("page:  ")); Serial.println(info.pageSize);
 }
@@ -4245,8 +4267,14 @@ String webCommandOutput(String command) {
     if (!fsReady) return "LittleFS not mounted\n";
     FSInfo info;
     LittleFS.info(info);
+    unsigned long freeBytes = info.totalBytes - info.usedBytes;
+    if (argc >= 2 && args[1] == "-h") {
+      return "total: " + humanBytes(info.totalBytes) + "\nused:  " + humanBytes(info.usedBytes) +
+             "\nfree:  " + humanBytes(freeBytes) + "\nblock: " + humanBytes(info.blockSize) +
+             "\npage:  " + humanBytes(info.pageSize) + "\n";
+    }
     return "total: " + String(info.totalBytes) + "\nused:  " + String(info.usedBytes) +
-           "\nfree:  " + String(info.totalBytes - info.usedBytes) + "\n";
+           "\nfree:  " + String(freeBytes) + "\n";
   }
   if (cmd == "version") return String(KERNEL_NAME) + " " + KERNEL_VERSION + "\n";
   if (cmd == "health") return healthText();
@@ -7995,7 +8023,7 @@ void executeLine(String line) {
     if (cmd == "mv" && !LittleFS.remove(srcPath)) { Serial.println(F("mv: copied but source remove failed")); return; }
     Serial.println(F("OK"));
   }
-  else if (cmd == "df") cmdDf();
+  else if (cmd == "df") cmdDf(argc >= 2 && args[1] == "-h");
   else if (cmd == "fsformat") {
     if (argc < 2 || args[1] != "--yes") {
       Serial.println(F("fsformat: use fsformat --yes to erase LittleFS"));

@@ -411,7 +411,10 @@ mv /home/motd.copy /home/motd.old
 
 ```text
 df
+df -h
 ```
+
+`df -h` shows the same LittleFS usage with human units such as K and M.
 
 ### `fsformat --yes`
 

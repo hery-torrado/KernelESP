@@ -6,7 +6,7 @@ System:
   health        system summary
   diag          read-only diagnostic bundle
   free          heap status
-  df            LittleFS space
+  df, df -h     LittleFS space
   uname         firmware and board info
   uptime        time since boot
   ps            pseudo process list

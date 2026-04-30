@@ -27,6 +27,7 @@ help cron
 uname
 free
 df
+df -h
 ```
 
 ### Web UI
@@ -112,6 +113,7 @@ append /home/hello.sh date
 sh /home/hello.sh
 rm /home/hello.sh
 df
+df -h
 du /
 find / boot
 ```
