@@ -42,6 +42,7 @@ with serial.Serial(port, baud, timeout=0.2, write_timeout=2) as ser:
 
     deadline = time.time() + 20.0
     saw_reset = False
+    window = ""
     while time.time() < deadline:
         chunk = ser.read(256)
         if not chunk:
@@ -49,9 +50,10 @@ with serial.Serial(port, baud, timeout=0.2, write_timeout=2) as ser:
         text = chunk.decode("utf-8", errors="replace")
         sys.stdout.write(text)
         sys.stdout.flush()
-        if "wifi sdk config erased" in text:
+        window = (window + text)[-2048:]
+        if "wifi sdk config erased" in window:
             saw_reset = True
-        if saw_reset and ("booting..." in text or "wifi connecting:" in text or "wifi ip " in text):
+        if saw_reset and ("booting..." in window or "wifi connecting:" in window or "wifi ip " in window):
             break
 
     if not saw_reset:
