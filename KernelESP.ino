@@ -3293,15 +3293,28 @@ String cronSpecText(const CronJob& cron) {
   return "*";
 }
 
+long ntpOffsetSeconds() {
+  return (long)(configGetValue("ntp.tz", "0").toFloat() * 3600.0f);
+}
+
+bool localTimeFromEpoch(time_t epoch, struct tm& out) {
+  if (epoch < 1600000000) return false;
+  epoch += ntpOffsetSeconds();
+  struct tm* tm = gmtime(&epoch);
+  if (!tm) return false;
+  out = *tm;
+  return true;
+}
+
 String dateText() {
   time_t now = time(nullptr);
   if (now < 1600000000) return "date: time not synced\n";
-  struct tm* tm = localtime(&now);
-  if (!tm) return "date: unavailable\n";
+  struct tm tmv;
+  if (!localTimeFromEpoch(now, tmv)) return "date: unavailable\n";
   char buf[80];
   snprintf(buf, sizeof(buf), "%04d-%02d-%02d %02d:%02d:%02d",
-           tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday,
-           tm->tm_hour, tm->tm_min, tm->tm_sec);
+           tmv.tm_year + 1900, tmv.tm_mon + 1, tmv.tm_mday,
+           tmv.tm_hour, tmv.tm_min, tmv.tm_sec);
   String out = String(buf) + "\n";
   out += "epoch: " + String((unsigned long)now) + "\n";
   return out;
@@ -3411,16 +3424,16 @@ void processCrons() {
 
   time_t now = time(nullptr);
   if (now < 1600000000) return;
-  struct tm* tm = localtime(&now);
-  if (!tm) return;
-  int dayKey = (tm->tm_year * 400) + tm->tm_yday;
+  struct tm tmv;
+  if (!localTimeFromEpoch(now, tmv)) return;
+  int dayKey = (tmv.tm_year * 400) + tmv.tm_yday;
 
   for (uint8_t i = 0; i < MAX_CRONS; i++) {
     if (!crons[i].active) continue;
     bool dateMatch = crons[i].mode == 0 ||
-                     (crons[i].mode == 1 && (crons[i].dowMask & (1 << tm->tm_wday))) ||
-                     (crons[i].mode == 2 && crons[i].month == (uint8_t)(tm->tm_mon + 1) && crons[i].day == (uint8_t)tm->tm_mday);
-    if (dateMatch && crons[i].hour == tm->tm_hour && crons[i].minute == tm->tm_min && crons[i].lastRunDay != dayKey) {
+                     (crons[i].mode == 1 && (crons[i].dowMask & (1 << tmv.tm_wday))) ||
+                     (crons[i].mode == 2 && crons[i].month == (uint8_t)(tmv.tm_mon + 1) && crons[i].day == (uint8_t)tmv.tm_mday);
+    if (dateMatch && crons[i].hour == tmv.tm_hour && crons[i].minute == tmv.tm_min && crons[i].lastRunDay != dayKey) {
       crons[i].lastRunDay = dayKey;
       Serial.print(F("[cron "));
       Serial.print(crons[i].id);
@@ -4276,7 +4289,7 @@ String webCommandOutput(String command) {
       return out.length() ? out : "(empty)\n";
     }
   }
-  if (cmd == "date") return dateText();
+  if (cmd == "date" && argc < 2) return dateText();
   if (cmd == "config") {
     if (argc < 2 || args[1] == "list") return readWholeFile(CONF_CONFIG);
     if (args[1] == "get" && argc >= 3) return configGetValue(args[2], "") + "\n";
@@ -5932,8 +5945,7 @@ bool httpTimeSync(const String& host) {
 bool ntpSync(bool waitForSync) {
   String server1 = configGetValue("ntp.server1", "pool.ntp.org");
   String server2 = configGetValue("ntp.server2", "time.nist.gov");
-  long tzSeconds = (long)(configGetValue("ntp.tz", "0").toFloat() * 3600.0f);
-  configTime(tzSeconds, 0, server1.c_str(), server2.c_str());
+  configTime(0, 0, server1.c_str(), server2.c_str());
   lastNtpSyncMs = millis();
   if (!waitForSync) return true;
   Serial.print(F("ntp sync"));
@@ -6018,7 +6030,7 @@ String timeStatusText() {
     out += "time: " + String(ntpPendingSync ? "sync pending" : "not synced") + "\n";
   } else {
     out += "epoch: " + String((unsigned long)now) + "\n";
-    out += String(ctime(&now));
+    out += dateText();
   }
   return out;
 }
@@ -6431,9 +6443,9 @@ bool compareStringValue(String left, uint8_t op, String right) {
 bool currentMinuteOfDay(int& minuteOfDay) {
   time_t now = time(nullptr);
   if (now < 1600000000) return false;
-  struct tm* tm = localtime(&now);
-  if (!tm) return false;
-  minuteOfDay = tm->tm_hour * 60 + tm->tm_min;
+  struct tm tmv;
+  if (!localTimeFromEpoch(now, tmv)) return false;
+  minuteOfDay = tmv.tm_hour * 60 + tmv.tm_min;
   return true;
 }
 
