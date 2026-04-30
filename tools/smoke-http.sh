@@ -72,6 +72,8 @@ printf 'HTTP smoke test: %s\n' "$BASE"
 "$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Wi-Fi Profiles'
 "$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'editwifi='
 "$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Create / Edit Wi-Fi Profile'
+"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'data-static-ip'
+"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'kespDhcpToggle'
 
 commands='version
 health
