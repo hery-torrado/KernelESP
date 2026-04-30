@@ -115,6 +115,7 @@ rm /home/hello.sh
 df
 df -h
 du /
+du -h /
 find / boot
 ```
 
@@ -151,6 +152,7 @@ tail -n 10 /var/log/kernel.log
 grep relay /var/log/kernel.log
 wc /etc/config.txt
 du /www
+du -h /www
 find / relay
 ```
 

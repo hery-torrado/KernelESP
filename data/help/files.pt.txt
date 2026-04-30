@@ -22,7 +22,9 @@ Comandos:
   find / text
   wc /path/file
   du /
+  du -h /
   df
+  df -h
 
 Pipes:
 

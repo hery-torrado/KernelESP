@@ -7,6 +7,7 @@ System:
   diag          read-only diagnostic bundle
   free          heap status
   df, df -h     LittleFS space
+  du, du -h     file or directory usage
   uname         firmware and board info
   uptime        time since boot
   ps            pseudo process list

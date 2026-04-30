@@ -979,7 +979,7 @@ void printHelpTopic(String topic) {
   else if (topic == "grep") Serial.println(F("grep <text> <file> - print matching lines; in pipes: cmd | grep <text>"));
   else if (topic == "find") Serial.println(F("find [dir] [text] - list files, optionally matching text"));
   else if (topic == "wc") Serial.println(F("wc <file> - count lines words bytes"));
-  else if (topic == "du") Serial.println(F("du [path] - show file/directory byte usage"));
+  else if (topic == "du") Serial.println(F("du [-h] [path] - show file/directory usage; -h uses human units like K/M"));
   else if (topic == "df") Serial.println(F("df [-h] - show LittleFS space; -h uses human units like K/M"));
   else if (topic == "cron") Serial.println(F("cron add HH:MM|daily|dow|date ...; cron list|rm|clear"));
   else if (topic == "rule") Serial.println(F("rule add temp|hum|press =|!=|<|>|<=|>=|range ...; cooldown|every|list"));
@@ -1212,6 +1212,8 @@ void cmdWc(String args[], int argc) {
   Serial.println(args[1]);
 }
 
+String humanBytes(unsigned long bytes);
+
 uint32_t duPath(const String& path, uint8_t depth) {
   if (depth > 6) return 0;
   if (!isDirectory(path)) {
@@ -1234,9 +1236,18 @@ uint32_t duPath(const String& path, uint8_t depth) {
 
 void cmdDu(String args[], int argc) {
   if (!ensureFS()) return;
-  String path = argc >= 2 ? normalizePath(args[1]) : cwd;
+  bool human = false;
+  String pathArg;
+  for (uint8_t i = 1; i < argc; i++) {
+    if (args[i] == "-h") human = true;
+    else if (!pathArg.length()) pathArg = args[i];
+    else { Serial.println(F("usage: du [-h] [path]")); return; }
+  }
+  String path = pathArg.length() ? normalizePath(pathArg) : cwd;
   if (!pathExists(path)) { Serial.println(F("du: not found")); return; }
-  Serial.print(duPath(path, 0));
+  uint32_t bytes = duPath(path, 0);
+  if (human) Serial.print(humanBytes(bytes));
+  else Serial.print(bytes);
   Serial.print('\t');
   Serial.println(path);
 }

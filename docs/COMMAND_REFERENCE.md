@@ -341,13 +341,16 @@ Returns lines, words, bytes and filename.
 wc /etc/config.txt
 ```
 
-### `du [path]`
+### `du [-h] [path]`
 
-Show byte usage for a file or directory tree.
+Show usage for a file or directory tree. `du -h` uses human units such as K and
+M.
 
 ```text
 du /
+du -h /
 du /www
+du -h /www
 du /www/style.css
 ```
 

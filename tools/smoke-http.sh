@@ -35,6 +35,8 @@ expected_pattern() {
     health) printf 'wifi:' ;;
     free) printf 'free heap:' ;;
     df) printf 'free:' ;;
+    "df -h") printf 'K|M|B' ;;
+    "du -h /www") printf 'K|M|B' ;;
     "wifi status") printf 'ssid:' ;;
     date) printf 'epoch:|time not synced' ;;
     "relay status") printf 'relay|no relays' ;;
@@ -112,6 +114,8 @@ commands='version
 health
 free
 df
+df -h
+du -h /www
 wifi status
 date
 relay status
