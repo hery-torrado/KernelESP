@@ -70,6 +70,7 @@ printf 'HTTP smoke test: %s\n' "$BASE"
 "$CURL" -sS --fail --max-time 15 "$BASE/app13.js" | grep -q 'mail status'
 "$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'System Profiles'
 "$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Wi-Fi Profiles'
+"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'editwifi='
 "$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Create / Edit Wi-Fi Profile'
 
 commands='version
