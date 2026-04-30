@@ -3146,6 +3146,26 @@ bool isUnsignedNumber(String token) {
   return true;
 }
 
+bool isSignedDecimalHours(String token) {
+  token.trim();
+  if (!token.length()) return false;
+  bool digit = false;
+  bool dot = false;
+  for (uint8_t i = 0; i < token.length(); i++) {
+    char c = token[i];
+    if ((c == '-' || c == '+') && i == 0) continue;
+    if (c == '.' && !dot) {
+      dot = true;
+      continue;
+    }
+    if (!isDigit(c)) return false;
+    digit = true;
+  }
+  if (!digit) return false;
+  float hours = token.toFloat();
+  return hours >= -12.0f && hours <= 14.0f;
+}
+
 bool parseClockTime(const String& token, uint8_t& hour, uint8_t& minute) {
   int colon = token.indexOf(':');
   if (colon <= 0) return false;
@@ -4728,6 +4748,7 @@ void handleWebUi() {
 void handleWebSettings() {
   if (!webAuthOk()) return;
   String keyArg = webServer.arg("key");
+  String settingsNotice;
   if (webServer.method() == HTTP_POST) {
     if (webServer.arg("newkey").length()) {
       configSetValue("web.key", webServer.arg("newkey"));
@@ -4752,7 +4773,15 @@ void handleWebSettings() {
     if (webServer.hasArg("ntp.autosync")) configSetValue("ntp.autosync", webServer.arg("ntp.autosync"));
     if (webServer.hasArg("ntp.server1")) configSetValue("ntp.server1", webServer.arg("ntp.server1"));
     if (webServer.hasArg("ntp.server2")) configSetValue("ntp.server2", webServer.arg("ntp.server2"));
-    if (webServer.hasArg("ntp.tz")) configSetValue("ntp.tz", webServer.arg("ntp.tz"));
+    if (webServer.hasArg("ntp.tz")) {
+      String tz = webServer.arg("ntp.tz");
+      tz.trim();
+      if (isSignedDecimalHours(tz)) {
+        configSetValue("ntp.tz", tz);
+      } else {
+        settingsNotice += "NTP UTC offset was not saved. Use numeric hours only, for example 0, 1, 2, -5 or 5.5. Do not enter an NTP server host such as hora.roa.es in this field.\n";
+      }
+    }
     if (webServer.hasArg("sensor.autostart")) configSetValue("sensor.autostart", webServer.arg("sensor.autostart"));
     if (webServer.hasArg("sensor.addr")) configSetValue("sensor.addr", webServer.arg("sensor.addr"));
     if (webServer.hasArg("sensor.sda")) configSetValue("sensor.sda", webServer.arg("sensor.sda"));
@@ -4817,17 +4846,23 @@ void handleWebSettings() {
   html += F("c=wifi%20reconnect'>Reconnect</a></p></form></section>");
   html += F("<section class='card'><h2>NTP</h2><form method='POST' action='/settings'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
-  html += F("'><p><select name='ntp.autosync'><option value='on'");
+  html += F("'><p class='muted'><strong>NTP servers</strong> are host names used to get the time, for example <code>pool.ntp.org</code> and <code>time.nist.gov</code>. <strong>UTC offset hours</strong> is not a server: enter a number such as <code>0</code>, <code>1</code>, <code>2</code>, <code>-5</code> or <code>5.5</code>. Do not put <code>hora.roa.es</code> in the offset field.</p>");
+  if (settingsNotice.length()) {
+    html += F("<pre class='warn'>");
+    html += htmlEscape(settingsNotice);
+    html += F("</pre>");
+  }
+  html += F("<p><select name='ntp.autosync'><option value='on'");
   if (configGetValue("ntp.autosync", "on") == "on") html += F(" selected");
   html += F(">ntp autosync on</option><option value='off'");
   if (configGetValue("ntp.autosync", "on") != "on") html += F(" selected");
-  html += F(">ntp autosync off</option></select></p><p><input name='ntp.server1' value='");
+  html += F(">ntp autosync off</option></select></p><p><input name='ntp.server1' placeholder='NTP server 1, e.g. pool.ntp.org' value='");
   html += htmlEscape(configGetValue("ntp.server1", "pool.ntp.org"));
-  html += F("'><input name='ntp.server2' value='");
+  html += F("'><input name='ntp.server2' placeholder='NTP server 2, e.g. time.nist.gov' value='");
   html += htmlEscape(configGetValue("ntp.server2", "time.nist.gov"));
-  html += F("'><input name='ntp.tz' value='");
+  html += F("'><input name='ntp.tz' inputmode='decimal' placeholder='UTC offset hours, e.g. 1 for UTC+1' value='");
   html += htmlEscape(configGetValue("ntp.tz", "0"));
-  html += F("' placeholder='timezone hours, e.g. 1'></p><p><button>Save NTP</button><a class='btn secondary' href='/cmd?");
+  html += F("'></p><p class='muted'>Examples: Spain winter time is <code>1</code>, Spain summer time is <code>2</code>, UTC is <code>0</code>. Server names belong only in the server fields.</p><p><button>Save NTP</button><a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
   html += F("c=ntp%20kick'>Kick now</a></p></form></section>");
   html += F("<section class='card'><h2>Sensor</h2><form method='POST' action='/settings'><input name='key' type='hidden' value='");
@@ -6066,6 +6101,10 @@ void cmdTimeNet(String args[], int argc) {
     Serial.println(F("OK"));
   } else if (sub == "tz") {
     if (argc < 3) { Serial.println(configGetValue("ntp.tz", "0")); return; }
+    if (!isSignedDecimalHours(args[2])) {
+      Serial.println(F("ntp: tz must be numeric UTC offset hours, e.g. 0, 1, 2, -5 or 5.5; not an NTP server host"));
+      return;
+    }
     Serial.println(configSetValue("ntp.tz", args[2]) ? F("OK") : F("ntp: tz failed"));
   } else if (sub == "fallback") {
     if (argc < 3) {

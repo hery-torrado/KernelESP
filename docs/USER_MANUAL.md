@@ -372,6 +372,10 @@ ntp tz -5
 ntp tz 5.5
 ```
 
+`ntp.tz` is not an NTP server field. Use numeric UTC offset hours only. Server
+names such as `pool.ntp.org`, `time.nist.gov` or `hora.roa.es` belong in
+`ntp server`.
+
 Cron and `date` use this configured time.
 
 ## 6. Relays

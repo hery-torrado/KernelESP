@@ -41,6 +41,12 @@ Tempo:
   ntp status
   ntp kick       atualização não bloqueante para scripts/cron
   ntp sync       sincronização manual bloqueante para testes
+  ntp server pool.ntp.org time.nist.gov
+  ntp tz 1
+
+Nota NTP: os campos de servidor contêm nomes de host. ntp tz é apenas o
+desvio UTC numérico em horas, por exemplo 0, 1, 2, -5 ou 5.5. Não coloques um
+servidor como hora.roa.es em ntp tz.
 
 Ficheiros:
 

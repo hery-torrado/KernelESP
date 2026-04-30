@@ -60,6 +60,10 @@ Conditional automation:
   ntp server pool.ntp.org time.nist.gov
   ntp tz 1
 
+NTP note: ntp server fields contain host names. ntp tz is only the numeric UTC
+offset in hours, for example 0, 1, 2, -5 or 5.5. Do not put a server such as
+hora.roa.es in ntp tz.
+
 Relay and GPIO:
 
   pins

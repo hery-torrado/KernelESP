@@ -720,10 +720,15 @@ ntp server pool.ntp.org time.nist.gov
 
 ### `ntp tz <hours>`
 
+Sets the local UTC offset in hours. This value is numeric only; it is not an
+NTP server name. Put hosts such as `pool.ntp.org`, `time.nist.gov` or
+`hora.roa.es` in `ntp server`, not in `ntp tz`.
+
 ```text
 ntp tz 0
 ntp tz 1
 ntp tz -5
+ntp tz 5.5
 ```
 
 ### `ntp fallback on|off` and `ntp httphost <host>`
