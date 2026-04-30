@@ -5257,9 +5257,19 @@ void handleWebProfiles() {
   html += htmlEscape(editWifiName);
   html += F("'><input name='wifi.ssid' placeholder='SSID' value='");
   html += htmlEscape(editSsid);
-  html += F("'><input name='wifi.password' type='password' placeholder='password'><input name='wifi.channel' placeholder='channel 0=auto' value='");
-  html += htmlEscape(editChannel);
-  html += F("'><input name='wifi.phy' placeholder='phy 11g/11n/11b' value='");
+  html += F("'><input name='wifi.password' type='password' placeholder='password'><select name='wifi.channel'><option value='0'");
+  if (editChannel == "0" || !editChannel.length()) html += F(" selected");
+  html += F(">Auto channel (recommended)</option>");
+  for (uint8_t ch = 1; ch <= 13; ch++) {
+    html += F("<option value='");
+    html += String(ch);
+    html += F("'");
+    if (editChannel == String(ch)) html += F(" selected");
+    html += F(">Channel ");
+    html += String(ch);
+    html += F("</option>");
+  }
+  html += F("</select><input name='wifi.phy' placeholder='phy 11g/11n/11b' value='");
   html += htmlEscape(editPhy);
   html += F("'><select name='wifi.power.dbm'><option value='10.0'");
   if (editPower == "10.0") html += F(" selected");
