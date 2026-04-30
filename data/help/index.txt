@@ -33,6 +33,7 @@ Key topics:
   quickstart       Setup path from empty board to first automation.
   commands         Compact command map.
   hardware         Pins, boot-sensitive GPIO and wiring notes.
+  pinouts          ESP-12F, NodeMCU/Wemos D1 mini and ESP-01 diagrams.
   relay            Relay setup, active_low/active_high and safe boot.
   cron             Daily, weekday and date schedules.
   email            SMTP relay setup and alert recipes.

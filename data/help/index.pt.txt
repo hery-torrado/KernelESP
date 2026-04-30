@@ -33,6 +33,7 @@ Tópicos principais:
   quickstart       Caminho da placa vazia até à primeira automação.
   commands         Mapa compacto de comandos.
   hardware         Pinos, GPIO delicados e cablagem.
+  pinouts          Esquemas ESP-12F, NodeMCU/Wemos D1 mini e ESP-01.
   relay            Relés, active_low/active_high e arranque seguro.
   cron             Horários diários, por dias e por data.
   email            SMTP e receitas de alertas.

@@ -5296,7 +5296,7 @@ void handleWebHelp() {
   if (!text.length()) text = "No local help for topic: " + topic + "\n";
   String html = webHeader("KernelESP Help", keyArg);
   html += F("<section class='card'><h2>Help</h2><p>");
-  const char* topics[] = {"index", "quickstart", "hardware", "relay", "sensor", "climate", "cron", "email", "mail", "inputs", "scripts", "web", "wifi", "files", "backup", "memory", "commands", "safety", "troubleshooting"};
+  const char* topics[] = {"index", "quickstart", "hardware", "pinouts", "relay", "sensor", "climate", "cron", "email", "mail", "inputs", "scripts", "web", "wifi", "files", "backup", "memory", "commands", "professional", "board", "release", "security", "safety", "troubleshooting"};
   for (uint8_t i = 0; i < sizeof(topics) / sizeof(topics[0]); i++) {
     html += F("<a class='btn secondary' href='/help");
     html += keyArg.length() ? "?key=" + urlEscape(keyArg) + "&topic=" : "?topic=";

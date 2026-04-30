@@ -33,6 +33,7 @@ Temas clave:
   quickstart       Ruta desde placa vacía hasta primera automatización.
   commands         Mapa compacto de comandos.
   hardware         Pines, GPIO delicados y cableado.
+  pinouts          Esquemas ESP-12F, NodeMCU/Wemos D1 mini y ESP-01.
   relay            Relés, active_low/active_high y arranque seguro.
   cron             Horarios diarios, por días y por fecha.
   email            SMTP y recetas de avisos.

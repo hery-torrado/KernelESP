@@ -1,0 +1,23 @@
+ESQUEMAS DE PINES
+=================
+
+Esta seccion muestra los esquemas principales de placas y modulos ESP8266 que
+usa KernelESP:
+
+  modulo ESP-12F
+  placas NodeMCU / Wemos D1 mini
+  modulo ESP-01
+
+Abre las imagenes de arriba, o usa los enlaces directos:
+
+  /pinout-esp12f.svg
+  /pinout-esp8266-boards.svg
+  /pinout-esp01.svg
+
+Los pines verdes suelen ser los preferidos para reles y E/S general. Los pines
+amarillos afectan al arranque y hay que tratarlos con cuidado. Los pines rojos
+son delicados para cargas normales o se usan internamente para flash, serie o
+arranque.
+
+Compara siempre el dibujo con la serigrafia exacta de tu placa antes de cablear
+hardware real.

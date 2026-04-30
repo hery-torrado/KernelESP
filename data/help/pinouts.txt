@@ -1,0 +1,22 @@
+PINOUTS
+=======
+
+This section shows the main ESP8266 board/module pinout sheets used by
+KernelESP:
+
+  ESP-12F module
+  NodeMCU / Wemos D1 mini development boards
+  ESP-01 module
+
+Open the images above, or use the direct links:
+
+  /pinout-esp12f.svg
+  /pinout-esp8266-boards.svg
+  /pinout-esp01.svg
+
+Green pins are usually preferred for relays and general I/O. Yellow pins affect
+boot mode and must be handled carefully. Red pins are risky for normal loads or
+are used internally by flash, serial or boot.
+
+Always compare the drawing with the exact silkscreen on your board before
+wiring real hardware.
