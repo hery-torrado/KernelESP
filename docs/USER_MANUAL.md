@@ -813,8 +813,9 @@ From web:
 
 The backup includes configuration files, root-level files, `/home` scripts,
 packages under `/pkg`, profiles under `/profiles`, and the persistent log.
-The same page also manages Wi-Fi profiles, including create, edit, use,
-reconnect and remove actions.
+The same page separates System Profiles from Wi-Fi Profiles. System Profiles
+are full configuration snapshots, not Wi-Fi networks. Wi-Fi Profiles include
+create, edit, use, reconnect and remove actions.
 
 ## 16. Mail Alerts
 

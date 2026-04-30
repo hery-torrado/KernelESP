@@ -218,7 +218,8 @@ Small forms that generate common commands:
 
 ### `/profiles`
 
-Profile, Wi-Fi profile and backup management. General profile loads/removals
+System profile, Wi-Fi profile and backup management. System Profiles are full
+configuration snapshots, not Wi-Fi networks; system profile loads/removals
 require a confirmation checkbox. Wi-Fi profiles can be created, edited, used,
 used with reconnect, or removed. Existing Wi-Fi passwords are not displayed in
 the editor; leaving the password field blank keeps the stored password.

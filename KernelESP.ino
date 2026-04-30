@@ -5212,11 +5212,11 @@ void handleWebProfiles() {
   String editDns1 = keyValueFromText(editWifiText, "dns1", "");
   String editDns2 = keyValueFromText(editWifiText, "dns2", "");
   String html = webHeader("KernelESP Profiles", keyArg);
-  html += F("<div class='grid'><section class='card'><h2>Profiles</h2><pre>");
+  html += F("<div class='grid'><section class='card'><h2>System Profiles</h2><p class='muted'>Full system configuration snapshots. These are not Wi-Fi networks.</p><pre>");
   html += htmlEscape(captureOutputForLine("profile list"));
   html += F("</pre><form method='POST' action='/profiles'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
-  html += F("'><input name='name' placeholder='profile name'><button name='action' value='profile_save'>Save</button> <label><input type='checkbox' name='confirm' value='yes'> Confirm load/remove</label> <button name='action' value='profile_load'>Load</button> <button name='action' value='profile_rm'>Remove</button></form></section>");
+  html += F("'><input name='name' placeholder='system profile name'><button name='action' value='profile_save'>Save snapshot</button> <label><input type='checkbox' name='confirm' value='yes'> Confirm load/remove snapshot</label> <button name='action' value='profile_load'>Load snapshot</button> <button name='action' value='profile_rm'>Remove snapshot</button></form></section>");
   html += F("<section class='card'><h2>Wi-Fi Profiles</h2><p class='muted'>Saved Wi-Fi profiles keep SSID, password, channel, PHY, power and IP mode. Passwords are not shown here.</p><pre>");
   html += htmlEscape(captureOutputForLine("wifi profile list"));
   html += F("</pre><form method='POST' action='/profiles'><input name='key' type='hidden' value='");
@@ -5249,7 +5249,7 @@ void handleWebProfiles() {
   html += F("'><input name='wifi.dns2' placeholder='dns2' value='");
   html += htmlEscape(editDns2);
   html += F("'><button name='action' value='wifi_write'>Save profile</button><button name='action' value='wifi_write_use'>Save + use now</button></form></section>");
-  html += F("<section class='card'><h2>Backup</h2><p><a class='btn' href='/backup");
+  html += F("<section class='card'><h2>Backup / Restore</h2><p><a class='btn' href='/backup");
   html += authQuery();
   html += F("'>Download backup</a><a class='btn secondary' href='/restore");
   html += authQuery();
