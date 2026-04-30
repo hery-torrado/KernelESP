@@ -3852,6 +3852,48 @@ bool webLockoutEnabled() {
   return configGetValue("web.lockout", "on") != "off";
 }
 
+static const char LOGIN_ESP12F_WEBP[] PROGMEM =
+  "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"
+  "k4AAAAA=";
+
 bool webAuthLocked() {
   return webLockoutEnabled() && webAuthLockedUntil && (long)(webAuthLockedUntil - millis()) > 0;
 }
@@ -3924,12 +3966,15 @@ bool webAuthOk() {
   String html = F("<html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width'><title>KernelESP Login</title>");
   html += F("<link rel='stylesheet' href='/style.css'><style>");
   html += F(".loginWrap{min-height:100vh;display:grid;place-items:center;padding:18px;background:#eef2f6}");
-  html += F(".loginBox{width:min(560px,100%);background:#fff;border:1px solid #d6dde7;border-radius:8px;box-shadow:0 16px 36px rgba(16,24,40,.12);overflow:hidden}");
-  html += F(".loginTop{background:#111820;color:#f7fafc;padding:18px 20px;border-bottom:4px solid #0d6b7d}.loginTop h1{margin:0;font-size:24px}.loginTop p{margin:5px 0 0;color:#c9d6e2}");
+  html += F(".loginBox{width:min(560px,100%);background:#fff;border:1px solid #d6dde7;border-radius:8px;box-shadow:0 16px 36px rgba(16,24,40,.12);overflow:hidden;position:relative}");
+  html += F(".loginEsp{position:absolute;top:8px;right:12px;width:118px;max-width:30%;height:auto;z-index:2;pointer-events:none;filter:drop-shadow(0 7px 10px rgba(0,0,0,.24));opacity:.94}");
+  html += F(".loginTop{background:#111820;color:#f7fafc;padding:18px 142px 18px 20px;border-bottom:4px solid #0d6b7d;min-height:78px;position:relative}.loginTop h1{margin:0;font-size:24px}.loginTop p{margin:5px 0 0;color:#c9d6e2}");
   html += F(".loginBody{padding:18px 20px}.loginGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.loginItem{border:1px solid #d6dde7;border-radius:7px;background:#f8fafc;padding:9px}.loginItem span{display:block;color:#667085;font-size:12px}.loginItem strong{display:block;overflow-wrap:anywhere}");
   html += F(".loginNote{border-radius:7px;padding:9px 10px;margin:10px 0;background:#ebf2ff;color:#244f96}.loginWarn{background:#fff2e8;color:#8a3f1c}.loginOk{background:#e7f6ef;color:#0f684d}.loginForm{display:block}.loginForm label{display:block;font-weight:700;margin:12px 0 6px}.loginForm button{width:100%;margin:10px 0 0}.loginHelp{border-top:1px solid #d6dde7;margin-top:14px;padding-top:12px;color:#667085;font-size:13px}");
-  html += F("@media(max-width:520px){.loginGrid{grid-template-columns:1fr}.loginTop,.loginBody{padding:16px}}");
-  html += F("</style></head><body><div class='loginWrap'><section class='loginBox'><div class='loginTop'><h1>KernelESP</h1><p>Local microcontroller console</p></div><div class='loginBody'>");
+  html += F("@media(max-width:520px){.loginGrid{grid-template-columns:1fr}.loginTop{padding:16px 104px 16px 16px;min-height:68px}.loginEsp{width:88px;right:10px;top:10px}.loginBody{padding:16px}}");
+  html += F("</style></head><body><div class='loginWrap'><section class='loginBox'><img class='loginEsp' src='data:image/webp;base64,");
+  html += FPSTR(LOGIN_ESP12F_WEBP);
+  html += F("' alt='' aria-hidden='true'><div class='loginTop'><h1>KernelESP</h1><p>Local microcontroller console</p></div><div class='loginBody'>");
   if (loggedOut) html += F("<div class='loginNote loginOk'>Signed out. Enter the web key to continue.</div>");
   else if (badKey) html += F("<div class='loginNote loginWarn'>Incorrect key. Check the web key or use the serial console to change it.</div>");
   else if (webKey() == "admin") html += F("<div class='loginNote loginWarn'>The web key is still the factory default. Change it after setup.</div>");

@@ -13,15 +13,6 @@ fi
 ESPTOOL_PY="${ESPTOOL_PY:-$HOME/Library/Arduino15/packages/esp8266/hardware/esp8266/3.1.2/tools/esptool/esptool.py}"
 BIN="$PROJECT_DIR/build/esp8266.esp8266.generic/KernelESP.ino.bin"
 
-case "$PORT" in
-  /dev/cu.usbserial-*)
-    TTY_PORT="/dev/tty.${PORT#/dev/cu.}"
-    if [ -e "$TTY_PORT" ]; then
-      PORT="$TTY_PORT"
-    fi
-    ;;
-esac
-
 if [ ! -f "$BIN" ]; then
   "$PROJECT_DIR/tools/compile.sh"
 fi

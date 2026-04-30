@@ -14,7 +14,7 @@ else
 fi
 
 printf '== UTF-8 and mojibake check ==\n'
-iconv -f UTF-8 -t UTF-8 README.md KernelESP.ino docs/*.md data/help/*.txt data/www/* >/dev/null
+iconv -f UTF-8 -t UTF-8 README.md KernelESP.ino docs/*.md data/help/*.txt data/www/*.css data/www/*.html data/www/*.js data/www/*.svg >/dev/null
 if command -v rg >/dev/null 2>&1; then
   if rg -n 'Ã|Â|�' README.md docs data/help data/www KernelESP.ino; then
     printf 'encoding artifacts found\n' >&2

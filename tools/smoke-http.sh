@@ -67,6 +67,7 @@ printf 'HTTP smoke test: %s\n' "$BASE"
   -D "$HEADER_OUT" "$BASE/logout" -o /dev/null
 grep -qi 'Set-Cookie: KESP=.*Max-Age=0' "$HEADER_OUT"
 "$CURL" -sS --max-time 15 -b "$COOKIE_JAR" "$BASE/" | grep -q 'KernelESP Login'
+"$CURL" -sS --max-time 15 "$BASE/" | grep -q 'data:image/webp;base64'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index" | grep -q 'KernelESP'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index&lang=es" | grep -q 'AYUDA DE KERNELESP'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=index&lang=pt" | grep -q 'AJUDA DO KERNELESP'
