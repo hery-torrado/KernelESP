@@ -674,7 +674,9 @@ ntp kick
 ### `ntp sync`
 
 Run a blocking NTP sync and wait briefly for a valid clock. Use this manually
-from serial or the web console when you want immediate feedback.
+from serial or the web console when you want immediate feedback. If NTP does
+not produce a valid clock and HTTP fallback is enabled, this command also tries
+the configured HTTP `Date` header fallback.
 
 ```text
 ntp sync
@@ -692,6 +694,9 @@ ntp http example.com
 
 ### `ntp status`
 
+Shows the configured servers, timezone, HTTP fallback, pending state, retry
+count, last attempt age, next retry delay and current time state.
+
 ```text
 ntp status
 ```
@@ -700,7 +705,8 @@ ntp status
 
 Enable or disable the background NTP worker. When enabled, KernelESP queues a
 non-blocking NTP refresh after Wi-Fi connects and retries in the background; it
-does not wait inside the command loop.
+does not wait inside the command loop. Early boot retries are intentionally
+short so the clock recovers soon after Wi-Fi and DNS become usable.
 
 ```text
 ntp auto on

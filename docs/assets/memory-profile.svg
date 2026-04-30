@@ -5,8 +5,8 @@
   <rect class="bg" width="1000" height="420"/>
   <text x="60" y="58" class="h">KernelESP 0.10.0 memory profile</text>
   <text x="60" y="92" class="t">Last verified build after pipes and GitHub preparation</text>
-  <text x="80" y="155" class="label">Global RAM</text><rect x="260" y="132" width="620" height="34" rx="8" class="bar"/><rect x="260" y="132" width="331" height="34" rx="8" class="ram"/><text x="900" y="155" class="t">42756 / 80192 bytes, 53%</text>
+  <text x="80" y="155" class="label">Global RAM</text><rect x="260" y="132" width="620" height="34" rx="8" class="bar"/><rect x="260" y="132" width="331" height="34" rx="8" class="ram"/><text x="900" y="155" class="t">42816 / 80192 bytes, 53%</text>
   <text x="80" y="225" class="label">IRAM</text><rect x="260" y="202" width="620" height="34" rx="8" class="bar"/><rect x="260" y="202" width="589" height="34" rx="8" class="iram"/><text x="900" y="225" class="t">62567 / 65536 bytes, 95%</text>
-  <text x="80" y="295" class="label">Flash app</text><rect x="260" y="272" width="620" height="34" rx="8" class="bar"/><rect x="260" y="272" width="289" height="34" rx="8" class="flash"/><text x="900" y="295" class="t">488872 / 1048576 bytes, 46%</text>
+  <text x="80" y="295" class="label">Flash app</text><rect x="260" y="272" width="620" height="34" rx="8" class="bar"/><rect x="260" y="272" width="289" height="34" rx="8" class="flash"/><text x="900" y="295" class="t">489440 / 1048576 bytes, 46%</text>
   <text x="80" y="360" class="t">Runtime heap is normally around 30-33 KB free. IRAM is the tightest resource.</text>
 </svg>

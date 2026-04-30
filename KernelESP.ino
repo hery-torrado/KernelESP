@@ -142,8 +142,9 @@ KernelConsole KernelSerial(Serial);
 #define WIFI_ATTEMPT_EVENT_FAILS 12
 #define WIFI_RETRY_MIN_MS 5000UL
 #define WIFI_RETRY_MAX_MS 60000UL
-#define NTP_RETRY_MIN_MS 60000UL
-#define NTP_RETRY_MAX_MS 300000UL
+#define NTP_RETRY_MIN_MS 10000UL
+#define NTP_RETRY_MAX_MS 120000UL
+#define NTP_HTTP_FALLBACK_RETRIES 2
 #define WIFI_PROFILE_DIR "/profiles/wifi"
 
 struct LogLine {
@@ -5683,11 +5684,15 @@ bool ntpSync(bool waitForSync) {
   if (!waitForSync) return true;
   Serial.print(F("ntp sync"));
   time_t now = time(nullptr);
-  for (uint8_t i = 0; i < 24 && now < 1600000000; i++) {
+  for (uint8_t i = 0; i < 40 && now < 1600000000; i++) {
     delay(250);
     Serial.print('.');
     yield();
     now = time(nullptr);
+  }
+  if (now < 1600000000 && configGetValue("time.http_fallback", "on") == "on") {
+    Serial.print(F(" http"));
+    if (httpTimeSync(configGetValue("time.http_host", "example.com"))) now = time(nullptr);
   }
   Serial.println();
   ntpSyncedOnce = now >= 1600000000;
@@ -5730,7 +5735,7 @@ void processNtp() {
     ntpPendingSync = true;
     if (ntpRetryCount < 255) ntpRetryCount++;
     ntpSync(false);
-    if (ntpRetryCount >= 3 && configGetValue("time.http_fallback", "on") == "on") {
+    if (ntpRetryCount >= NTP_HTTP_FALLBACK_RETRIES && configGetValue("time.http_fallback", "on") == "on") {
       httpTimeSync(configGetValue("time.http_host", "example.com"));
     }
   }
@@ -5745,9 +5750,18 @@ String timeStatusText() {
   out += "ntp.tz=" + configGetValue("ntp.tz", "0") + "\n";
   out += "time.http_fallback=" + configGetValue("time.http_fallback", "on") + "\n";
   out += "time.http_host=" + configGetValue("time.http_host", "example.com") + "\n";
+  out += "ntp.pending=" + String(ntpPendingSync ? "yes" : "no") + "\n";
   out += "ntp.retry_count=" + String(ntpRetryCount) + "\n";
+  if (lastNtpSyncMs) {
+    unsigned long elapsed = millis() - lastNtpSyncMs;
+    unsigned long retryMs = NTP_RETRY_MIN_MS;
+    for (uint8_t i = 1; i < ntpRetryCount && retryMs < NTP_RETRY_MAX_MS; i++) retryMs *= 2;
+    if (retryMs > NTP_RETRY_MAX_MS) retryMs = NTP_RETRY_MAX_MS;
+    out += "ntp.last_attempt_ms_ago=" + String(elapsed) + "\n";
+    out += "ntp.next_retry_ms=" + String(ntpPendingSync && elapsed < retryMs ? retryMs - elapsed : 0) + "\n";
+  }
   if (now < 1600000000) {
-    out += "time: not synced\n";
+    out += "time: " + String(ntpPendingSync ? "sync pending" : "not synced") + "\n";
   } else {
     out += "epoch: " + String((unsigned long)now) + "\n";
     out += String(ctime(&now));

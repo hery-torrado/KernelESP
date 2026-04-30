@@ -93,9 +93,9 @@ If upload fails with `Device not configured`, wait a few seconds and retry.
 ## Last Verified Compile Size
 
 ```text
-RAM global: 42756 / 80192 bytes, 53%
+RAM global: 42816 / 80192 bytes, 53%
 IRAM:       62567 / 65536 bytes, 95%
-Flash app: 488872 / 1048576 bytes, 46%
+Flash app: 489440 / 1048576 bytes, 46%
 ```
 
 ## Last Verified Runtime State

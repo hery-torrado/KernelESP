@@ -234,9 +234,9 @@ SKIP_COMPILE=1 tools/verify.sh
 Last verified build for `0.10.0`:
 
 ```text
-RAM global: 42756 / 80192 bytes, 53%
+RAM global: 42816 / 80192 bytes, 53%
 IRAM:       62567 / 65536 bytes, 95%
-Flash app: 488872 / 1048576 bytes, 46%
+Flash app: 489440 / 1048576 bytes, 46%
 LittleFS:  about 1.00 MB free after web/help assets on the tested 4 MB module
 Runtime heap: around 30-33 KB free in normal web use
 ```
