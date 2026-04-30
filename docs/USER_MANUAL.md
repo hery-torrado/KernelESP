@@ -298,6 +298,11 @@ wifi profile list
 wifi profile use work
 ```
 
+The `/profiles` web page can also create and edit Wi-Fi profiles. The editor
+lets you set the profile name, SSID, password, channel, PHY, transmit power,
+DHCP/static IP fields and DNS. When editing an existing profile, leave the
+password field blank to keep the stored password.
+
 For a compact diagnosis with repair hints:
 
 ```text
@@ -808,6 +813,8 @@ From web:
 
 The backup includes configuration files, root-level files, `/home` scripts,
 packages under `/pkg`, profiles under `/profiles`, and the persistent log.
+The same page also manages Wi-Fi profiles, including create, edit, use,
+reconnect and remove actions.
 
 ## 16. Mail Alerts
 

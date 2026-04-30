@@ -5140,28 +5140,77 @@ void handleWebProfiles() {
   if (!webAuthOk()) return;
   String keyArg = webServer.arg("key");
   String result;
+  String editWifiName;
+  String editWifiText;
   if (webServer.method() == HTTP_POST) {
     String action = webServer.arg("action");
     String name = webServer.arg("name");
     name.trim();
     String wifiName = webServer.arg("wifi.name");
     wifiName.trim();
+    String safeWifiName = safeName(wifiName);
     if (action == "profile_save" && name.length()) {
       result = "$ profile save " + name + "\n" + captureOutputForLine("profile save " + name);
     } else if (action == "profile_load" && name.length() && webServer.arg("confirm") == "yes") {
       result = "$ profile load " + name + " --yes\n" + captureOutputForLine("profile load " + name + " --yes");
     } else if (action == "profile_rm" && name.length() && webServer.arg("confirm") == "yes") {
       result = "$ profile rm " + name + "\n" + captureOutputForLine("profile rm " + name);
-    } else if (action == "wifi_save" && wifiName.length()) {
+    } else if (action == "wifi_save" && safeWifiName.length()) {
       result = "$ wifi profile save " + wifiName + "\n" + captureOutputForLine("wifi profile save " + wifiName);
-    } else if (action == "wifi_use" && wifiName.length()) {
+    } else if (action == "wifi_use" && safeWifiName.length()) {
       result = "$ wifi profile use " + wifiName + "\n" + captureOutputForLine("wifi profile use " + wifiName);
-    } else if (action == "wifi_reconnect" && wifiName.length()) {
+    } else if (action == "wifi_reconnect" && safeWifiName.length()) {
       result = "$ wifi profile use " + wifiName + " reconnect\n" + captureOutputForLine("wifi profile use " + wifiName + " reconnect");
-    } else if (action == "wifi_rm" && wifiName.length() && webServer.arg("wifi.confirm") == "yes") {
+    } else if (action == "wifi_rm" && safeWifiName.length() && webServer.arg("wifi.confirm") == "yes") {
       result = "$ wifi profile rm " + wifiName + "\n" + captureOutputForLine("wifi profile rm " + wifiName);
+    } else if (action == "wifi_edit" && safeWifiName.length()) {
+      editWifiName = safeWifiName;
+      editWifiText = readWholeFile(wifiProfilePath(editWifiName));
+      if (!editWifiText.length()) result = "wifi profile: not found\n";
+    } else if ((action == "wifi_write" || action == "wifi_write_use") && safeWifiName.length()) {
+      LittleFS.mkdir(WIFI_PROFILE_DIR);
+      String oldText = readWholeFile(wifiProfilePath(safeWifiName));
+      String ssid = webServer.arg("wifi.ssid");
+      ssid.trim();
+      if (!ssid.length()) {
+        result = "wifi profile: SSID is required\n";
+      } else {
+        String pass = webServer.arg("wifi.password");
+        if (!pass.length() && oldText.length()) pass = keyValueFromText(oldText, "password", "");
+        String text;
+        text += "ssid=" + ssid + "\n";
+        text += "password=" + pass + "\n";
+        text += "channel=" + (webServer.arg("wifi.channel").length() ? webServer.arg("wifi.channel") : "0") + "\n";
+        text += "phy=" + (webServer.arg("wifi.phy").length() ? webServer.arg("wifi.phy") : "11g") + "\n";
+        text += "power.dbm=" + (webServer.arg("wifi.power.dbm").length() ? webServer.arg("wifi.power.dbm") : "17.5") + "\n";
+        text += "dhcp=" + (webServer.arg("wifi.dhcp").length() ? webServer.arg("wifi.dhcp") : "on") + "\n";
+        text += "ip=" + webServer.arg("wifi.ip") + "\n";
+        text += "gateway=" + webServer.arg("wifi.gateway") + "\n";
+        text += "mask=" + webServer.arg("wifi.mask") + "\n";
+        text += "dns1=" + webServer.arg("wifi.dns1") + "\n";
+        text += "dns2=" + webServer.arg("wifi.dns2") + "\n";
+        bool ok = writeWholeFile(wifiProfilePath(safeWifiName), text);
+        result = ok ? "wifi profile saved: " + safeWifiName + "\n" : "wifi profile: save failed\n";
+        if (ok && action == "wifi_write_use") result += captureOutputForLine("wifi profile use " + safeWifiName + " reconnect");
+        editWifiName = safeWifiName;
+        editWifiText = text;
+      }
     }
   }
+  if (!editWifiName.length() && webServer.hasArg("editwifi")) {
+    editWifiName = safeName(webServer.arg("editwifi"));
+    editWifiText = readWholeFile(wifiProfilePath(editWifiName));
+  }
+  String editSsid = keyValueFromText(editWifiText, "ssid", "");
+  String editChannel = keyValueFromText(editWifiText, "channel", "0");
+  String editPhy = keyValueFromText(editWifiText, "phy", "11g");
+  String editPower = keyValueFromText(editWifiText, "power.dbm", "17.5");
+  String editDhcp = keyValueFromText(editWifiText, "dhcp", "on");
+  String editIp = keyValueFromText(editWifiText, "ip", "");
+  String editGateway = keyValueFromText(editWifiText, "gateway", "");
+  String editMask = keyValueFromText(editWifiText, "mask", "");
+  String editDns1 = keyValueFromText(editWifiText, "dns1", "");
+  String editDns2 = keyValueFromText(editWifiText, "dns2", "");
   String html = webHeader("KernelESP Profiles", keyArg);
   html += F("<div class='grid'><section class='card'><h2>Profiles</h2><pre>");
   html += htmlEscape(captureOutputForLine("profile list"));
@@ -5172,7 +5221,34 @@ void handleWebProfiles() {
   html += htmlEscape(captureOutputForLine("wifi profile list"));
   html += F("</pre><form method='POST' action='/profiles'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
-  html += F("'><input name='wifi.name' placeholder='wifi profile name'><button name='action' value='wifi_save'>Save current Wi-Fi</button><button name='action' value='wifi_use'>Use</button><button name='action' value='wifi_reconnect'>Use + reconnect</button> <label><input type='checkbox' name='wifi.confirm' value='yes'> Confirm remove</label> <button name='action' value='wifi_rm'>Remove</button></form></section>");
+  html += F("'><input name='wifi.name' placeholder='wifi profile name'><button name='action' value='wifi_edit'>Load editor</button><button name='action' value='wifi_save'>Save current Wi-Fi</button><button name='action' value='wifi_use'>Use</button><button name='action' value='wifi_reconnect'>Use + reconnect</button> <label><input type='checkbox' name='wifi.confirm' value='yes'> Confirm remove</label> <button name='action' value='wifi_rm'>Remove</button></form></section>");
+  html += F("<section class='card'><h2>Create / Edit Wi-Fi Profile</h2><p class='muted'>Leave password blank while editing to keep the stored password.</p><form method='POST' action='/profiles'><input name='key' type='hidden' value='");
+  html += htmlEscape(keyArg);
+  html += F("'><input name='wifi.name' placeholder='profile name' value='");
+  html += htmlEscape(editWifiName);
+  html += F("'><input name='wifi.ssid' placeholder='SSID' value='");
+  html += htmlEscape(editSsid);
+  html += F("'><input name='wifi.password' type='password' placeholder='password'><input name='wifi.channel' placeholder='channel 0=auto' value='");
+  html += htmlEscape(editChannel);
+  html += F("'><input name='wifi.phy' placeholder='phy 11g/11n/11b' value='");
+  html += htmlEscape(editPhy);
+  html += F("'><input name='wifi.power.dbm' placeholder='power dBm' value='");
+  html += htmlEscape(editPower);
+  html += F("'><select name='wifi.dhcp'><option value='on'");
+  if (editDhcp != "off") html += F(" selected");
+  html += F(">DHCP on</option><option value='off'");
+  if (editDhcp == "off") html += F(" selected");
+  html += F(">static IP</option></select><input name='wifi.ip' placeholder='IP' value='");
+  html += htmlEscape(editIp);
+  html += F("'><input name='wifi.gateway' placeholder='gateway' value='");
+  html += htmlEscape(editGateway);
+  html += F("'><input name='wifi.mask' placeholder='mask' value='");
+  html += htmlEscape(editMask);
+  html += F("'><input name='wifi.dns1' placeholder='dns1' value='");
+  html += htmlEscape(editDns1);
+  html += F("'><input name='wifi.dns2' placeholder='dns2' value='");
+  html += htmlEscape(editDns2);
+  html += F("'><button name='action' value='wifi_write'>Save profile</button><button name='action' value='wifi_write_use'>Save + use now</button></form></section>");
   html += F("<section class='card'><h2>Backup</h2><p><a class='btn' href='/backup");
   html += authQuery();
   html += F("'>Download backup</a><a class='btn secondary' href='/restore");
