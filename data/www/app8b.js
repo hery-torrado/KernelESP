@@ -1,6 +1,7 @@
+(()=>{if(window.kespApp8bLoaded)return;window.kespApp8bLoaded=1;
 let oldStatus=refreshStatus;refreshStatus=async()=>{await oldStatus();paintBadges()};
 let oldLive=refreshLive;refreshLive=async()=>{await oldLive();paintSensor()};
-let oldRelays=relays;relays=rs=>{oldRelays(rs);setTimeout(paintRelays,0)};
+let oldRelays8b=relays;relays=rs=>{oldRelays8b(rs);setTimeout(paintRelays,0)};
 function badge(t,k){return`<span class="kbadge ${k}">${esc(t)}</span>`}
 function paintBadges(){$$(".stat").forEach(a=>{let l=$("span",a)?.textContent,v=$("strong",a);if(!l||!v||v.dataset.badge)return;let t=v.textContent,k="note";if(l=="Wi-Fi")k=t=="connected"?"ok":"bad";else if(l=="Armed")k=t=="on"?"ok":"warn";else if(l=="Time")k=t=="synced"?"ok":"warn";else if(l=="Heap"||l=="LittleFS"||l=="Max block")k="ok";v.dataset.badge=1;v.innerHTML=badge(t,k)})}
 function paintRelays(){$$("#relays .relay").forEach(r=>$$(".pill",r).forEach(p=>{let t=p.textContent;p.classList.toggle("on",t=="ON");p.classList.toggle("off",t=="OFF")}))}
@@ -10,3 +11,4 @@ document.addEventListener("input",e=>{if(e.target.id=="scriptText")lineNums()});
 document.addEventListener("scroll",e=>{if(e.target.id=="scriptText")$("#scriptLines").scrollTop=e.target.scrollTop},true);
 addScripts();
 setTimeout(()=>{paintBadges();paintSensor();paintRelays()},1200);
+})();
