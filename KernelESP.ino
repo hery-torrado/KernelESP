@@ -493,7 +493,7 @@ void ensureUnixDefaults() {
     writeWholeFile("/help/wifi.txt", "wifi status\nwifi reconnect\nap start\nap status\n");
   }
   if (!LittleFS.exists("/help/web.txt")) {
-    writeWholeFile("/help/web.txt", "/diag status and recovery\n/wizard relay/rule/cron forms\n/wifi-profiles Wi-Fi network profiles\n/system-profiles snapshots and backup\n/edit scripts\n");
+    writeWholeFile("/help/web.txt", "/automations relays, schedules, rules and scripts\n/diag status and recovery\n/wifi-profiles Wi-Fi network profiles\n/system-profiles snapshots and backup\n");
   }
   if (!LittleFS.exists("/help/safety.txt")) {
     writeWholeFile("/help/safety.txt", "arm\ndisarm\narmed\nfsformat --yes\nrestore <file> --yes\nprofile load <name> --yes\n");
@@ -3849,13 +3849,9 @@ String webHeader(const String& title, const String& keyArg) {
   html += query;
   html += F("'>Dashboard</a><a href='/ui");
   html += query;
-  html += F("'>Live UI</a><a href='/edit");
+  html += F("'>Live UI</a><a href='/automations");
   html += query;
-  html += F("'>Editor</a><a href='/automations");
-  html += query;
-  html += F("'>Auto</a><a href='/wizard");
-  html += query;
-  html += F("'>Wizard</a><a href='/diag");
+  html += F("'>Automation</a><a href='/diag");
   html += query;
   html += F("'>Diag</a><a href='/wifi-profiles");
   html += query;
@@ -3863,9 +3859,7 @@ String webHeader(const String& title, const String& keyArg) {
   html += query;
   html += F("'>System Profiles</a><a href='/help");
   html += query;
-  html += F("'>Help</a><a href='/relays");
-  html += query;
-  html += F("'>Relays</a><a href='/logs");
+  html += F("'>Help</a><a href='/logs");
   html += query;
   html += F("'>Logs</a><a href='/settings");
   html += query;
@@ -4319,13 +4313,11 @@ void handleWebRoot() {
   html += authParamPrefix();
   html += F("c=ls%20/'>ls /</a> <a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
-  html += F("c=relay%20status'>relay status</a> <a class='btn secondary' href='/cmd?");
+  html += F("c=health'>health</a> <a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
-  html += F("c=timer%20list'>timers</a> <a class='btn secondary' href='/cmd?");
+  html += F("c=df'>df</a> <a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
-  html += F("c=rule%20list'>rules</a> <a class='btn secondary' href='/cmd?");
-  html += authParamPrefix();
-  html += F("c=cron%20list'>cron</a></p></section></div>");
+  html += F("c=date'>date</a></p></section></div>");
   html += F("<div class='grid'><section class='card'><h2>Time</h2><pre>");
   html += htmlEscape(timeStatusText());
   html += F("</pre><p><a class='btn secondary' href='/cmd?");
@@ -4339,55 +4331,17 @@ void handleWebRoot() {
   html += F("'>Sensor API</a><a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
   html += F("c=i2c%20scan'>I2C scan</a></p></section></div>");
-  html += F("<section class='card'><h2>Relays</h2>");
-  bool anyRelay = false;
-  for (uint8_t i = 0; i < MAX_RELAYS; i++) {
-    if (!relays[i].configured) continue;
-    anyRelay = true;
-    html += F("<div class='relay'><div><strong>");
-    html += htmlEscape(relays[i].name);
-    html += F("</strong> <span class='pill'>GPIO");
-    html += String(relays[i].pin);
-    html += F("</span> ");
-    html += relays[i].state ? F("<span class='pill'>ON</span>") : F("<span class='pill'>OFF</span>");
-    html += F("</div><div><a class='btn ok' href='/relay?");
-    html += authParamPrefix();
-    html += F("name=");
-    html += htmlEscape(relays[i].name);
-    html += F("&state=on'>ON</a><a class='btn warn' href='/relay?");
-    html += authParamPrefix();
-    html += F("name=");
-    html += htmlEscape(relays[i].name);
-    html += F("&state=off'>OFF</a><a class='btn secondary' href='/relay?");
-    html += authParamPrefix();
-    html += F("name=");
-    html += htmlEscape(relays[i].name);
-    html += F("&state=toggle'>TOGGLE</a><a class='btn secondary' href='/relay?");
-    html += authParamPrefix();
-    html += F("name=");
-    html += htmlEscape(relays[i].name);
-    html += F("&state=pulse&ms=500'>PULSE</a></div></div>");
-  }
-  if (!anyRelay) html += F("<p class='muted'>No relays configured. Use serial or command: <code>relay add light D1 active_low</code></p>");
-  html += F("</section><div class='grid'><section class='card'><h2>Scripts</h2><p><a class='btn' href='/edit");
-  html += keyArg.length() ? "?key=" + urlEscape(keyArg) + "&path=/boot.sh" : "?path=/boot.sh";
-  html += F("'>Edit /boot.sh</a> <a class='btn secondary' href='/edit");
+  html += F("<section class='card'><h2>Management</h2><p><a class='btn' href='/automations");
   html += authQuery();
-  html += F("'>Open editor</a></p>");
-  html += fileRowsHtml("/", keyArg);
-  html += F("</section><section class='card'><h2>Tools</h2><p><a class='btn secondary' href='/logs");
+  html += F("'>Automation</a><a class='btn secondary' href='/diag");
   html += authQuery();
-  html += F("'>Logs</a><a class='btn secondary' href='/settings");
-  html += authQuery();
-  html += F("'>Settings</a><a class='btn secondary' href='/automations");
-  html += authQuery();
-  html += F("'>Automations</a><a class='btn secondary' href='/cmd?");
+  html += F("'>Diagnostics</a><a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
   html += F("c=health'>Health</a><a class='btn secondary' href='/restore");
   html += authQuery();
   html += F("'>Restore</a><a class='btn secondary' href='/backup");
   html += authQuery();
-  html += F("'>Backup</a></p></section></div>");
+  html += F("'>Backup</a></p></section>");
   html += webFooter();
   webServer.send(200, "text/html", html);
 }
@@ -4403,19 +4357,58 @@ void handleWebRelay() {
   else if (state == "toggle") changed = applyRelay(idx, !relays[idx].state);
   else changed = applyRelay(idx, state == "on");
   if (changed) saveRelays();
-  webServer.sendHeader("Location", "/" + authQuery());
+  String back = webServer.arg("back");
+  if (back == "/automations" || back == "/relays") webServer.sendHeader("Location", back + authQuery());
+  else webServer.sendHeader("Location", "/" + authQuery());
   webServer.send(303);
 }
 
-void handleWebRelaysPage() {
-  if (!webAuthOk()) return;
-  String keyArg = webServer.arg("key");
-  String html = webHeader("KernelESP Relays", keyArg);
+String webWizardCommandFromArgs() {
+  String kind = webServer.arg("kind");
+  String cmd;
+  if (kind == "relay") {
+    cmd = "relay add " + webServer.arg("name") + " " + webServer.arg("pin") + " " + webServer.arg("mode");
+  } else if (kind == "schedule") {
+    cmd = "schedule " + webServer.arg("relay") + " " + webServer.arg("on") + " " + webServer.arg("off");
+  } else if (kind == "climate") {
+    cmd = "climate " + webServer.arg("metric") + " " + webServer.arg("relay") + " " + webServer.arg("low") + " " + webServer.arg("high");
+  } else if (kind == "input") {
+    cmd = "input add " + webServer.arg("name") + " " + webServer.arg("pin") + " " + webServer.arg("mode");
+  }
+  return cmd;
+}
+
+void appendWebWizardForms(String& html, const String& keyArg, const String& actionPath) {
+  html += F("<div class='grid'><section class='card'><h2>Relay Setup</h2><form method='POST' action='");
+  html += actionPath;
+  html += F("'><input name='key' type='hidden' value='");
+  html += htmlEscape(keyArg);
+  html += F("'><input name='kind' type='hidden' value='relay'><p><input name='name' placeholder='name' value='light'><input name='pin' placeholder='D1'><select name='mode'><option value='active_low'>active_low</option><option value='active_high'>active_high</option></select></p><p><button>Add relay</button></p></form></section>");
+  html += F("<section class='card'><h2>Daily Schedule</h2><form method='POST' action='");
+  html += actionPath;
+  html += F("'><input name='key' type='hidden' value='");
+  html += htmlEscape(keyArg);
+  html += F("'><input name='kind' type='hidden' value='schedule'><p><input name='relay' placeholder='relay'><input name='on' placeholder='08:00'><input name='off' placeholder='20:00'></p><p><button>Add daily schedule</button></p></form></section></div>");
+  html += F("<div class='grid'><section class='card'><h2>Climate Rule</h2><form method='POST' action='");
+  html += actionPath;
+  html += F("'><input name='key' type='hidden' value='");
+  html += htmlEscape(keyArg);
+  html += F("'><input name='kind' type='hidden' value='climate'><p><select name='metric'><option value='temp'>temperature</option><option value='hum'>humidity</option></select><input name='relay' placeholder='relay'><input name='low' placeholder='low'><input name='high' placeholder='high'></p><p><button>Add rule</button></p></form></section>");
+  html += F("<section class='card'><h2>Input Watcher</h2><form method='POST' action='");
+  html += actionPath;
+  html += F("'><input name='key' type='hidden' value='");
+  html += htmlEscape(keyArg);
+  html += F("'><input name='kind' type='hidden' value='input'><p><input name='name' placeholder='button'><input name='pin' placeholder='D2'><select name='mode'><option value='pullup'>pullup</option><option value='float'>float</option></select></p><p><button>Add input</button></p></form></section></div>");
+}
+
+void appendWebRelayControls(String& html, const String& keyArg, const String& backRoute) {
   html += F("<section class='card'><h2>Relays</h2><pre>");
   html += htmlEscape(relayStatusText());
   html += F("</pre>");
+  bool anyRelay = false;
   for (uint8_t i = 0; i < MAX_RELAYS; i++) {
     if (!relays[i].configured) continue;
+    anyRelay = true;
     html += F("<div class='relay'><div><strong>");
     html += htmlEscape(relays[i].name);
     html += F("</strong> GPIO");
@@ -4428,23 +4421,39 @@ void handleWebRelaysPage() {
     html += authParamPrefix();
     html += F("name=");
     html += urlEscape(relays[i].name);
+    html += F("&back=");
+    html += urlEscape(backRoute);
     html += F("&state=on'>ON</a><a class='btn warn' href='/relay?");
     html += authParamPrefix();
     html += F("name=");
     html += urlEscape(relays[i].name);
+    html += F("&back=");
+    html += urlEscape(backRoute);
     html += F("&state=off'>OFF</a><a class='btn secondary' href='/relay?");
     html += authParamPrefix();
     html += F("name=");
     html += urlEscape(relays[i].name);
+    html += F("&back=");
+    html += urlEscape(backRoute);
     html += F("&state=toggle'>TOGGLE</a><a class='btn secondary' href='/relay?");
     html += authParamPrefix();
     html += F("name=");
     html += urlEscape(relays[i].name);
+    html += F("&back=");
+    html += urlEscape(backRoute);
     html += F("&state=pulse&ms=500'>PULSE</a></div></div>");
   }
-  html += F("<h2>Add relay</h2><form action='/cmd'><input name='key' type='hidden' value='");
+  if (!anyRelay) html += F("<p class='muted'>(no relays)</p>");
+  html += F("<h2>Add Relay</h2><form action='/cmd'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
   html += F("'><input name='c' value='relay add light D1 active_low'><button>Run</button></form></section>");
+}
+
+void handleWebRelaysPage() {
+  if (!webAuthOk()) return;
+  String keyArg = webServer.arg("key");
+  String html = webHeader("KernelESP Relays", keyArg);
+  appendWebRelayControls(html, keyArg, "/relays");
   html += webFooter();
   webServer.send(200, "text/html", html);
 }
@@ -4452,8 +4461,18 @@ void handleWebRelaysPage() {
 void handleWebAutomations() {
   if (!webAuthOk()) return;
   String keyArg = webServer.arg("key");
-  String html = webHeader("KernelESP Automations", keyArg);
-  html += F("<div class='grid'><section class='card'><h2>Jobs</h2><pre>");
+  String result;
+  if (webServer.method() == HTTP_POST) {
+    String cmd = webWizardCommandFromArgs();
+    if (cmd.length()) result = "$ " + cmd + "\n" + captureOutputForLine(cmd);
+  }
+  String html = webHeader("KernelESP Automation", keyArg);
+  if (result.length()) {
+    html += F("<section class='card'><h2>Result</h2><pre>");
+    html += htmlEscape(result);
+    html += F("</pre></section>");
+  }
+  html += F("<div class='grid'><section class='card'><h2>Automation Overview</h2><pre>");
   html += htmlEscape(captureOutputForLine("jobs"));
   html += F("</pre></section><section class='card'><h2>Inputs</h2><pre>");
   html += htmlEscape(inputsText());
@@ -4463,7 +4482,9 @@ void handleWebAutomations() {
   html += F("</pre></section><section class='card'><h2>State</h2><pre>");
   String state = readWholeFile(CONF_STATE);
   html += htmlEscape(state.length() ? state : "(empty)\n");
-  html += F("</pre></section></div><section class='card'><h2>Command</h2><form action='/cmd'><input name='key' type='hidden' value='");
+  html += F("</pre></section></div>");
+  appendWebRelayControls(html, keyArg, "/automations");
+  html += F("<section class='card'><h2>Schedules, Rules and Timers</h2><form action='/cmd'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
   html += F("'><input name='c' placeholder='cron add daily 08:00 relay on pump'><button>Run</button></form><p>");
   html += F("<a class='btn secondary' href='/cmd?");
@@ -4476,7 +4497,19 @@ void handleWebAutomations() {
   html += authParamPrefix();
   html += F("c=scene%20list'>Scenes</a><a class='btn secondary' href='/cmd?");
   html += authParamPrefix();
-  html += F("c=input%20list'>Inputs</a></p></section>");
+  html += F("c=input%20list'>Inputs</a><a class='btn secondary' href='/ui");
+  html += authQuery();
+  html += F("'>Live UI</a></p></section>");
+  html += F("<section class='card'><h2>Scripts</h2><p><a class='btn' href='/edit");
+  html += keyArg.length() ? "?key=" + urlEscape(keyArg) + "&path=/boot.sh" : "?path=/boot.sh";
+  html += F("'>Edit /boot.sh</a><a class='btn secondary' href='/edit");
+  html += authQuery();
+  html += F("'>Open script editor</a><a class='btn secondary' href='/ui");
+  html += authQuery();
+  html += F("'>Live script editor</a></p>");
+  html += fileRowsHtml("/", keyArg);
+  html += F("</section>");
+  appendWebWizardForms(html, keyArg, "/automations");
   html += webFooter();
   webServer.send(200, "text/html", html);
 }
@@ -5364,17 +5397,7 @@ void handleWebWizard() {
   String keyArg = webServer.arg("key");
   String result;
   if (webServer.method() == HTTP_POST) {
-    String kind = webServer.arg("kind");
-    String cmd;
-    if (kind == "relay") {
-      cmd = "relay add " + webServer.arg("name") + " " + webServer.arg("pin") + " " + webServer.arg("mode");
-    } else if (kind == "schedule") {
-      cmd = "schedule " + webServer.arg("relay") + " " + webServer.arg("on") + " " + webServer.arg("off");
-    } else if (kind == "climate") {
-      cmd = "climate " + webServer.arg("metric") + " " + webServer.arg("relay") + " " + webServer.arg("low") + " " + webServer.arg("high");
-    } else if (kind == "input") {
-      cmd = "input add " + webServer.arg("name") + " " + webServer.arg("pin") + " " + webServer.arg("mode");
-    }
+    String cmd = webWizardCommandFromArgs();
     if (cmd.length()) result = "$ " + cmd + "\n" + captureOutputForLine(cmd);
   }
   String html = webHeader("KernelESP Wizard", keyArg);
@@ -5383,18 +5406,7 @@ void handleWebWizard() {
     html += htmlEscape(result);
     html += F("</pre></section>");
   }
-  html += F("<div class='grid'><section class='card'><h2>Relay</h2><form method='POST' action='/wizard'><input name='key' type='hidden' value='");
-  html += htmlEscape(keyArg);
-  html += F("'><input name='kind' type='hidden' value='relay'><p><input name='name' placeholder='name' value='light'><input name='pin' placeholder='D1'><select name='mode'><option value='active_low'>active_low</option><option value='active_high'>active_high</option></select></p><p><button>Add relay</button></p></form></section>");
-  html += F("<section class='card'><h2>Schedule</h2><form method='POST' action='/wizard'><input name='key' type='hidden' value='");
-  html += htmlEscape(keyArg);
-  html += F("'><input name='kind' type='hidden' value='schedule'><p><input name='relay' placeholder='relay'><input name='on' placeholder='08:00'><input name='off' placeholder='20:00'></p><p><button>Add daily schedule</button></p></form></section></div>");
-  html += F("<div class='grid'><section class='card'><h2>Climate Rule</h2><form method='POST' action='/wizard'><input name='key' type='hidden' value='");
-  html += htmlEscape(keyArg);
-  html += F("'><input name='kind' type='hidden' value='climate'><p><select name='metric'><option value='temp'>temperature</option><option value='hum'>humidity</option></select><input name='relay' placeholder='relay'><input name='low' placeholder='low'><input name='high' placeholder='high'></p><p><button>Add rule</button></p></form></section>");
-  html += F("<section class='card'><h2>Input</h2><form method='POST' action='/wizard'><input name='key' type='hidden' value='");
-  html += htmlEscape(keyArg);
-  html += F("'><input name='kind' type='hidden' value='input'><p><input name='name' placeholder='button'><input name='pin' placeholder='D2'><select name='mode'><option value='pullup'>pullup</option><option value='float'>float</option></select></p><p><button>Add input</button></p></form></section></div>");
+  appendWebWizardForms(html, keyArg, "/wizard");
   html += webFooter();
   webServer.send(200, "text/html", html);
 }
@@ -5408,7 +5420,7 @@ void startWeb() {
   webServer.on("/ui", handleWebUi);
   webServer.on("/relay", handleWebRelay);
   webServer.on("/relays", handleWebRelaysPage);
-  webServer.on("/automations", handleWebAutomations);
+  webServer.on("/automations", HTTP_ANY, handleWebAutomations);
   webServer.on("/cmd", handleWebCmd);
   webServer.on("/edit", HTTP_GET, handleWebEdit);
   webServer.on("/save", HTTP_POST, handleWebSave);

@@ -51,11 +51,9 @@ The web UI has:
 - Dashboard
 - Live UI at `/ui`
 - Command runner
-- Relay controls
+- Automation
 - Time and sensor panels
-- File/script editor
 - Diagnostics
-- Relay/rule wizard
 - Wi-Fi Profiles
 - System Profiles
 - Local help

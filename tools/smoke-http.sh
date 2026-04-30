@@ -68,13 +68,21 @@ printf 'HTTP smoke test: %s\n' "$BASE"
 "$CURL" -sS --fail --max-time 15 "$BASE/app11.js" | grep -q 'app12.js'
 "$CURL" -sS --fail --max-time 15 "$BASE/app12.js" | grep -q 'Mail Alerts'
 "$CURL" -sS --fail --max-time 15 "$BASE/app13.js" | grep -q 'mail status'
-"$CURL" -sS --fail --max-time 15 "$BASE/?key=$KEY" | grep -q '/wifi-profiles'
-"$CURL" -sS --fail --max-time 15 "$BASE/?key=$KEY" | grep -q '/system-profiles'
-"$CURL" -sS --fail --max-time 15 "$BASE/ui?key=$KEY" | grep -q '/wifi-profiles'
-"$CURL" -sS --fail --max-time 15 "$BASE/ui?key=$KEY" | grep -q '/system-profiles'
-"$CURL" -sS --fail --max-time 15 "$BASE/ui?key=$KEY" | grep -q '/wizard'
-"$CURL" -sS --fail --max-time 15 "$BASE/ui?key=$KEY" | grep -q '/diag'
-"$CURL" -sS --fail --max-time 15 "$BASE/ui?key=$KEY" | grep -q '/relays'
+home_html="$("$CURL" -sS --fail --max-time 15 "$BASE/?key=$KEY")"
+ui_html="$("$CURL" -sS --fail --max-time 15 "$BASE/ui?key=$KEY")"
+printf '%s' "$home_html" | grep -q '/automations'
+printf '%s' "$home_html" | grep -q '/wifi-profiles'
+printf '%s' "$home_html" | grep -q '/system-profiles'
+printf '%s' "$ui_html" | grep -q '/automations'
+printf '%s' "$ui_html" | grep -q '/wifi-profiles'
+printf '%s' "$ui_html" | grep -q '/system-profiles'
+if printf '%s\n%s' "$home_html" "$ui_html" | grep -Eq ">Editor</a>|>Auto</a>|>Wizard</a>|>Relays</a>|href=['\"]/(edit|wizard|relays)['\"]"; then
+  echo "main navigation still exposes redundant automation entries" >&2
+  exit 1
+fi
+"$CURL" -sS --fail --max-time 15 "$BASE/automations?key=$KEY" | grep -q 'Schedules, Rules and Timers'
+"$CURL" -sS --fail --max-time 15 "$BASE/automations?key=$KEY" | grep -q 'Relay Setup'
+"$CURL" -sS --fail --max-time 15 "$BASE/automations?key=$KEY" | grep -q 'Scripts'
 "$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Open Wi-Fi Profiles'
 "$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Open System Profiles'
 "$CURL" -sS --fail --max-time 15 "$BASE/system-profiles?key=$KEY" | grep -q 'System Profiles'

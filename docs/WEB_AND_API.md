@@ -112,7 +112,8 @@ Command runner.
 
 ### `/automations`
 
-Shows timers, cron, rules, scenes, persistent state and digital inputs.
+Main automation hub. It gathers relay controls, setup forms, schedules, cron,
+rules, timers, scenes, inputs and script links in one place.
 
 ```text
 /automations?key=admin
@@ -120,7 +121,8 @@ Shows timers, cron, rules, scenes, persistent state and digital inputs.
 
 ### `/relays`
 
-Dedicated relay management page.
+Compatibility relay management page. The main menu now exposes relay controls
+through `/automations`.
 
 ```text
 /relays?key=admin
@@ -128,7 +130,8 @@ Dedicated relay management page.
 
 ### `/edit`
 
-Text/script editor.
+Compatibility text/script editor. The main menu exposes scripts through
+`/automations`.
 
 ```text
 /edit?key=admin&path=/etc/boot.sh
@@ -205,7 +208,7 @@ Diagnostics and recovery page:
 
 ### `/wizard`
 
-Small forms that generate common commands:
+Compatibility setup forms. The same forms are available from `/automations`:
 
 - add relay
 - add daily relay schedule

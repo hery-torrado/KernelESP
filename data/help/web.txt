@@ -5,7 +5,7 @@ Main pages:
 
   /        Dashboard
   /ui      Full Live UI
-  /edit    File editor
+  /automations Automation hub
   /help    Local help
   /settings Settings
 
@@ -49,4 +49,3 @@ API examples:
   /api/cmd?key=YOUR_KEY&c=health
   /api/sensor?key=YOUR_KEY
   /api/relay?key=YOUR_KEY&name=light&state=pulse&ms=500
-

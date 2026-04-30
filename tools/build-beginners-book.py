@@ -778,7 +778,7 @@ class Book:
 
     def diagram_web(self, x: float, y: float, w: float, h: float) -> None:
         self.diagram_frame(x, y, w, h, "Web UI")
-        labels = ["Dashboard", "Live UI", "Commands", "Relays", "Scripts", "Help"]
+        labels = ["Dashboard", "Live UI", "Automation", "Diagnostics", "Profiles", "Help"]
         for i, label in enumerate(labels):
             col = i % 3
             row = i // 3
