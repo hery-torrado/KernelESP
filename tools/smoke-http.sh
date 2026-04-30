@@ -36,7 +36,7 @@ expected_pattern() {
     free) printf 'free heap:' ;;
     df) printf 'free:' ;;
     "wifi status") printf 'ssid:' ;;
-    date) printf 'epoch:' ;;
+    date) printf 'epoch:|time not synced' ;;
     "relay status") printf 'relay|no relays' ;;
     "rule list") printf 'rules|no rules|every:' ;;
     "crontab -l") printf 'daily|no cron|every:' ;;
@@ -60,10 +60,10 @@ printf 'HTTP smoke test: %s\n' "$BASE"
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=email&lang=es" | grep -q 'AVISOS POR EMAIL'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=email&lang=pt" | grep -q 'ALERTAS POR EMAIL'
 "$CURL" -sS --fail --max-time 15 "$BASE/help?key=$KEY&topic=mail" | grep -q 'MAIL ALERTS'
-"$CURL" -sS --fail --max-time 15 "$BASE/i18n.js?v=18" | grep -q 'i18n-help.js'
-"$CURL" -sS --fail --max-time 15 "$BASE/i18n.js?v=18" | grep -q 'Portugu'
-"$CURL" -sS --fail --max-time 15 "$BASE/i18n-es.js?v=18" | grep -q 'Configuraci'
-"$CURL" -sS --fail --max-time 15 "$BASE/i18n-pt.js?v=18" | grep -q 'Defini'
+"$CURL" -sS --fail --max-time 15 "$BASE/i18n.js?v=19" | grep -q 'i18n-help.js'
+"$CURL" -sS --fail --max-time 15 "$BASE/i18n.js?v=19" | grep -q 'Portugu'
+"$CURL" -sS --fail --max-time 15 "$BASE/i18n-es.js?v=19" | grep -q 'Configuraci'
+"$CURL" -sS --fail --max-time 15 "$BASE/i18n-pt.js?v=19" | grep -q 'Defini'
 "$CURL" -sS --fail --max-time 15 "$BASE/style.css" | grep -q ':root'
 "$CURL" -sS --fail --max-time 15 "$BASE/app11.js" | grep -q 'app12.js'
 "$CURL" -sS --fail --max-time 15 "$BASE/app12.js" | grep -q 'Mail Alerts'

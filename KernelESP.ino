@@ -3830,7 +3830,7 @@ bool webAuthOk() {
   html += htmlEscape(webServer.uri());
   html += F("'><label for='key'>Web key</label><input id='key' name='key' type='password' placeholder='Enter the access key' autocomplete='current-password' autofocus><button>Sign in</button></form>");
   html += F("<div class='loginHelp'>Serial recovery: <code>config set web.key new_key</code>. If the network fails, use <code>wifi status</code> or <code>wifi recover</code>.</div>");
-  html += F("</div></section></div><script src='/i18n-es.js?v=18'></script><script src='/i18n-es2.js?v=18'></script><script src='/i18n-es3.js?v=18'></script><script src='/i18n-es4.js?v=18'></script><script src='/i18n-es5.js?v=18'></script><script src='/i18n-pt.js?v=18'></script><script src='/i18n-pt2.js?v=18'></script><script src='/i18n-pt3.js?v=18'></script><script src='/i18n-pt4.js?v=18'></script><script src='/i18n-pt5.js?v=18'></script><script src='/i18n.js?v=18'></script></body></html>");
+  html += F("</div></section></div><script src='/i18n-es.js?v=19'></script><script src='/i18n-es2.js?v=19'></script><script src='/i18n-es3.js?v=19'></script><script src='/i18n-es4.js?v=19'></script><script src='/i18n-es5.js?v=19'></script><script src='/i18n-pt.js?v=19'></script><script src='/i18n-pt2.js?v=19'></script><script src='/i18n-pt3.js?v=19'></script><script src='/i18n-pt4.js?v=19'></script><script src='/i18n-pt5.js?v=19'></script><script src='/i18n.js?v=19'></script></body></html>");
   webServer.send(401, "text/html; charset=utf-8", html);
   return false;
 }
@@ -3869,7 +3869,7 @@ String webHeader(const String& title, const String& keyArg) {
 }
 
 String webFooter() {
-  return F("</main><script src='/i18n-es.js?v=18'></script><script src='/i18n-es2.js?v=18'></script><script src='/i18n-es3.js?v=18'></script><script src='/i18n-es4.js?v=18'></script><script src='/i18n-es5.js?v=18'></script><script src='/i18n-pt.js?v=18'></script><script src='/i18n-pt2.js?v=18'></script><script src='/i18n-pt3.js?v=18'></script><script src='/i18n-pt4.js?v=18'></script><script src='/i18n-pt5.js?v=18'></script><script src='/i18n.js?v=18'></script></body></html>");
+  return F("</main><script src='/i18n-es.js?v=19'></script><script src='/i18n-es2.js?v=19'></script><script src='/i18n-es3.js?v=19'></script><script src='/i18n-es4.js?v=19'></script><script src='/i18n-es5.js?v=19'></script><script src='/i18n-pt.js?v=19'></script><script src='/i18n-pt2.js?v=19'></script><script src='/i18n-pt3.js?v=19'></script><script src='/i18n-pt4.js?v=19'></script><script src='/i18n-pt5.js?v=19'></script><script src='/i18n.js?v=19'></script></body></html>");
 }
 
 String fsListToString(const String& rawPath) {
