@@ -68,6 +68,7 @@ printf 'HTTP smoke test: %s\n' "$BASE"
 "$CURL" -sS --fail --max-time 15 "$BASE/app11.js" | grep -q 'app12.js'
 "$CURL" -sS --fail --max-time 15 "$BASE/app12.js" | grep -q 'Mail Alerts'
 "$CURL" -sS --fail --max-time 15 "$BASE/app13.js" | grep -q 'mail status'
+"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Wi-Fi Profiles'
 
 commands='version
 health
@@ -83,6 +84,7 @@ input list
 mail status
 health | grep wifi
 board
+wifi profile list
 diag'
 
 printf '%s\n' "$commands" | while IFS= read -r cmd; do

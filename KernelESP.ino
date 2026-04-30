@@ -1911,11 +1911,13 @@ void cmdWifiProfile(String args[], int argc) {
     Dir dir = LittleFS.openDir(WIFI_PROFILE_DIR);
     bool any = false;
     while (dir.next()) {
-      any = true;
-      String name = basenameOf(dir.fileName());
+      if (dir.isDirectory()) continue;
+      String path = dirChildPath(WIFI_PROFILE_DIR, dir.fileName());
+      String name = basenameOf(path);
       if (name.endsWith(".txt")) name.remove(name.length() - 4);
+      any = true;
       Serial.print(name);
-      String text = readWholeFile(dir.fileName());
+      String text = readWholeFile(path);
       String ssid = keyValueFromText(text, "ssid", "");
       if (ssid.length()) {
         Serial.print(F("\t"));
@@ -5137,16 +5139,27 @@ void handleWebHelp() {
 void handleWebProfiles() {
   if (!webAuthOk()) return;
   String keyArg = webServer.arg("key");
+  String result;
   if (webServer.method() == HTTP_POST) {
     String action = webServer.arg("action");
     String name = webServer.arg("name");
     name.trim();
-    if (action == "save" && name.length()) {
-      captureOutputForLine("profile save " + name);
-    } else if (action == "load" && name.length() && webServer.arg("confirm") == "yes") {
-      captureOutputForLine("profile load " + name + " --yes");
-    } else if (action == "rm" && name.length() && webServer.arg("confirm") == "yes") {
-      captureOutputForLine("profile rm " + name);
+    String wifiName = webServer.arg("wifi.name");
+    wifiName.trim();
+    if (action == "profile_save" && name.length()) {
+      result = "$ profile save " + name + "\n" + captureOutputForLine("profile save " + name);
+    } else if (action == "profile_load" && name.length() && webServer.arg("confirm") == "yes") {
+      result = "$ profile load " + name + " --yes\n" + captureOutputForLine("profile load " + name + " --yes");
+    } else if (action == "profile_rm" && name.length() && webServer.arg("confirm") == "yes") {
+      result = "$ profile rm " + name + "\n" + captureOutputForLine("profile rm " + name);
+    } else if (action == "wifi_save" && wifiName.length()) {
+      result = "$ wifi profile save " + wifiName + "\n" + captureOutputForLine("wifi profile save " + wifiName);
+    } else if (action == "wifi_use" && wifiName.length()) {
+      result = "$ wifi profile use " + wifiName + "\n" + captureOutputForLine("wifi profile use " + wifiName);
+    } else if (action == "wifi_reconnect" && wifiName.length()) {
+      result = "$ wifi profile use " + wifiName + " reconnect\n" + captureOutputForLine("wifi profile use " + wifiName + " reconnect");
+    } else if (action == "wifi_rm" && wifiName.length() && webServer.arg("wifi.confirm") == "yes") {
+      result = "$ wifi profile rm " + wifiName + "\n" + captureOutputForLine("wifi profile rm " + wifiName);
     }
   }
   String html = webHeader("KernelESP Profiles", keyArg);
@@ -5154,14 +5167,25 @@ void handleWebProfiles() {
   html += htmlEscape(captureOutputForLine("profile list"));
   html += F("</pre><form method='POST' action='/profiles'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
-  html += F("'><input name='name' placeholder='profile name'><button name='action' value='save'>Save</button> <label><input type='checkbox' name='confirm' value='yes'> Confirm load/remove</label> <button name='action' value='load'>Load</button> <button name='action' value='rm'>Remove</button></form></section>");
+  html += F("'><input name='name' placeholder='profile name'><button name='action' value='profile_save'>Save</button> <label><input type='checkbox' name='confirm' value='yes'> Confirm load/remove</label> <button name='action' value='profile_load'>Load</button> <button name='action' value='profile_rm'>Remove</button></form></section>");
+  html += F("<section class='card'><h2>Wi-Fi Profiles</h2><p class='muted'>Saved Wi-Fi profiles keep SSID, password, channel, PHY, power and IP mode. Passwords are not shown here.</p><pre>");
+  html += htmlEscape(captureOutputForLine("wifi profile list"));
+  html += F("</pre><form method='POST' action='/profiles'><input name='key' type='hidden' value='");
+  html += htmlEscape(keyArg);
+  html += F("'><input name='wifi.name' placeholder='wifi profile name'><button name='action' value='wifi_save'>Save current Wi-Fi</button><button name='action' value='wifi_use'>Use</button><button name='action' value='wifi_reconnect'>Use + reconnect</button> <label><input type='checkbox' name='wifi.confirm' value='yes'> Confirm remove</label> <button name='action' value='wifi_rm'>Remove</button></form></section>");
   html += F("<section class='card'><h2>Backup</h2><p><a class='btn' href='/backup");
   html += authQuery();
   html += F("'>Download backup</a><a class='btn secondary' href='/restore");
   html += authQuery();
   html += F("'>Restore backup</a></p><pre>");
   html += htmlEscape(captureOutputForLine("df"));
-  html += F("</pre></section></div>");
+  html += F("</pre></section>");
+  if (result.length()) {
+    html += F("<section class='card'><h2>Result</h2><pre>");
+    html += htmlEscape(result);
+    html += F("</pre></section>");
+  }
+  html += F("</div>");
   html += webFooter();
   webServer.send(200, "text/html", html);
 }
@@ -7368,8 +7392,12 @@ void cmdProfile(String args[], int argc) {
     Dir dir = LittleFS.openDir(PROFILE_DIR);
     bool any = false;
     while (dir.next()) {
+      if (dir.isDirectory()) continue;
+      String name = basenameOf(dir.fileName());
+      if (!name.endsWith(".bak")) continue;
+      name.remove(name.length() - 4);
       any = true;
-      Serial.println(basenameOf(dir.fileName()));
+      Serial.println(name);
     }
     if (!any) Serial.println(F("(empty)"));
   } else if (sub == "save") {
