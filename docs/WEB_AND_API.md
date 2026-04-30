@@ -216,13 +216,29 @@ Small forms that generate common commands:
 /wizard?key=admin
 ```
 
+### `/wifi-profiles`
+
+Wi-Fi profile management. Wi-Fi profiles can be created, edited, used, used
+with reconnect, or removed. Existing Wi-Fi passwords are not displayed in the
+editor; leaving the password field blank keeps the stored password.
+
+```text
+/wifi-profiles?key=admin
+```
+
+### `/system-profiles`
+
+System profile, backup and restore management. System Profiles are full
+configuration snapshots, not Wi-Fi networks; system profile loads/removals
+require a confirmation checkbox.
+
+```text
+/system-profiles?key=admin
+```
+
 ### `/profiles`
 
-System profile, Wi-Fi profile and backup management. System Profiles are full
-configuration snapshots, not Wi-Fi networks; system profile loads/removals
-require a confirmation checkbox. Wi-Fi profiles can be created, edited, used,
-used with reconnect, or removed. Existing Wi-Fi passwords are not displayed in
-the editor; leaving the password field blank keeps the stored password.
+Compatibility landing page with links to Wi-Fi Profiles and System Profiles.
 
 ```text
 /profiles?key=admin

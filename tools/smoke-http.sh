@@ -68,14 +68,29 @@ printf 'HTTP smoke test: %s\n' "$BASE"
 "$CURL" -sS --fail --max-time 15 "$BASE/app11.js" | grep -q 'app12.js'
 "$CURL" -sS --fail --max-time 15 "$BASE/app12.js" | grep -q 'Mail Alerts'
 "$CURL" -sS --fail --max-time 15 "$BASE/app13.js" | grep -q 'mail status'
-"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'System Profiles'
-"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Wi-Fi Profiles'
-"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'editwifi='
-"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Create / Edit Wi-Fi Profile'
-"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'data-static-ip'
-"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'kespDhcpToggle'
-"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q '17.5 dBm standard'
-"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Auto channel (recommended)'
+"$CURL" -sS --fail --max-time 15 "$BASE/?key=$KEY" | grep -q '/wifi-profiles'
+"$CURL" -sS --fail --max-time 15 "$BASE/?key=$KEY" | grep -q '/system-profiles'
+"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Open Wi-Fi Profiles'
+"$CURL" -sS --fail --max-time 15 "$BASE/profiles?key=$KEY" | grep -q 'Open System Profiles'
+"$CURL" -sS --fail --max-time 15 "$BASE/system-profiles?key=$KEY" | grep -q 'System Profiles'
+"$CURL" -sS --fail --max-time 15 "$BASE/system-profiles?key=$KEY" | grep -q 'Backup / Restore'
+"$CURL" -sS --fail --max-time 15 "$BASE/system-profiles?key=$KEY" | grep -q "action='/system-profiles'"
+"$CURL" -sS --fail --max-time 15 "$BASE/wifi-profiles?key=$KEY" | grep -q 'Wi-Fi Profiles'
+"$CURL" -sS --fail --max-time 15 "$BASE/wifi-profiles?key=$KEY" | grep -q 'editwifi='
+"$CURL" -sS --fail --max-time 15 "$BASE/wifi-profiles?key=$KEY" | grep -q 'Create / Edit Wi-Fi Profile'
+"$CURL" -sS --fail --max-time 15 "$BASE/wifi-profiles?key=$KEY" | grep -q "action='/wifi-profiles'"
+"$CURL" -sS --fail --max-time 15 "$BASE/wifi-profiles?key=$KEY" | grep -q 'data-static-ip'
+"$CURL" -sS --fail --max-time 15 "$BASE/wifi-profiles?key=$KEY" | grep -q 'kespDhcpToggle'
+"$CURL" -sS --fail --max-time 15 "$BASE/wifi-profiles?key=$KEY" | grep -q '17.5 dBm standard'
+"$CURL" -sS --fail --max-time 15 "$BASE/wifi-profiles?key=$KEY" | grep -q 'Auto channel (recommended)'
+if "$CURL" -sS --fail --max-time 15 "$BASE/wifi-profiles?key=$KEY" | grep -q 'Backup / Restore'; then
+  echo "Wi-Fi Profiles page leaked Backup / Restore" >&2
+  exit 1
+fi
+if "$CURL" -sS --fail --max-time 15 "$BASE/system-profiles?key=$KEY" | grep -q 'Create / Edit Wi-Fi Profile'; then
+  echo "System Profiles page leaked Wi-Fi editor" >&2
+  exit 1
+fi
 
 commands='version
 health

@@ -493,7 +493,7 @@ void ensureUnixDefaults() {
     writeWholeFile("/help/wifi.txt", "wifi status\nwifi reconnect\nap start\nap status\n");
   }
   if (!LittleFS.exists("/help/web.txt")) {
-    writeWholeFile("/help/web.txt", "/diag status and recovery\n/wizard relay/rule/cron forms\n/profiles backup and profiles\n/edit scripts\n");
+    writeWholeFile("/help/web.txt", "/diag status and recovery\n/wizard relay/rule/cron forms\n/wifi-profiles Wi-Fi network profiles\n/system-profiles snapshots and backup\n/edit scripts\n");
   }
   if (!LittleFS.exists("/help/safety.txt")) {
     writeWholeFile("/help/safety.txt", "arm\ndisarm\narmed\nfsformat --yes\nrestore <file> --yes\nprofile load <name> --yes\n");
@@ -3857,9 +3857,11 @@ String webHeader(const String& title, const String& keyArg) {
   html += query;
   html += F("'>Wizard</a><a href='/diag");
   html += query;
-  html += F("'>Diag</a><a href='/profiles");
+  html += F("'>Diag</a><a href='/wifi-profiles");
   html += query;
-  html += F("'>Profiles</a><a href='/help");
+  html += F("'>Wi-Fi Profiles</a><a href='/system-profiles");
+  html += query;
+  html += F("'>System Profiles</a><a href='/help");
   html += query;
   html += F("'>Help</a><a href='/relays");
   html += query;
@@ -5139,23 +5141,69 @@ void handleWebHelp() {
 void handleWebProfiles() {
   if (!webAuthOk()) return;
   String keyArg = webServer.arg("key");
+  String query = webPropagatedKey(keyArg).length() ? "?key=" + urlEscape(webPropagatedKey(keyArg)) : "";
+  String html = webHeader("KernelESP Profiles", keyArg);
+  html += F("<div class='grid'><section class='card'><h2>Wi-Fi Profiles</h2><p class='muted'>Network profiles, credentials, DHCP/static IP, radio channel and transmit power.</p><p><a class='btn' href='/wifi-profiles");
+  html += query;
+  html += F("'>Open Wi-Fi Profiles</a></p></section>");
+  html += F("<section class='card'><h2>System Profiles</h2><p class='muted'>Full system configuration snapshots plus backup and restore tools.</p><p><a class='btn' href='/system-profiles");
+  html += query;
+  html += F("'>Open System Profiles</a></p></section></div>");
+  html += webFooter();
+  webServer.send(200, "text/html", html);
+}
+
+void handleWebSystemProfiles() {
+  if (!webAuthOk()) return;
+  String keyArg = webServer.arg("key");
   String result;
-  String editWifiName;
-  String editWifiText;
   if (webServer.method() == HTTP_POST) {
     String action = webServer.arg("action");
     String name = webServer.arg("name");
     name.trim();
-    String wifiName = webServer.arg("wifi.name");
-    wifiName.trim();
-    String safeWifiName = safeName(wifiName);
     if (action == "profile_save" && name.length()) {
       result = "$ profile save " + name + "\n" + captureOutputForLine("profile save " + name);
     } else if (action == "profile_load" && name.length() && webServer.arg("confirm") == "yes") {
       result = "$ profile load " + name + " --yes\n" + captureOutputForLine("profile load " + name + " --yes");
     } else if (action == "profile_rm" && name.length() && webServer.arg("confirm") == "yes") {
       result = "$ profile rm " + name + "\n" + captureOutputForLine("profile rm " + name);
-    } else if (action == "wifi_save" && safeWifiName.length()) {
+    }
+  }
+  String html = webHeader("KernelESP System Profiles", keyArg);
+  html += F("<div class='grid'><section class='card'><h2>System Profiles</h2><p class='muted'>Full system configuration snapshots. These are not Wi-Fi networks.</p><pre>");
+  html += htmlEscape(captureOutputForLine("profile list"));
+  html += F("</pre><form method='POST' action='/system-profiles'><input name='key' type='hidden' value='");
+  html += htmlEscape(keyArg);
+  html += F("'><input name='name' placeholder='system profile name'><button name='action' value='profile_save'>Save snapshot</button> <label><input type='checkbox' name='confirm' value='yes'> Confirm load/remove snapshot</label> <button name='action' value='profile_load'>Load snapshot</button> <button name='action' value='profile_rm'>Remove snapshot</button></form></section>");
+  html += F("<section class='card'><h2>Backup / Restore</h2><p><a class='btn' href='/backup");
+  html += authQuery();
+  html += F("'>Download backup</a><a class='btn secondary' href='/restore");
+  html += authQuery();
+  html += F("'>Restore backup</a></p><pre>");
+  html += htmlEscape(captureOutputForLine("df"));
+  html += F("</pre></section>");
+  if (result.length()) {
+    html += F("<section class='card'><h2>Result</h2><pre>");
+    html += htmlEscape(result);
+    html += F("</pre></section>");
+  }
+  html += F("</div>");
+  html += webFooter();
+  webServer.send(200, "text/html", html);
+}
+
+void handleWebWifiProfiles() {
+  if (!webAuthOk()) return;
+  String keyArg = webServer.arg("key");
+  String result;
+  String editWifiName;
+  String editWifiText;
+  if (webServer.method() == HTTP_POST) {
+    String action = webServer.arg("action");
+    String wifiName = webServer.arg("wifi.name");
+    wifiName.trim();
+    String safeWifiName = safeName(wifiName);
+    if (action == "wifi_save" && safeWifiName.length()) {
       result = "$ wifi profile save " + wifiName + "\n" + captureOutputForLine("wifi profile save " + wifiName);
     } else if (action == "wifi_use" && safeWifiName.length()) {
       result = "$ wifi profile use " + wifiName + "\n" + captureOutputForLine("wifi profile use " + wifiName);
@@ -5211,13 +5259,8 @@ void handleWebProfiles() {
   String editMask = keyValueFromText(editWifiText, "mask", "");
   String editDns1 = keyValueFromText(editWifiText, "dns1", "");
   String editDns2 = keyValueFromText(editWifiText, "dns2", "");
-  String html = webHeader("KernelESP Profiles", keyArg);
-  html += F("<div class='grid'><section class='card'><h2>System Profiles</h2><p class='muted'>Full system configuration snapshots. These are not Wi-Fi networks.</p><pre>");
-  html += htmlEscape(captureOutputForLine("profile list"));
-  html += F("</pre><form method='POST' action='/profiles'><input name='key' type='hidden' value='");
-  html += htmlEscape(keyArg);
-  html += F("'><input name='name' placeholder='system profile name'><button name='action' value='profile_save'>Save snapshot</button> <label><input type='checkbox' name='confirm' value='yes'> Confirm load/remove snapshot</label> <button name='action' value='profile_load'>Load snapshot</button> <button name='action' value='profile_rm'>Remove snapshot</button></form></section>");
-  html += F("<section class='card'><h2>Wi-Fi Profiles</h2><p class='muted'>Click a profile to load it into the editor. Passwords are not shown here.</p><div class='stack'>");
+  String html = webHeader("KernelESP Wi-Fi Profiles", keyArg);
+  html += F("<div class='grid'><section class='card'><h2>Wi-Fi Profiles</h2><p class='muted'>Click a profile to load it into the editor. Passwords are not shown here.</p><div class='stack'>");
   LittleFS.mkdir(WIFI_PROFILE_DIR);
   Dir wifiDir = LittleFS.openDir(WIFI_PROFILE_DIR);
   bool anyWifiProfile = false;
@@ -5230,7 +5273,7 @@ void handleWebProfiles() {
     String listText = readWholeFile(wifiPath);
     String listSsid = keyValueFromText(listText, "ssid", "");
     String listChannel = keyValueFromText(listText, "channel", "0");
-    String editHref = keyArg.length() ? "/profiles?key=" + urlEscape(keyArg) + "&editwifi=" : "/profiles?editwifi=";
+    String editHref = webPropagatedKey(keyArg).length() ? "/wifi-profiles?key=" + urlEscape(webPropagatedKey(keyArg)) + "&editwifi=" : "/wifi-profiles?editwifi=";
     editHref += urlEscape(listName);
     anyWifiProfile = true;
     html += F("<div class='row'><span><a href='");
@@ -5248,10 +5291,10 @@ void handleWebProfiles() {
     html += F("'>Edit</a></span></div>");
   }
   if (!anyWifiProfile) html += F("<p class='muted'>(empty)</p>");
-  html += F("</div><form method='POST' action='/profiles'><input name='key' type='hidden' value='");
+  html += F("</div><form method='POST' action='/wifi-profiles'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
   html += F("'><input name='wifi.name' placeholder='wifi profile name'><button name='action' value='wifi_edit'>Load editor</button><button name='action' value='wifi_save'>Save current Wi-Fi</button><button name='action' value='wifi_use'>Use</button><button name='action' value='wifi_reconnect'>Use + reconnect</button> <label><input type='checkbox' name='wifi.confirm' value='yes'> Confirm remove</label> <button name='action' value='wifi_rm'>Remove</button></form></section>");
-  html += F("<section class='card'><h2>Create / Edit Wi-Fi Profile</h2><p class='muted'>Leave password blank while editing to keep the stored password.</p><form method='POST' action='/profiles'><input name='key' type='hidden' value='");
+  html += F("<section class='card'><h2>Create / Edit Wi-Fi Profile</h2><p class='muted'>Leave password blank while editing to keep the stored password.</p><form method='POST' action='/wifi-profiles'><input name='key' type='hidden' value='");
   html += htmlEscape(keyArg);
   html += F("'><input name='wifi.name' placeholder='profile name' value='");
   html += htmlEscape(editWifiName);
@@ -5306,13 +5349,6 @@ void handleWebProfiles() {
   html += F("'");
   if (editDhcp != "off") html += F(" disabled");
   html += F("><button name='action' value='wifi_write'>Save profile</button><button name='action' value='wifi_write_use'>Save + use now</button></form><script>function kespDhcpToggle(){var s=document.getElementById('wifiDhcpMode'),d=!s||s.value!='off';document.querySelectorAll('[data-static-ip]').forEach(function(i){i.disabled=d})}kespDhcpToggle()</script></section>");
-  html += F("<section class='card'><h2>Backup / Restore</h2><p><a class='btn' href='/backup");
-  html += authQuery();
-  html += F("'>Download backup</a><a class='btn secondary' href='/restore");
-  html += authQuery();
-  html += F("'>Restore backup</a></p><pre>");
-  html += htmlEscape(captureOutputForLine("df"));
-  html += F("</pre></section>");
   if (result.length()) {
     html += F("<section class='card'><h2>Result</h2><pre>");
     html += htmlEscape(result);
@@ -5385,6 +5421,8 @@ void startWeb() {
   webServer.on("/diag", handleWebDiag);
   webServer.on("/help", handleWebHelp);
   webServer.on("/profiles", HTTP_ANY, handleWebProfiles);
+  webServer.on("/wifi-profiles", HTTP_ANY, handleWebWifiProfiles);
+  webServer.on("/system-profiles", HTTP_ANY, handleWebSystemProfiles);
   webServer.on("/wizard", HTTP_ANY, handleWebWizard);
   webServer.on("/api/status", handleApiStatus);
   webServer.on("/api/sensor", handleApiSensor);

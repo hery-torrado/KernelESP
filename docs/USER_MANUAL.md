@@ -56,7 +56,8 @@ The web UI has:
 - File/script editor
 - Diagnostics
 - Relay/rule wizard
-- Profiles
+- Wi-Fi Profiles
+- System Profiles
 - Local help
 - Logs
 - Settings
@@ -298,7 +299,7 @@ wifi profile list
 wifi profile use work
 ```
 
-The `/profiles` web page can also create and edit Wi-Fi profiles. The editor
+The `/wifi-profiles` web page can also create and edit Wi-Fi profiles. The editor
 lets you set the profile name, SSID, password, channel, PHY, transmit power,
 DHCP/static IP fields and DNS. When editing an existing profile, leave the
 password field blank to keep the stored password.
@@ -808,14 +809,15 @@ From web:
 ```text
 /backup?key=<key>
 /restore?key=<key>
-/profiles?key=<key>
+/system-profiles?key=<key>
+/wifi-profiles?key=<key>
 ```
 
 The backup includes configuration files, root-level files, `/home` scripts,
 packages under `/pkg`, profiles under `/profiles`, and the persistent log.
-The same page separates System Profiles from Wi-Fi Profiles. System Profiles
-are full configuration snapshots, not Wi-Fi networks. Wi-Fi Profiles include
-create, edit, use, reconnect and remove actions.
+System Profiles are full configuration snapshots, not Wi-Fi networks, and they
+live on their own web page with backup and restore tools. Wi-Fi Profiles live
+on a separate page and include create, edit, use, reconnect and remove actions.
 
 ## 16. Mail Alerts
 
